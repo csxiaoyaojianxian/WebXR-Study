@@ -1,0 +1,72 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 00:14:21
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-01 03:06:52
+ * @Descripttion: 3D模型和动画
+-->
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <script src="./lib/1.3.0/aframe.js"></script>
+  <script src="./lib/aframe-extras.js"></script>
+</head>
+
+<body>
+<!--
+
+A-Frame 提供了加载 glTF(推荐), OBJ, COLLADA 模型的组件
+
+aframe-extras 中的 animation-mixer 组件提供了播放three.js(.json)和glTF(.gltf)模型动画的控制功能
+
+模型动画 demo
+https://github.com/rexraptor08/animation-controls
+
+【资源查找】
+https://github.com/neutraltone/awesome-stock-resources
+纹理： https://www.textures.com/
+360全景图： https://www.flickr.com/groups/equirectangular/
+
+3D模型：
+https://sketchfab.com/
+https://clara.io/
+https://3dwarehouse.sketchup.com/
+https://archive3d.net/
+https://www.turbosquid.com/Search/3D-Models/free
+
+-->
+
+<script>
+  AFRAME.registerComponent('animation-control', {
+    schema: {
+      // default: ''
+    },
+    init() {
+      const cat = document.querySelector('#cat');
+      this.el.addEventListener('click', () => {
+        // https://github.com/n5ro/aframe-extras/tree/master/src/loaders#animation
+        // 该模型动画 name 为 Scene
+        cat.setAttribute("animation-mixer", 'clip: Scene; duration: 2');
+      });
+    }
+  });
+</script>
+<a-scene>
+  
+  <a-assets>
+    <a-asset-item id="model" src="./models/toon_cat_free/scene.gltf"></a-asset-item>
+  </a-assets>
+
+  <a-entity id="cat" scale="0.008 0.008 0.008" position="0 0 -5" rotation="0 30 0" gltf-model="#model"></a-entity>
+
+  <a-box position="2 1 -5" color="gray" animation-control=""></a-box>
+
+  <a-camera>
+    <a-cursor></a-cursor>
+  </a-camera>
+
+</a-scene>
+
+<body>
+</html>

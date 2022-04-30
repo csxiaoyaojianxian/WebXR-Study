@@ -2,7 +2,7 @@
  * @Author: victorsun
  * @Date: 2022-04-30 09:50:22
  * @LastEditors: victorsun
- * @LastEditTime: 2022-04-30 22:55:04
+ * @LastEditTime: 2022-04-30 23:13:46
  * @Descripttion: 构建一个基础场景
 -->
 <html>
@@ -28,7 +28,7 @@ AFRAME.registerComponent('log', {
   }
 });
 
-// 注册组件
+// 注册组件，基于凝视（Gaze-Based）的光标组件交互
 AFRAME.registerComponent('scale-on-mouseenter', {
   schema: {
     to: { default: '2.5 2.5 2.5' }
@@ -41,6 +41,9 @@ AFRAME.registerComponent('scale-on-mouseenter', {
     });
     this.el.addEventListener('mouseleave', () => {
       this.el.setAttribute('scale', {x: 2, y: 2, z: 2});
+    });
+    this.el.addEventListener('click', () => {
+      this.el.setAttribute('scale', {x: 2.5, y: 2.5, z: 2.5});
     });
   }
 });
@@ -55,7 +58,7 @@ AFRAME.registerComponent('scale-on-mouseenter', {
     <audio src="./assets/backgroundnoise.wav" autoplay preload></audio>
   </a-assets>
 
-  <!-- 通过事件监听方式 缩放 -->
+  <!-- 事件监听 基于凝视（Gaze-Based）的光标组件交互 -->
   <a-box
     src="#boxTexture" color="red" position="0 2 -5" rotation="0 45 45" scale="2 2 2"
     log="Box1 加载完毕!"
@@ -65,7 +68,7 @@ AFRAME.registerComponent('scale-on-mouseenter', {
     <!-- <a-sphere position="1.6 -3 2" scale="0.3 0.3 0.3"></a-sphere> -->
   </a-box>
 
-  <!-- 通过事件动画方式 缩放 -->
+  <!-- 事件动画 缩放 -->
   <a-box
     src="#boxTexture" color="red" position="4 2 -5" rotation="0 45 45" scale="2 2 2"
     animation="property: position; to: 4 2.2 -5; dur: 2000; dir: alternate; loop: true"
