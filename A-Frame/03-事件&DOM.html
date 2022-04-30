@@ -2,7 +2,7 @@
  * @Author: victorsun
  * @Date: 2022-04-26 22:04:47
  * @LastEditors: victorsun
- * @LastEditTime: 2022-04-30 20:50:59
+ * @LastEditTime: 2022-04-30 20:58:53
  * @Descripttion: 事件 & DOM
 -->
 <html>
@@ -15,11 +15,6 @@
 // 创建组件：添加实体后随即删除
 AFRAME.registerComponent('remove-self-once-loaded', {
   init: function () {
-    // 获取当前实体
-    console.log(this.el.sceneEl);
-    // 获取当前实体的上层场景
-    console.log(this.el);
-
     console.log('组件创建成功，5s后将执行删除');
     setTimeout(() => {
       this.el.parentNode.removeChild(entityEl);
