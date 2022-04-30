@@ -1,0 +1,98 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-04-30 09:50:22
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-04-30 20:47:07
+ * @Descripttion: 构建一个基础场景
+-->
+<html>
+<head>
+  <script src="./lib/1.1.0/aframe.js"></script>
+  <!-- <script src="./lib/jquery.js"></script> -->
+</head>
+<body>
+
+<!--
+
+<a-scene> 是场景容器，用来包含所有实体，会自动处理所有3D所需要的设置：建立WebGL上下文，画布，相机，光照，渲染器
+
+-->
+
+<script>
+// 注册log组件
+AFRAME.registerComponent('log', {
+  schema: {type: 'string'},
+  init: function () {
+    var stringToLog = this.data;
+    console.log(stringToLog);
+  }
+});
+
+// 注册组件
+AFRAME.registerComponent('scale-on-mouseenter', {
+  schema: {
+    to: { default: '2.5 2.5 2.5' }
+  },
+  init () {
+    var data = this.data;
+
+    this.el.addEventListener('mouseenter', () => {
+      this.el.setAttribute('scale', data.to);
+    });
+    this.el.addEventListener('mouseleave', () => {
+      this.el.setAttribute('scale', {x: 2, y: 2, z: 2});
+    });
+  }
+});
+</script>
+
+<a-scene log="Scene1 加载完毕!">
+  <!-- 资源管理系统 -->
+  <a-assets>
+    <img id="boxTexture" src="./assets/material.jpg">
+    <img id="skyTexture" src="./assets/sechelt.jpg">
+    <img id="groundTexture" src="./assets/floor.jpg">
+    <audio src="./assets/backgroundnoise.wav" autoplay preload></audio>
+  </a-assets>
+
+  <!-- 通过事件监听方式 缩放 -->
+  <a-box
+    src="#boxTexture" color="red" position="0 2 -5" rotation="0 45 45" scale="2 2 2"
+    log="Box1 加载完毕!"
+    scale-on-mouseenter="to: 2.2 2.2 2.2"
+  >
+    <!-- 继承父实体的属性，下方实体的世界位置为 1 2 -2 -->
+    <!-- <a-sphere position="1.6 -3 2" scale="0.3 0.3 0.3"></a-sphere> -->
+  </a-box>
+
+  <!-- 通过事件动画方式 缩放 -->
+  <a-box
+    src="#boxTexture" color="red" position="4 2 -5" rotation="0 45 45" scale="2 2 2"
+    animation="property: position; to: 4 2.2 -5; dur: 2000; dir: alternate; loop: true"
+    log="Box2 加载完毕!"
+    animation__2="property: scale; startEvents: mouseenter; to: 2.2 2.2 2.2"
+    animation__3="property: scale; startEvents: mouseleave; to: 2 2 2"
+  >
+  </a-box>
+
+  <!-- 自定义相机 -->
+  <a-camera>
+    <!-- 光标 -->
+    <a-cursor></a-cursor>
+  </a-camera>
+
+  <!-- 地面 -->
+  <a-plane src="#groundTexture" rotation="-90 0 0" width="30" height="30" repeat="10 10"></a-plane>
+
+  <!-- 天空环境 -->
+  <a-sky src="#skyTexture"></a-sky>
+
+  <!-- 空间音频 -->
+  <a-sound src="https://cdn.aframe.io/basic-guide/audio/backgroundnoise.wav" autoplay="true" loop="true" position="-3 1 -4"></a-sound>
+
+  <a-light type="ambient" color="#445451"></a-light>
+  <a-light type="point" intensity="2" position="2 4 4"></a-light>
+</a-scene>
+
+</body>
+</html>

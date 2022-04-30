@@ -1,0 +1,83 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-04-26 22:04:47
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-04-30 20:50:59
+ * @Descripttion: 事件 & DOM
+-->
+<html>
+<head>
+<script src="./lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+
+<script>
+// 创建组件：添加实体后随即删除
+AFRAME.registerComponent('remove-self-once-loaded', {
+  init: function () {
+    // 获取当前实体
+    console.log(this.el.sceneEl);
+    // 获取当前实体的上层场景
+    console.log(this.el);
+
+    console.log('组件创建成功，5s后将执行删除');
+    setTimeout(() => {
+      this.el.parentNode.removeChild(entityEl);
+    }, 5000);
+  }
+});
+</script>
+
+<a-scene></a-scene>
+
+<script>
+/**
+ * 【 实体 / 组件 操作相关 】
+ */
+// 实体查询 .querySelector() / .querySelectorAll()
+// 实体创建/删除 .createElement() / .appendChild() / .removeChild()
+// 实体修改 .setAttribute() / .removeAttribute()
+
+var sceneEl = document.querySelector('a-scene');
+var entityEl = document.createElement('a-entity');
+// 添加组件
+entityEl.setAttribute('remove-self-once-loaded', '');
+entityEl.setAttribute('geometry', {
+  primitive: 'box',
+  height: 2,
+});
+// 更新多属性组件的单个属性
+entityEl.setAttribute('material', 'color', 'red');
+// 使用 flag: true 替换多属性对象全部属性
+entityEl.setAttribute('position', {
+  x: 1,
+  // y: 2,
+  z: -3,
+}, true);
+sceneEl.appendChild(entityEl);
+
+// 删除 camera 的默认 wasd 组件功能
+window.onload = () => {
+  var cameraEl = document.querySelector('[camera]');
+  // cameraEl.removeAttribute('wasd-controls');
+}
+
+/**
+ * 【 事件和事件侦听器 】
+ */
+var func = (event) => {
+  console.log('执行测试事件', event, event.detail);
+}
+// .addEventListener() 添加事件侦听
+entityEl.addEventListener('test-event', func);
+setTimeout(() => {
+  // .emit() 触发事件 (事件名/详细数据/是否冒泡)
+  entityEl.emit('test-event', { testData: 'hello world' }, false);
+  // 使用 .removeEventListener() 来删除一个事件侦听器
+  entityEl.removeEventListener('test-event', func);
+  // 再次 .emit() 无法触发事件
+  entityEl.emit('test-event');
+}, 1000);
+</script>
+</body>
+</html>

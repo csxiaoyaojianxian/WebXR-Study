@@ -1,0 +1,74 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-04-26 22:03:14
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-04-30 20:47:41
+ * @Descripttion: 基础概念
+-->
+<!DOCTYPE html>
+<html lang="en">
+<body>
+<!--
+
+A-Frame 使用右手坐标系统，距离单位是米(meters)，旋转单位是角度(degrees)，循序右手规则
+
+A-Frame 是 实体-组件-系统模式
+
+实体（Entities）是容器对象，用来包含组件，没有附加组件的实体不会渲染任何东西，类似于空的<div>
+组件（Components）是可重用的模块或数据容器，可以依附于实体以提供外观、行为、功能，所有的逻辑都是通过组件实现，即插即用
+系统（Systems）为组件类提供全局范围管理和服务，通常是可选的，可以使用它们来分离逻辑和数据、系统处理逻辑（有点类似控制器或者服务层的角色），组件充当数据容器
+
+A-Frame中位置(position)、旋转(rotation)和尺寸(scale)是实体(Entity)的固有组件
+Entity一般会附加几何模型(geometry)和材料(material)组件
+
+不同组件组合成不同类型的实体的抽象示例：
+Box = Position + Geometry + Material
+Light Bulb = Position + Light + Geometry + Material + Shadow
+Sign = Position + Geometry + Material + Text
+VR Controller = Position + Rotation + Input + Model + Grab + Gestures
+Ball = Position + Velocity + Physics + Geometry + Material
+Player = Position + Camera + Input + Avatar + Identity
+
+【组件查找】
+https://aframe.io/aframe-registry/
+https://www.npmjs.com/search?q=aframe-component
+https://aframe.io/blog/
+https://github.com/supermedium/superframe/tree/master/components/text-geometry/
+https://github.com/ngokevin/angle
+https://github.com/aframevr/awesome-aframe#components
+
+
+可以使用快捷键 ctrl + alt + i 打开3D查看工具
+
+-->
+
+<!--
+
+原语（primitives） 如 <a-box></a-box>
+
+-->
+
+<script>
+// 注册原语(一般用不到)
+/*
+var extendDeep = AFRAME.utils.extendDeep;
+// The mesh mixin provides common material properties for creating mesh-based primitives.
+// This makes the material component a default component and maps all the base material properties.
+var meshMixin = AFRAME.primitives.getMeshMixin();
+AFRAME.registerPrimitive('a-box', extendDeep({}, meshMixin, {
+  // Preset default components. These components and component properties will be attached to the entity out-of-the-box.
+  defaultComponents: {
+    geometry: {primitive: 'box'}
+  },
+  // Defined mappings from HTML attributes to component properties (using dots as delimiters).
+  // If we set `depth="5"` in HTML, then the primitive will automatically set `geometry="depth: 5"`.
+  mappings: {
+    depth: 'geometry.depth',
+    height: 'geometry.height',
+    width: 'geometry.width'
+  }
+}));
+*/
+</script>
+</body>
+</html>
