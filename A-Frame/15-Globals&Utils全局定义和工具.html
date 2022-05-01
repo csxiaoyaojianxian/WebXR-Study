@@ -1,0 +1,110 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 15:46:54
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-01 21:32:54
+ * @Descripttion: Globals&Utils全局定义和工具
+-->
+<html>
+<head>
+<script src="./lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+
+[window]
+window.AFRAME
+window.hasNativeWebVRImplementation 客户端是否支持原生WebVR
+
+[window.AFRAME]
+AComponent            组件（Component）原型
+AEntity               实体（Entity）原型
+ANode                 A-Frame元素继承的基础节点原型
+AScene                场景（Scene）原型
+components            已注册的组件对象
+geometries            已注册的几何对象
+primitives.primitives 已注册的原语对象
+registerComponent     用来注册组件的函数
+registerElement       A-Frame元素基类
+registerGeometry      用来注册几何模型的函数
+registerPrimitive     用来注册原语的函数
+registerShader        用来注册材料或着色器的函数
+schema                与模式相关的实用程序
+shaders               注册的着色器对象
+systems               注册的系统对象
+THREE                 全局three.js object
+TWEEN                 全局tween.js object
+utils                 A-Frame 工具模块
+version               A-Frame构建的版本
+
+
+[window.AFRAME.utils.coordinates]
+.isCoordinates (value)  测试字符串是否是vec3
+.parse (value)          把 "x y z" 字符串解析为 {x, y, z} vec3对象，同时支持vec4
+.stringify (data)       把 {x, y, z} vec3对象转换为 "x y z" 字符串
+
+[window.AFRAME.utils.entity]
+.getComponentProperty (entity, componentName, delimiter='.')    类似 Entity.getAttribute，支持为多属性组件返回单个属性
+.setComponentProperty (entity, componentName, value, delimiter)
+
+[window.AFRAME.utils.styleParser]
+.parse (value)    把一个类似CSS样式的字符串解析为一个对象
+.stringify (data) 把一个对象转化为一个类似CSS样式的字符串
+
+[window.AFRAME.utils.device]
+.checkHeadsetConnected ()      通过寻找定位（方向）数据来检查VR头戴设备是否连接，返回一个boolean
+.isGearVR ()                   检查设备是否是Gear VR，返回一个boolean
+.isOculusGo()                  检查设备是否是isOculusGo，返回一个boolean
+.isMobile ()                   检查设备是否是手机，返回一个boolean
+
+[window.AFRAME.utils]
+.deepEqual (a, b)                            检查两个对象是否具有相同的属性和值，包括嵌入对象
+.diff (a, b)                                 返回两个对象之间的差异，返回的对象的一组键表示哪些值不相等，而一组值是b的值
+.extend(target, source, [source, ...])       对象赋值polyfill
+.extendDeep (target, source, [source, ...])  深度赋值
+
+AFRAME.utils.throttle (function, minimumInterval [, optionalContext])                    返回一个限制函数，每minimumInterval毫秒最多调用一次，可以使用this来方便函数处理
+AFRAME.utils.throttleTick (function (t, dt) {...}, minimumInterval [, optionalContext])  throttle()的变体，性能要更好一些，并且适配tick处理程序，因为它使用了全局渲染循环中传递的t和dt时间戳
+AFRAME.utils.getUrlParameter (name)                                                      获取url参数值字符串，否则返回空字符串
+-->
+
+<a-scene>
+  <a-entity id="box" geometry="primitive: box"></a-entity>
+</a-scene>
+
+<script>
+// [window.AFRAME.utils.coordinates]
+AFRAME.utils.coordinates.isCoordinates('1 2 3'); // >> true
+AFRAME.utils.coordinates.parse('1 2 -3'); // >> {x: 1, y: 2, z: -3}
+AFRAME.utils.coordinates.stringify({x: 1, y: 2, z: -3}); // >> "1 2 -3"
+// [window.AFRAME.utils.entity]
+var entity = document.querySelector('#box');
+AFRAME.utils.entity.getComponentProperty(entity, 'geometry.primitive'); // >> "box"
+AFRAME.utils.entity.getComponentProperty(entity, 'geometry|primitive', '|'); // >> "box" 支持设置分隔符
+AFRAME.utils.entity.getComponentProperty(entity, 'geometry'); // >> {primitive: 'box', width: 1, ...}
+AFRAME.utils.entity.setComponentProperty(entity, 'geometry.width', 1);
+AFRAME.utils.entity.setComponentProperty(entity, 'geometry|height', 2, '|');
+AFRAME.utils.entity.setComponentProperty(entity, 'geometry', {depth: 3});
+// [window.AFRAME.utils.styleParser]
+AFRAME.utils.styleParser.parse('attribute: color; dur: 5000;'); // >> {"attribute": "color", "dur": "5000"}
+AFRAME.utils.styleParser.stringify({height: 10, width: 5}); // >> "height: 10; width: 5"
+// [window.AFRAME.utils]
+deepEqual({a: 1, b: {c: 3}}, {a: 1, b: {c: 3}}); // >> true
+diff({a: 1, b: 2, c: 3}, {b: 2, c: 4}); // >> {"a": undefined, "c": 4}
+
+AFRAME.utils.getUrlParameter('testing');
+
+// throttleTick
+AFRAME.registerComponent('foo', {
+  init: function () {
+    // Set up the tick throttling.
+    this.tick = AFRAME.utils.throttleTick(this.tick, 500, this);
+  },
+  // Tick function that will be wrapped to be throttled.
+  tick: function (t, dt) {}
+});
+
+</script>
+
+</body>
+</html>

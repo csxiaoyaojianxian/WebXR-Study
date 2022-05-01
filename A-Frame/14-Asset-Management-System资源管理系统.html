@@ -1,0 +1,55 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 15:46:54
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-01 20:54:41
+ * @Descripttion: Asset-Management-System 资源管理系统
+-->
+<html>
+<head>
+<script src="./lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+A-Frame 资源管理系统能够预加载和缓存资源以实现更好的性能
+
+音频和视频资源仅在我们设置了 autoplay 或 preload="auto" 时才会阻塞场景
+
+<a-assets> / <a-asset-item>
+loaded  所有资源都已经加载完成，或者已超时
+timeout 资源加载超时
+-->
+
+<a-scene>
+  <!-- 支持设置超时时间 -->
+  <a-assets timeout="10000">
+    <!-- <a-asset-item> - 杂项资产，如三维模型和材料 -->
+    <a-asset-item id="model-cat" src="./models/toon_cat_free/scene.gltf"></a-asset-item>
+    <!-- <audio> - 音频文件 -->
+    <audio id="noise" src="./assets/backgroundnoise.wav" loop="true"></audio>
+    <!-- <img> - 图像纹理 -->
+    <img id="pic" src="./assets/material.jpg">
+    <!-- <video> - 视频纹理 -->
+    <video id="video-sunshine" src="./assets/video.mp4" autoplay loop="true"></video>
+
+    <!-- mixins -->
+    <a-mixin id="small" scale="0.02 0.02 0.02"></a-mixin>
+    <a-mixin id="pos1" position="0 0 -15"></a-mixin>
+    <a-mixin id="pos2" position="0 0 -5"></a-mixin>
+  </a-assets>
+
+  <a-plane mixin="pos1" src="#pic"></a-plane>
+  <a-sound src="#noise" autoplay="true"></a-sound>
+  <a-entity mixin="pos2" geometry="primitive: plane" material="src: #video-sunshine"></a-entity>
+  <!-- <a-entity mixin="small pos1" gltf-model="#model-cat"></a-entity> -->
+</a-scene>
+
+<script>
+// 直接访问three.js的FileLoader
+console.log(document.querySelector('a-assets').fileLoader);
+// 访问cache
+console.log(THREE.Cache);
+</script>
+
+</body>
+</html>

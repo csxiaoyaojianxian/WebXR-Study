@@ -2,7 +2,7 @@
  * @Author: victorsun
  * @Date: 2022-04-30 09:50:22
  * @LastEditors: victorsun
- * @LastEditTime: 2022-04-30 23:13:46
+ * @LastEditTime: 2022-05-01 20:40:15
  * @Descripttion: 构建一个基础场景
 -->
 <html>
@@ -55,7 +55,7 @@ AFRAME.registerComponent('scale-on-mouseenter', {
     <img id="boxTexture" src="./assets/material.jpg">
     <img id="skyTexture" src="./assets/sechelt.jpg">
     <img id="groundTexture" src="./assets/floor.jpg">
-    <audio src="./assets/backgroundnoise.wav" autoplay preload></audio>
+    <audio id="noise" src="./assets/backgroundnoise.wav" autoplay preload></audio>
   </a-assets>
 
   <!-- 事件监听 基于凝视（Gaze-Based）的光标组件交互 -->
@@ -91,7 +91,8 @@ AFRAME.registerComponent('scale-on-mouseenter', {
   <a-sky src="#skyTexture"></a-sky>
 
   <!-- 空间音频 -->
-  <a-sound src="https://cdn.aframe.io/basic-guide/audio/backgroundnoise.wav" autoplay="true" loop="true" position="-3 1 -4"></a-sound>
+  <!-- <a-sound src="https://cdn.aframe.io/basic-guide/audio/backgroundnoise.wav" autoplay="true" loop="true" position="-3 1 -4"></a-sound> -->
+  <a-sound src="#noise" loop="true" position="-3 1 -4"></a-sound>
 
   <a-light type="ambient" color="#445451"></a-light>
   <a-light type="point" intensity="2" position="2 4 4"></a-light>

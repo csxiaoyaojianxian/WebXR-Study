@@ -1,0 +1,32 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 15:46:54
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-01 20:05:43
+ * @Descripttion: Mixins混合
+-->
+<html>
+<head>
+<script src="./lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+
+<a-scene>
+  <a-assets>
+    <!-- Mixins必须有一个id -->
+    <a-mixin id="red" material="color: red"></a-mixin>
+    <a-mixin id="blue" material="color: blue"></a-mixin>
+    <a-mixin id="cube" geometry="primitive: box" position="0 0 -5"></a-mixin>
+    <a-mixin id="wide" geometry="width: 10"></a-mixin>
+  </a-assets>
+  <!-- 属性合并 -->
+  <!-- <a-entity geometry="primitive: box; width: 10; depth: 2" position="0 0 -5"></a-entity> -->
+  <a-entity mixin="cube wide" geometry="depth: 2"></a-entity>
+  <!-- color: blue -->
+  <a-entity mixin="red blue cube"></a-entity>
+  <!-- color: green -->
+  <a-entity mixin="red blue cube" material="color: green"></a-entity>
+</a-scene>
+
+</body>
+</html>
