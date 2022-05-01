@@ -1,0 +1,76 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 15:46:54
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-01 17:29:53
+ * @Descripttion: System系统
+-->
+<html>
+<head>
+<script src="./lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+系统为组件提供全局范围的服务和管理，如公共API等
+系统可以通过场景元素来访问，并帮助组件和全局场景交互
+例如，相机系统管理所有实体的camera组件，控制哪个摄像机是活动摄像机
+-->
+
+<script>
+// 系统注册并在组件中全局获取(和组件注册类似)
+// 如果系统名称与组件名匹配，则组件将具有一个对系统的引用this.system
+AFRAME.registerSystem('my-component', {
+  schema: {}, // 和组件一致
+  init: function () {
+    console.log(this.data); // 对应 this.data
+    console.log(this.el); // <a-scene>
+    console.log(this.schema); // 和组件一致
+
+    this.entities = []; // 存储订阅数据
+  },
+  pause: function () {},
+  play: function () {},
+  tick: function () {},
+
+  // 自定义方法：系统管理所有组件，组件订阅系统
+  registerMe: function (el) {
+    this.entities.push(el);
+  },
+  unregisterMe: function (el) {
+    var index = this.entities.indexOf(el);
+    this.entities.splice(index, 1);
+  },
+
+  // 自定义方法：逻辑与数据分离，让系统处理繁重工作
+  doComplexWork: function (data = {}) {
+    // ...
+    return JSON.parse(JSON.stringify(data));
+  }
+});
+
+// 组件调用
+AFRAME.registerComponent('my-component', {
+  init: function () {
+    this.system.registerMe(this.el);
+  },
+  remove: function () {
+    this.system.unregisterMe(this.el);
+  },
+  // 复杂逻辑定义在系统中
+  update: function () {
+    this.system.doComplexWork();
+  },
+});
+</script>
+
+<a-scene my-component>
+  <a-entity my-component></a-entity>
+</a-scene>
+
+<script>
+// 访问一个系统
+document.querySelector('a-scene').systems['my-component'];
+</script>
+
+</body>
+</html>

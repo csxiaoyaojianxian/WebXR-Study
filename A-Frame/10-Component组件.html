@@ -1,0 +1,114 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 15:46:54
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-01 17:45:41
+ * @Descripttion: Component组件
+-->
+<html>
+<head>
+<script src="./lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+[1] schema 模式
+内置属性类型：
+array       将逗号分隔的值解析为数组 (i.e., "1, 2, 3" 为 ['1', '2', '3'])
+            默认 []
+asset       指向资源URL，url(<url>)的形式则解析URL字符串，若是元素id选择器(如#texture)，则调用getElementById和getAttribute('src')来返回一个URL。可能改变XHRs或直接返回媒体元素(如<img>元素)
+            默认 ''
+audio       和asset属性类型解析类似，约定为音频资源
+            默认 ''
+boolean     字符串解析为布尔值（i.e., "false" 为 false，否则为 true）
+            默认 false
+color       不解析，仅约定传入颜色值
+            默认 #FFF
+int         调用parseInt取整操作（i.e., "124.5" 为 124）
+            默认 0
+map         和asset属性类型解析类似，约定为纹理资源
+            默认 ''
+model       和asset属性类型解析类似，约定为模型资源
+            默认 ''
+number      调用parseFloat转为数值（i.e., "124.5" 为 124.5'）
+            默认 0
+selector    调用querySelector（i.e., "#box" 为 <a-entity id="box">）
+            默认 null
+selectorAll 调用querySelectorAll并转换NodeList为Array (i.e., ".boxes" 为 [<a-entity class=”boxes”, ...]）
+            默认 null
+string      不做任何解析
+            默认 ''
+vec2        把2个整数解析为一个二维向量{x, y}对象（i.e., 1 -2 to {x: 1, y: -2}
+            默认 {x: 0, y: 0}
+vec3        把3个整数解析为一个三维向量{x, y, z}对象（i.e., 1 -2 3 to {x: 1, y: -2, z: 3}
+            默认 {x: 0, y: 0, z: 0}
+vec4        把4个整数解析为一个四维向量{x, y, z, w}对象（i.e., 1 -2 3 -4.5 to {x: 1, y: -2, z: 3, w: -4.5}
+            默认 {x: 0, y: 0, z: 0, w: 0}
+
+[2] 组件原型方法
+.flushToDOM ()  手动序列化组件数据并更新DOM
+-->
+
+<script>
+// 组件注册必须在 a-scene 调用之前
+// AFRAME.registerComponent (name, definition)
+AFRAME.registerComponent('foo', {
+  schema: {
+    // 支持类型推断，自动推断出 type
+    myName: {default: ''},
+    // 支持自定义属性类型和解析器   i.e.   foo="myProperty: a/b"   a/b 转换为 ['a', 'b']
+    myProperty: {
+      default: '',
+      parse: function (value) {
+        return value.split('/');
+      },
+      stringify: function (value) {
+        return value.join('/');
+      },
+    }
+  },
+  dependencies: ['bar'], // 依赖的前置组件
+  multiple: true, // 是否支持多实例，默认 false 为单例模式，支持多例后可以通过 (__<ID>) 形式添加，this.id 取到 <ID> 值
+  events: { // 自动添加/分离的事件处理器 .play()时添加，.pause() 和 .remove() 时分离
+    click: function (evt) {},
+  },
+  init: function () { // 初始化时调用一次
+    // 组件原型属性
+    console.log(this.data); // 解析出的组件属性，通过模式（schema）的默认值、混合（mixins）和实体的属性计算而来
+    console.log(this.el); // entity的HTML元素对象引用
+    console.log(this.el.sceneEl); // scene的HTML元素对象引用
+    console.log(this.id); // 组件实例ID（如 foo 来自sound__foo，单个组件未指定ID，返回 undefined）
+    console.log(this.schema); // 对应schema
+  },
+  update: function (oldData) {}, // 初始化和属性更新时调用
+  tick: function (time, timeDelta) {}, // 在每个场景渲染循环被调用，用于连续的改变或检查，time:场景全局的正常运行毫秒数，timeDelta:当前到最后一帧后毫秒的时间差
+  tock: function (time, timeDelta, camera) {}, // 与 tick 方法相同，但在场景渲染后调用
+  remove: function () {}, // 组件或实体删除时调用
+  pause: function () {}, // 用于暂停动态行为，场景或实体暂停时调用，删除时也会被调用
+  play: function () {}, // 用于启动或恢复动态行为，场景或实体播放时调用，初始化时也会被调用
+  updateSchema: function (newData) {}, // 组件 schema 更新时调用，可用来动态修改 schema 模式
+});
+
+// 访问组件的成员和方法
+AFRAME.registerComponent('foo2', {
+  init: function () {
+    this.bar = 'baz';
+  },
+  qux: function () {
+    // ...
+  }
+});
+</script>
+
+<a-scene>
+  <a-entity foo foo2></a-entity>
+</a-scene>
+
+<script>
+// 访问 bar 成员和 qux 方法
+var fooComponent = document.querySelector('[foo2]').components.foo2;
+console.log(fooComponent.bar);
+fooComponent.qux();
+</script>
+
+</body>
+</html>
