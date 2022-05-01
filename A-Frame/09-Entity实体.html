@@ -1,0 +1,162 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 10:24:17
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-01 15:45:10
+ * @Descripttion: Entity实体
+-->
+<html>
+<head>
+<script src="./lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+A-Frame使用<a-entity>元素来表示一个实体
+实体是占位符对象以便插入组件来提供其外观、行为和功能
+
+位置（position）旋转（rotation）尺寸（scale）是实体的固有组件
+其他常用组件如：几何模型（geometry）材料（material）光照（light）
+-->
+
+<a-scene>
+  <a-entity id="mario" geometry="primitive: box" material="color: red; opacity: 0.5" position="0 0 -5"></a-entity>
+</a-scene>
+
+<script>
+/**
+ * [1] 实体的获取(DOM操作)
+ */
+var el = document.querySelector('#mario');
+
+/**
+ * [2] 属性（Properties）
+ */
+// [2.1] components
+// <a-entity>.components 能够访问实体的组件对象(包括每个组件的数据、状态和方法)
+var camera = document.querySelector('a-entity[camera]').components.camera.camera;
+var material = document.querySelector('a-entity[material]').components.material.material;
+// document.querySelector('a-entity[sound]').components.sound.pause(); // 调用组件api
+
+// [2.2] hasLoaded
+// 实体是否已添加并完成了组件初始化
+
+// [2.3] isPlaying
+// 实体是否处于活动状态 true / false
+
+// [2.4] object3D
+// <a-entity>.object3D 获取THREE.Group对象，是对实体的 three.js Object3D 对象的引用
+
+// [2.5] object3DMap
+// 访问组件所设置的不同类型的THREE.Object3D对象，如相机（cameras）, 网孔（meshes）, 光照（lights）或者声音
+
+// [2.6] sceneEl
+// 实体包含一个对其所在场景元素的引用
+var sceneEl = document.querySelector('a-scene');
+var entity = sceneEl.querySelector('a-entity');
+console.log(entity.sceneEl === sceneEl);  // >> true
+
+/**
+ * [3] 方法（Methods）
+ */
+// [3.1] addState (stateName) / removeState (stateName)
+// 给实体添加/删除状态，该方法将发出 stateadded / stateremoved 事件，可以通过.is来检查状态是否存在
+entity.addEventListener('stateadded', function (evt) {
+  if (evt.detail === 'selected') {
+    console.log('Entity now selected!');
+  }
+});
+entity.addEventListener('stateremoved', function (evt) {
+  if (evt.detail === 'selected') {
+    console.log('Entity no longer selected.');
+  }
+});
+entity.addState('selected');
+entity.is('selected'); // >> true
+entity.removeState('selected');
+entity.is('selected'); // >> false
+
+// [3.2] destroy ()
+// 清除内存和相关的组件数据
+
+// [3.3] Attribute 组件设置相关
+// setAttribute (componentName, value, [propertyValue | clobber]) 如果 attr 不是注册组件名或是单属性组件，按正常DOM工作，否则会先进行解析
+// getAttribute (componentName)                                   获取并解析组件数据，包含mixins和defaults
+// getDOMAttribute (componentName)                                是 getAttribute 的子集，只包含 DOM 中显式定义的数组(DOM中设置了几个参数就返回几个参数)，不含mixins和defaults
+// removeAttribute (componentName, propertyName)                  删除组件并触发该组件的remove生命周期方法，如果给定propertyName，将重置属性为默认值
+
+entity.setAttribute('position', '0 0 -5');
+entity.setAttribute('position', { x: 0, y: 0, z: -5 });
+entity.setAttribute('position', 'z', -5);
+// entity.setAttribute('visible', false); // componentName不是一个已注册组件的名称，则效果等同普通dom操作
+
+entity.getAttribute('position'); // >> {x: 0, y: 0, z: -5}
+entity.getAttribute('position').z; // -5
+entity.getAttribute('data-position'); // >> "0 0 -5" componentName不是一个已注册组件的名称，则效果等同普通dom操作
+
+// entity.removeAttribute('material');
+entity.removeAttribute('material', 'opacity');
+entity.getDOMAttribute('material'); // >> {color: 'red'}
+
+// [3.4] emit (name, detail, bubbles)
+// 发出自定义DOM事件，参考《事件&DOM》
+
+// [3.5] pause () / play ()
+// 停止/启动当前实体和子实体任何动画和组件定义的动态行为，并在其每个组件上调用 Component.pause() / Component.play()，组件通常是删除事件侦听器
+// DOM附加实体时会自动调用 play()，例如 sound 组件会播放声音
+entity.pause();
+entity.play();
+
+// [3.6] flushToDOM (recursive)
+// 手动序列化实体组件的数据并更新DOM
+
+// [3.7] Object3D相关
+// setObject3D (type, obj)                 注册传递的obj对象
+// getObject3D (type)
+// getOrCreateObject3D (type, Constructor)
+// removeObject3D (type)                   通过type从该实体的THREE.Group以及场景中删除该对象
+/*
+AFRAME.registerComponent('example-geometry', {
+  update: function () {
+    var mesh = this.el.getOrCreateObject3D('mesh', THREE.Mesh);
+    mesh.geometry = new THREE.Geometry();
+  }
+});
+*/
+
+/**
+ * [4] 事件（Events）
+ */
+/*
+child-attached       子实体附加到实体上
+    |-- el             所附加子元素的引用
+child-detached       子实体分离出去
+componentchanged     实体的组件修改
+    |-- name           组件名
+    |-- id             组件ID
+    |-- newData        组件新数据
+    |-- oldData        组件旧数据
+componentinitialized 实体的组件初始化
+    |-- name           组件名
+    |-- id             组件ID
+    |-- data           组件数据
+componentremoved     实体的组件删除
+    |-- name           组件名
+    |-- id             组件ID
+loaded               实体已添加并完成了组件初始化
+object3dset          THREE.Object3D被通过setObject3D(name)方法设置在实体上
+pause                实体处于非活动状态（或暂停）
+play                 实体处于活动状态（或播放）
+stateadded           实体新增状态
+    |-- state          增加的状态（字符串）
+stateremoved         实体删除状态
+    |-- state          删除的状态（字符串）
+schemachanged        组件的参数已更改
+    |-- component      修改的组件名
+
+*/
+
+
+</script>
+
+</body>
+</html>
