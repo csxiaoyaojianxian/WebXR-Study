@@ -2,7 +2,7 @@
  * @Author: victorsun
  * @Date: 2022-05-01 15:46:54
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-01 17:48:08
+ * @LastEditTime: 2022-05-01 18:08:16
  * @Descripttion: Scene场景
 -->
 <html>
@@ -11,17 +11,72 @@
 </head>
 <body>
 <!--
+场景是一个全局根对象，用于附加组件和等待资源加载完成
+场景从实体（Entity）类继承而来，因此继承了实体类所有的属性和方法
+场景默认处理了three.js和WebVR公式化代码：
+1. 设置画布（canvas），渲染器（renderer）以及渲染循环
+2. 缺省相机和光照
+3. 设置webvr-polyfill, VREffect
+4. 添加进入VR的界面，来启动WebVR API
+
+[1] 属性
+behaviors     带tick方法的组件数组，将在每帧都运行
+camera        当前three.js相机
+canvas        canvas元素的引用
+isMobile      运行环境是否是移动设备
+object3D      THREE.Scene对象
+renderer      当前THREE.WebGLRenderer
+renderStarted 场景是否在渲染中。
+effect        通过传递当前渲染器到THREE.VREffect来创建的VR渲染器
+systems       实例化的systems
+time          以秒为单位的场景已正常运行时间
+
+[2] 状态
+vr-mode       判断当前是否是 VR 模式，通过 sceneEl.is('vr-mode') 来检查
+
+[3] 方法
+enterVR       切换到立体声渲染并将内容发布到头戴设备上，由用户调用
+exitVR        切换到单通道渲染器且停止在头戴设备上呈现内容
+?reload       重载场景
+
+[4] 事件
+enter-vr      用户进入VR，内容开始呈现在头戴设备上
+exit-vr       用户退出VR，内容停止显示在头戴设备上
+loaded        所有节点都已经被加载
+renderstart   渲染循环已经开始
 
 
+[A-Frame自带场景配置组件]
+embedded           从canvas去除全屏模式
+fog                添加雾效果
+keyboard-shortcuts 切换键盘快捷键
+inspector          注入A-Frame查看器
+stats              切换性能状态
+vr-mode-ui         切换进入或退出VR的界面
 
 -->
 
+<a-scene fog stats>
+  <a-assets>
+    <img id="texture" src="./assets/material.jpg">
+  </a-assets>
+  <a-box src="#texture" position="0 0 -5"></a-box>
+</a-scene>
+
 <script>
-//
+// 在场景中运行内容脚本，推荐编写组件添加到 a-scene
+// 若裸写脚本
+var scene = document.querySelector('a-scene');
+if (scene.hasLoaded) {
+  run();
+} else {
+  scene.addEventListener('loaded', run);
+}
+function run () {
+  var entity = scene.querySelector('a-box');
+  entity.setAttribute('material', 'color', 'red');
+}
 </script>
 
-<a-scene>
-
-</a-scene>
 </body>
 </html>
