@@ -2,7 +2,7 @@
  * @Author: victorsun
  * @Date: 2022-05-01 21:41:26
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-02 02:30:37
+ * @LastEditTime: 2022-05-02 20:33:57
  * @Descripttion: 文本组件
 -->
 <html>
@@ -11,16 +11,71 @@
 </head>
 <body>
 <!--
+[属性]
+align         多行文本对齐（left, center, right）  left
+alphaTest     如果alpha小于此值不显示  0.5
+anchor        水平定位（left, center, right, align）  center
+baseline      垂直定位（top, center, bottom）  center
+color         文本颜色  white
+font          字体，可以是A-Frame的stock字体或者一个字体文件的URL  default
+fontImage     字体图像渲染文本的纹理路径，默认为font名称后缀替换为.png，如果使用的是stock字体，则不需要指定该值  从字体名称派生
+height        文本块的高度  从文本大小派生
+letterSpacing 以像素为单位的字母间距  0
+lineHeight    以像素为单位的行高  从字体文件派生
+opacity       不透明度，范围从0到1，其中0表示完全透明，1表示完全不透明  1.0
+shader        用于渲染文本的着色器  sdf
+side          要渲染的边，（front, back, double）  front
+tabSize       以空格计算的缩进字数  4
+transparent   文本是否透明  true
+value         文本的实际内容，换行符和制表符通过 \n和 \t来支持  ''
+whitespace    如何处理空白（normal、pre、nowrap）， 关于whitespace.      normal
+width         宽度（米）  如果存在，则从几何体中导出
+wrapCount     字符数多少后可以换行  40
+wrapPixels    像素数多少后可以换行  从wrapCount派生
+xOffset       添加填充的 X 偏移量
+zOffset       如果将几何体用作背景，则应用z-offset以避免z冲突  0.001
 
 
+[事件]
+textfontset	  字体资源加载后触发
+
+
+[字体]
+[Stock字体] 默认从CDN加载，若要脱机工作，需要下载后通过URL指向它们
+[Stock MSDF Fonts]
+roboto	https://cdn.aframe.io/fonts/Roboto-msdf.json
+
+[Stock SDF Fonts]
+aileronsemibold	https://cdn.aframe.io/fonts/Aileron-Semibold.fnt
+dejavu	https://cdn.aframe.io/fonts/DejaVu-sdf.fnt
+exo2bold	https://cdn.aframe.io/fonts/Exo2Bold.fnt
+exo2semibold	https://cdn.aframe.io/fonts/Exo2SemiBold.fnt
+kelsonsans	https://cdn.aframe.io/fonts/KelsonSans.fnt
+monoid	https://cdn.aframe.io/fonts/Monoid.fnt
+mozillavr	https://cdn.aframe.io/fonts/mozillavr.fnt
+sourcecodepro	https://cdn.aframe.io/fonts/SourceCodePro.fnt
 
 -->
-
-<script>
-//
-</script>
-
 <a-scene>
+  <a-assets>
+    <!-- msdf自定义字体，制作工具 https://msdf-bmfont.donmccurdy.com/ -->
+    <!-- 若不指定，fontImage 字体贴图将是 <font的名称>.png，如后面的三行的demo  -->
+    <a-mixin id="default-font" text="font: ../assets/Roboto-msdf.json"></a-mixin>
+  </a-assets>
+
+  <!--
+  <a-entity text="font: mozillavr; value: Via stock font name."></a-entity>
+  <a-entity text="font: https://cdn.aframe.io/fonts/mozillavr.fnt; value: Via URL."></a-entity>
+  <a-entity text="text: Hello World; font: ../fonts/DejaVu-sdf.fnt; fontImage: ../fonts/DejaVu-sdf.png"></a-entity>
+  -->
+
+  <a-entity
+    geometry="primitive: plane; width: 2; height: 0.5"
+    mixin="default-font"
+    text="value: Hello World!;align: center"
+    position="0 1.6 -1"
+  ></a-entity>
+
   <a-sky src="../assets/sechelt.jpg"></a-sky>
 </a-scene>
 
