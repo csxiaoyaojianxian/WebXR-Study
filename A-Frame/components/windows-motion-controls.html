@@ -1,0 +1,54 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-02 23:17:42
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-02 23:53:51
+ * @Descripttion: windows-运动控制
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+[属性]
+hand               将被跟踪的手 (i.e., right, left)                            right
+pair               哪对控制器  if > 2 已连接                                      0
+model              控制器模型是否加载                                            true
+hideDisconnected   当没有连接匹配的游戏手柄（基于 ID 和手）时禁用控制器模型的渲染       true
+
+[事件]
+
+thumbstickdown          摇杆按钮已按下
+thumbstickup            摇杆按钮松开
+thumbstickchanged       摇杆按钮已更改
+thumbstickmoved         摇杆轴移动
+triggerdown             扳机已按下
+triggerup               触发器释放
+triggerchanged          触发器已更改
+gripdown                握把按钮已按下
+gripup                  握把按钮松开
+gripchanged             握把按钮已更改
+menudown                菜单按钮已按下
+menuup                  菜单按钮松开
+menuchanged             菜单按钮已更改
+trackpaddown            触控板已按下
+trackpadup              触控板松开
+trackpadchanged         触控板已更改
+trackpadmoved           触控板轴移动
+controllermodelready    加载模型文件并完成解析
+
+-->
+
+<script>
+//
+</script>
+
+<a-scene>
+  <a-entity windows-motion-controls="hand: left"></a-entity>
+  <a-entity windows-motion-controls="hand: right"></a-entity>
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+</body>
+</html>

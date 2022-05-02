@@ -1,0 +1,53 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 21:41:26
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-03 00:12:37
+ * @Descripttion: webXR
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+webxr系统设置了一个场景中的webxr设备配置
+
+[属性] 初始化后不可更改
+referenceSpaceType  参考空间类型，摄像机和控制器的场景参考空间类型    local-floor
+requiredFeatures    所需的 WebXR 会话功能                        local-floor
+optionalFeatures    可选的 WebXR 会话功能                        bounded-floor
+overlayElement      在 AR 模式下用作 WebXR DOM 覆盖的元素选择器        null
+
+[referenceSpaceType 选项]
+viewer          刚性连接到相机并随其移动/旋转
+local           原点是会话开始时靠近用户头部位置的任意点
+local-floor     原点是会话开始时靠近用户脚的任意点
+bounded-floor   和 local-floor 相似，但支持具有安全边界的 room-scale 跟踪
+unbounded       和 local 相似，但支持超过约 5 米/15 英尺的大规模移动
+
+[requiredFeatures 选项]
+应用程序正常工作所需的 WebXR 功能名称数组（逗号分隔列表）
+hit-test	https://immersive-web.github.io/hit-test/
+dom-overlay	https://immersive-web.github.io/dom-overlays/
+
+[optionalFeatures 选项]
+应用程序可以使用的 WebXR 功能名称的数组（逗号分隔列表）
+
+[overlayElement 选项]
+在 AR 会话期间应用作 WebXR DOM 覆盖的 DOM 元素的选择器，目前仅支持在 Android 82 或更高版本上使用 Chrome 的手持式 AR
+
+-->
+
+<script>
+//
+</script>
+
+<a-scene webxr="requiredFeatures: hit-test,local-floor;
+                optionalFeatures: dom-overlay,unbounded;
+                overlayElement: #overlay;">
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+</body>
+</html>

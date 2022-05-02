@@ -1,0 +1,45 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-02 23:16:47
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-03 00:36:39
+ * @Descripttion: 游戏手柄控制器组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+[属性]
+armModel          手臂模型，如果不存在，手臂模型是否用于位置数据       true
+autoHide          控制器连接或断开连接时是否自动隐藏                 true
+controller        Gamepad API 返回的数组中控制器的索引               0
+id                使用精确匹配从 Gamepad API 中选择控制器
+idPrefix          使用前缀匹配从 Gamepad API 中选择控制器
+headElement       如果需要，手臂模型的头部元素（如果不是活动相机）
+hand              如果需要手臂模型，使用哪只手                      right
+orientationOffset 应用于模型方向的偏移                      x: 0, y: 0, z: 0
+
+[事件]
+controllerconnected      控制器已连接并设置
+controllerdisconnected   控制器已断开连接
+axismove                 轴已更改
+buttonchanged            任何触摸或按下按钮触发
+buttondown               按下按钮
+buttonup                 按钮松开
+touchstart               触摸按钮开始触摸
+touchend                 触摸按钮停止触摸
+-->
+
+<script>
+//
+</script>
+
+<a-scene>
+  <a-entity tracked-controls="controller: 0; idPrefix: OpenVR"></a-entity>
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+</body>
+</html>

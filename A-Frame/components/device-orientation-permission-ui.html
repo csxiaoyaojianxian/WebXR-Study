@@ -1,0 +1,56 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-02 21:51:53
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-02 23:42:16
+ * @Descripttion: device-orientation-permission-ui 设备方向权限-ui
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+
+<style>
+/* 覆盖css */
+.a-dialog-allow-button {
+  background-color: red;
+}
+
+.a-dialog-deny-button {
+  background-color: blue;
+}
+
+.a-dialog-ok-button {
+   background-color: green;
+ }
+</style>
+</head>
+<body>
+<!--
+获取 DeviceOrientation 事件权限弹出的授权对话框，仅适用 a-scene
+
+[属性]
+enabled               需要时是否显示对话框                                    true
+denyButtonText        拒绝按钮文本                                       English text
+allowButtonText       允许按钮文本                                       English text
+cancelButtonText      取消按钮文本                                       English text
+deviceMotionMessage   对话框中的消息请求用户允许启用 Device Motion API      English text
+mobileDesktopMessage  以模态显示的消息，要求用户切换到移动浏览模式             English text
+httpsMessage          请求用户切换到 HTTPS 的消息                          English text
+
+[事件]
+deviceorientationpermissiongranted         用户已授予对 DeviceOrientation 事件的访问权限
+deviceorientationpermissionrejected        用户或浏览器拒绝访问 DeviceOrientation 事件
+deviceorientationpermissionrequested       应用程序已请求访问 DeviceOrientation 事件的权限
+
+-->
+
+<script>
+//
+</script>
+
+<a-scene device-orientation-permission-ui="enabled: false"></a-scene>
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 21:41:26
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-02 23:35:40
+ * @Descripttion: AR虚拟定位组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+该组件使用 WebXR hit-test API 在现实世界中定位虚拟对象
+
+[属性]
+target          目标，要移动的对象                         null
+enabled         是否进行命中测试                          true
+src             用于标记的图像
+type            足迹模型的形状 'footprint' or 'map'       "footprint"
+footprintDepth  足迹模型的高度, 1 为完整高度                0.1
+mapSize         如果没有设置目标，这就是地图的大小          0.5 0.5
+
+[事件]
+ar-hit-test-start     The AR Hit Test system has managed start scanning
+ar-hit-test-achieved  The AR Hit Test system has managed to find a surface to start hit testing on
+ar-hit-test-select    The user has stopped positioning the detail contains the latest position, orientation and inputSource that was used
+
+-->
+
+<script>
+//
+</script>
+
+<a-scene webxr="optionalFeatures:  hit-test;" ar-hit-test="target:#myobject;">
+  <a-entity id="myobject"></a-entity>
+</a-scene>
+
+</body>
+</html>
