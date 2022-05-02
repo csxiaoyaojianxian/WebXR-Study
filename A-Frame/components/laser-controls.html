@@ -1,0 +1,50 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-02 22:47:30
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-02 23:00:13
+ * @Descripttion: laser-controls 激光控制组件 TODO
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+激光交互可以在多DoF自由度之间扩展
+0 DoF（基于凝视，Cardboard）
+3 DoF（Daydream、带有控制器的 GearVR）
+6 DoF（Vive、Oculus Touch）
+
+引擎盖下是基于以下组件：
+vive-controls
+oculus-touch-controls
+daydream-controls
+gearvr-controls
+windows-motion-controls
+
+
+
+[属性]
+hand                left / right
+model               是否加载控制器的默认模型
+defaultModelColor   默认控制器模型的颜色
+
+[自定义 raycaster]
+参考 raycaster 组件属性
+
+-->
+
+<script>
+//
+</script>
+
+<a-scene>
+
+  <a-entity laser-controls="hand: left" raycaster="lineColor: red; lineOpacity: 0.5"></a-entity>
+
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+</body>
+</html>

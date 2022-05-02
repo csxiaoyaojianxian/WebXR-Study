@@ -2,7 +2,7 @@
  * @Author: victorsun
  * @Date: 2022-05-01 21:41:26
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-02 02:33:59
+ * @LastEditTime: 2022-05-02 22:36:04
  * @Descripttion: gltf 模型组件
 -->
 <html>
@@ -20,9 +20,13 @@ demo见 《3D模型和动画》
 
 [事件]
 model-loaded   模型加载到场景中
+model-error    模型加载错误
+
+[动画] animation-mixer
+<a-entity gltf-model="url(/path/to/tree.gltf)" animation-mixer></a-entity>
 
 [模型转换]
-FBX → glTF      http://gltf.autodesk.io/
+FBX → glTF      https://github.com/facebookincubator/FBX2glTF
 COLLADA → glTF  https://cesium.com/blog/2019/09/17/ion-gltf/
 OBJ → glTF      https://github.com/CesiumGS/obj2gltf
 

@@ -6,3 +6,6 @@
 TODO list:
 1. 一些官方案例，首页中
 2. 2个官方指南
+
+参考阅读：
+https://blog.mozvr.com/a-saturday-night-gltf-workflow/
