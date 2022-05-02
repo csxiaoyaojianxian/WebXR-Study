@@ -2,7 +2,7 @@
  * @Author: victorsun
  * @Date: 2022-05-01 15:46:54
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-01 23:37:26
+ * @LastEditTime: 2022-05-02 21:33:18
  * @Descripttion: Animations动画组件
 -->
 <html>
@@ -10,7 +10,73 @@
 <script src="../lib/1.3.0/aframe.js"></script>
 </head>
 <body>
+<!--
+[属性]
+property        动画属性，可能是组件名，组件的点分隔属性(如 material.color)，或普通属性
+isRawProperty   默认false，标记为true支持对 A-Frame 组件之外的任意对象属性进行动画处理，以获得更好的性能。如果 property 以 components 或 object3D 开通，将被推断为true，例如，components.material.material.opacity  false
+from            初始值，建议传入，否则将在动画开始时采样  null
+to              动画结束时的目标值  null
+type            目前只支持 'color'，在 isRawProperty 为 ture 时对XYZ/RGB颜色值的补间  ''
+delay           启动前延迟(ms)  0
+dir             动画的方向，默认 normal，可选 alternate(交替), reverse(反向)
+dur             动画持续时间  1000
+easing          动画的缓动函数  easeInQuad
+elasticity      反弹多少（越高越强）  400
+loop            循环次数，true表示无限循环  0
+round           是否舍入值  false        
+startEvents     开始事件，以逗号分隔的事件列表，若指定，动画将不会自动播放，startEvents将重新启动动画，用pauseEvents恢复。如果实体上有其他动画组件为相同的属性设置动画，则这些动画将自动暂停以不发生冲突  null
+pauseEvents     暂停事件，使用resumeEvents恢复  null
+resumeEvents    恢复事件  null
+autoplay        是否自动播放  true
+enabled         是否禁用，如果禁用，动画将停止并且 startEvents 不会触发动画开始  true
 
+[事件]
+animationbegin      动画开始，事件详情包含动画名
+animationcomplete   动画结束，事件详情包含动画名
+animationcomplete__ 含ID的动画结束 (e.g., animation__click)
+
+[成员] el.components.animation.<MEMBER>.
+animation           anime.js对象
+config              anime.js配置
+
+[easing]
+easeIn        easeOut        easeInOut       Others
+easeInQuad    easeOutQuad    easeInOutQuad   linear
+easeInCubic   easeOutCubic   easeInOutCubic   
+easeInQuart   easeOutQuart   easeInOutQuart   
+easeInQuint   easeOutQuint   easeInOutQuint   
+easeInSine    easeOutSine    easeInOutSine   
+easeInExpo    easeOutExpo    easeInOutExpo   
+easeInCirc    easeOutCirc    easeInOutCirc   
+easeInBack    easeOutBack    easeInOutBack   
+easeInElastic easeOutElastic easeInOutElastic
+
+
+[Tips] property 属性直接使用 object3D / components
+例如：
+{ property: object3D.position.z; to: 5 }
+{ property: components.material.material.color; from: red; to: #FFCCAA }
+相比之下，material.color 会在每一帧调用 .setAttribute，影响性能
+涉及到颜色的补间动画，都要设置 type: color，颜色值支持 hex, color names, hsl, rgb
+
+
+https://animejs.com/
+-->
+
+<a-scene>
+  <a-entity id="mouseCursor" cursor="rayOrigin: mouse"></a-entity>
+
+  <!-- components.material.material.color 直接对值进行补间以获得更好的性能而不是通过 .setAttribute -->
+  <a-entity
+    geometry="primitive: box"
+    material="color: red"
+    position="0 0 -5"
+    animation__mouseenter="property: components.material.material.color; type: color; to: blue; startEvents: mouseenter; dur: 500";
+    animation__mouseleave="property: components.material.material.color; type: color; to: red; startEvents: mouseleave; dur: 500";>
+  </a-entity>
+
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
 
 </body>
 </html>

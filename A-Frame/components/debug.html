@@ -1,0 +1,33 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 21:41:26
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-02 21:49:40
+ * @Descripttion: 调试组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+调试组件启用组件到 DOM 序列化
+出于性能原因，A-Frame 默认不会使用组件数据更新 DOM，为了调试时观察组件数据变化，可以使用 debug 组件
+-->
+
+<a-scene debug>
+  <!-- 观察审查器中 raycaster 属性变化 -->
+  <a-entity id="mouseCursor" cursor="rayOrigin: mouse" position="0 0 0"></a-entity>
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+<script>
+// 手动序列化，使用 Entity.flushToDOM 或 Component.flushToDOM
+document.querySelector('a-entity').components.position.flushToDOM();  // Flush a component.
+document.querySelector('a-entity').flushToDOM();  // Flush an entity.
+document.querySelector('a-entity').flushToDOM(true);  // Flush an entity and its children.
+document.querySelector('a-scene').flushToDOM(true);  // Flush every entity.
+</script>
+
+</body>
+</html>

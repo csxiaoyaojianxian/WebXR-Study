@@ -1,0 +1,35 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 21:41:26
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-02 22:01:21
+ * @Descripttion: 嵌入式组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+<style>
+a-scene {
+  height: 300px;
+  width: 600px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+</style>
+</head>
+<body>
+<!--
+移除 <canvas> 组件的全屏css且使 进入VR 按钮更小，方便嵌入网页
+可以使用 <iframe allowfullscreen="yes" allowvr="yes"> 来展示多 scenes
+-->
+
+<div id="myEmbeddedScene"></div>
+  <a-scene embedded>
+    <a-sky src="../assets/sechelt.jpg"></a-sky>
+  </a-scene>
+</div>
+
+</body>
+</html>
