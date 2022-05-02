@@ -1,0 +1,39 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 21:41:26
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-02 02:23:04
+ * @Descripttion: 雾组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+仅应用于 a-scene
+
+[属性]
+type    雾气分布类型，linear(线性) / exponential(指数)      linear
+color   雾气颜色，例如，设置为黑色，则远处的对象将渲染为黑色     #000
+
+[Linear Fog] 线性雾随着距离的增加而线性增加
+near    开始应用的最小距离    1
+far     停止应用的最大距离    1000
+
+[Exponential Fog] 指数雾的密度随距离呈指数增长
+density 浓雾密度    0.00025
+
+-->
+
+<a-scene fog="type: exponential; density: 0.002; color: #AAA">
+
+  <a-box position="10 0 -20"></a-box>
+  <!-- 排除材质 -->
+  <a-entity material="fog: false"></a-entity>
+
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+</body>
+</html>

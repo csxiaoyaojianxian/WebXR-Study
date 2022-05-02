@@ -1,0 +1,87 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 21:41:26
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-02 02:24:17
+ * @Descripttion: 光标组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+光标组件实现了通过点击和凝视与实体交互
+<a-cursor> 原语为基于注视的光标提供默认的标线外观
+光标基于光线投射组件，光标组件模仿传统的 Web 开发，提供了 mousedown、mouseup、mouseenter、mouseleave、click 事件，底层基于 raycaster-intersection 和 raycaster-intersection-cleared 事件，捕获最近的可见相交实体
+
+[属性]
+fuse                      光标是否基于凝视动作                       桌面false 移动设备true
+fuseTimeout               触发凝视点击事件等待时间(ms)                1500
+mouseCursorStylesEnabled  ?是否显示射线起源，鼠标模式当悬停实体时        true
+rayOrigin                 ?射线从哪里发出(entity/mouse)，鼠标用于开发   entity
+downEvents                ?mousedown触发的额外事件                   []
+upEvents                  ?mouseup触发的额外事件                     []
+
+[事件]
+click       如果单击当前相交实体（无论是通过鼠标点击还是通过凝视动作），则从光标和相交实体上发出
+fusing      当开始凝视时和凝视中，从光标和相交实体上发出
+mousedown   在canvas元素上的鼠标按下时，从光标和相交实体（如果有）上发出
+mouseenter  当光标与实体相交时，从光标和相交实体（如果有）上发出
+mouseleave  当光标不再与先前相交的实体相交时，从光标和相交实体（如果有）上发出
+mouseup     在canvas元素上的鼠标松开时，从光标和相交实体（如果有）上发出
+
+[状态-光标实体]
+cursor-fusing   当光标停留在某个实体上时
+cursor-hovering 当光标悬停在另一个实体上时添加
+
+[状态-相交实体]
+cursor-hovered  当光标悬停在相交实体上时添加到该实体
+-->
+
+<script>
+// evt.detail.intersection
+// click切换颜色
+AFRAME.registerComponent('cursor-listener', {
+  init: function () {
+    var lastIndex = -1;
+    var COLORS = ['red', 'green', 'blue'];
+
+    this.el.addEventListener('click', function (evt) {
+      lastIndex = (lastIndex + 1) % COLORS.length;
+      this.setAttribute('material', 'color', COLORS[lastIndex]);
+      // 相交点数据存储在 evt.detail.intersection 中
+      // 包含 {distance, point, face, faceIndex, indices, object}
+      console.log('点击位置: ', evt.detail.intersection.point); // Vector3 {x: 0, y: 0, z: -4.5}
+    });
+
+    this.el.addEventListener('fusing', function (evt) {
+      console.log('开始凝视位置: ', evt.detail.intersection.point); // Vector3 {x: 0, y: 0, z: -4.5}
+    });
+  }
+});
+</script>
+
+<a-scene>
+  <!-- 创建一个固定在屏幕中心的环形光标，将其作为活动相机（camera）的一个子实体以随镜头移动，放置在相机前，即 -Z 轴 -->
+  <!-- raycaster: 通过光线投射组件配置光标，如设置最大距离、相交点检查频率、可点击对象 -->
+  <!-- 添加基于凝视的点击的动画交互 -->
+  <a-entity camera look-controls wasd-controls>
+    <a-entity
+      cursor="fuse: true; fuseTimeout: 1500"
+      position="0 0 -1"
+      raycaster="far: 20; interval: 1000; objects: #box"
+      animation__click="property: scale; startEvents: click; easing: easeInCubic; dur: 150; from: 0.1 0.1 0.1; to: 1 1 1"
+      animation__fusing="property: scale; startEvents: fusing; easing: easeInCubic; dur: 1500; from: 1 1 1; to: 0.1 0.1 0.1"
+      animation__mouseleave="property: scale; startEvents: mouseleave; easing: easeInCubic; dur: 500; to: 1 1 1"
+      geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: black; shader: flat">
+    </a-entity>
+  </a-entity>
+
+  <a-entity id="box" cursor-listener geometry="primitive: box" position="0 0 -5" material="color: blue"></a-entity>
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+</body>
+
+</html>

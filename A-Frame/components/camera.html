@@ -1,0 +1,58 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 21:40:58
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-02 02:24:49
+ * @Descripttion: 相机组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+
+[属性]
+active     多摄影机场景中，摄影机是否为活动  true
+far        相机视锥体的远裁剪平面          10000
+fov        视场角(度)                    80
+near       相机视锥体的近裁剪平面          0.005
+userHeight 非虚拟现实模式的相机高度(米)     false 非VR下1.6(平均人眼高度)
+zoom       相机的缩放系数                 1
+
+-->
+
+<a-scene>
+
+  <!-- 当场景中没有 camera 时添加的默认 camera -->
+  <!-- <a-entity camera="active: true" look-controls wasd-controls position="0 1.6 0" data-aframe-default-camera></a-entity> -->
+  
+  <a-box position="0 0 -5" color="red"></a-box>
+
+  <!-- 相机1: 位于人眼平均高度（1.6米）的照相机 -->
+  <a-entity camera="userHeight: 1.6" look-controls></a-entity>
+  <!-- 相机2 -->
+  <a-entity id="second-camera" camera="active: false" position="1 2 3" look-controls></a-entity>
+
+  <!-- 相机3: 平视显示器（HUD） -->
+  <a-entity camera look-controls>
+    <!-- 将实体固定到相机，如展示菜单，不推荐 -->
+    <a-entity geometry="primitive: plane; height: 0.2; width: 0.2" position="0 0 -1" material="color: gray; opacity: 0.5"></a-entity>
+  </a-entity>
+
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+<script>
+setTimeout(() => {
+  // 切换激活的相机
+  var secondCameraEl = document.querySelector('#second-camera');
+  secondCameraEl.setAttribute('camera', 'active', true);
+}, 3000);
+
+// 获取相机位置
+// ...
+</script>
+
+</body>
+</html>

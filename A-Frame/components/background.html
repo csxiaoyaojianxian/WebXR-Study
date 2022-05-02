@@ -1,0 +1,25 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 21:41:26
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-01 23:37:33
+ * @Descripttion: 背景组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+背景组件可以为场景设置背景色，效率要比a-sky高很多
+因为并没有创建额外的模型，没有不必要的裁剪（当天空盒超出视锥体时）和遮挡处理（当天空盒遮挡3D对象时）
+
+[属性]
+color        场景背景的颜色              black
+transparent  背景是透明的，将忽略颜色属性  false
+-->
+
+<a-scene background="color: red"></a-scene>
+
+</body>
+</html>

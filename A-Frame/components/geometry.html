@@ -1,0 +1,171 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 21:41:26
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-02 11:48:05
+ * @Descripttion: 几何体组件 geometry
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+实体的 primitive 属性可以定义基础形状，通常还定义一个材质组件来创建完整的Mesh
+
+[基础属性]
+primitive  几何体名称，确定几何图形类型                            box
+skipCache  禁用从缓存中检索共享几何体对象                          false
+
+
+[内置几何体]
+
+【box】长方体
+width           X轴上的边的宽度（米）   1
+height          Y轴上的边的高度（米）   1
+depth           Z轴上的边的深度（米）   1
+segmentsWidth   X轴分段               1
+segmentsHeight  Y轴分段               1
+segmentsDepth   Z轴分段               1
+
+【circle】二维圆形
+radius          圆半径（米）                                  1
+segments        构造圆的三角形数，如比萨饼片，分段数越大，圆就越圆  32
+thetaStart      第一段的起始角度，可用于定义部分圆                0
+thetaLength     中心角（度），默认设置为360，形成一个完整的圆     360
+
+【cone】圆锥体
+height          圆锥体的高度                                  2
+openEnded       圆锥体的末端是打开的（true）还是盖上的（false）  false
+radiusBottom    圆锥体底端的半径                               1
+radiusTop       圆锥体顶端的半径                               1
+segmentsRadial  圆锥体周长周围的分段面数                        36
+segmentsHeight  沿圆锥体高度的面行数                           18
+thetaStart      起始角度（度）                                 0
+thetaLength     以度为单位的中心角                            360
+
+【cylinder】圆柱体，可以用于制作 prisms(棱柱)
+radius          圆柱体的半径                                  1
+height          圆柱体的高度                                  2
+segmentsRadial  圆柱体周长周围的分段面数                        36
+segmentsHeight  沿圆柱体高度的面行数                           18
+openEnded       圆柱体的端部是打开的（true）还是盖上的（false）  false
+thetaStart      起始角度（度）                                0
+thetaLength     以度为单位的中心角                            360
+
+【dodecahedron】十二面体
+radius          半径（米）      1
+
+【octahedron】八面体
+radius          半径（米）      1
+
+【plane】平面
+width           沿X轴的宽度     1
+height          沿Y轴的高度     1
+segmentsHeight  Y轴上的分割面数  1
+segmentsWidth   X轴上的分段面数  1
+
+【ring】环
+radiusInner     圆环内孔半径                          1
+radiusOuter     圆环外缘半径                          1
+segmentsTheta   分段数 数字越大，环就越圆               32
+segmentsPhi     由segmentsTheta定义的每个面内的三角形数  8
+thetaStart      起始角度（度）                         0
+thetaLength     以度为单位的中心角                     360
+
+【sphere】球体
+radius          球体的半径        1
+segmentsWidth   水平段数         18
+segmentsHeight  垂直段数         36
+phiStart        水平起始角        0
+phiLength       水平扫描角度大小  360
+thetaStart      垂直起始角        0
+thetaLength     垂直扫描角度大小  360
+
+【tetrahedron】四面体
+radius          四面体的半径（米） 1
+
+【torus】圆环体
+radius          圆环体外缘的半径                           1
+radiusTubular   管子的半径                               0.2
+segmentsRadial  沿管端圆周的段数 数字越大，意味着管子就越圆    36
+segmentsTubular 沿管面周长的段数 数字越大，意味着管子就越圆    32
+arc             中心角                                  360
+
+【torusKnot】环形结
+radius          包含圆环结的半径                           1
+radiusTubular   圆环结管的半径                            0.2
+segmentsRadial  沿管端圆周的段数 数字越大，意味着管子就越圆    36
+segmentsTubular 沿管面周长的段数 数字越大，意味着管子就越圆    32
+p               几何结构绕着它的旋转对称轴旋转多少次          2
+q               几何体绕着圆环内部的圆旋转多少次              3
+
+【triangle】三角形
+vertexA         三个顶点之一的坐标                       0 0.5 0
+vertexB         三个顶点之一的坐标                    -0.5 -0.5 0
+vertexC         三个顶点之一的坐标                     0.5 -0.5 0
+-->
+
+<script>
+// 注册自定义几何体[TODO]
+AFRAME.registerGeometry('example', {
+  schema: {
+    vertices: {
+      default: ['-10 10 0', '-10 -10 0', '10 -10 0'],
+    }
+  },
+  init: function (data) {
+    var geometry = new THREE.Geometry();
+    geometry.vertices = data.vertices.map(function (vertex) {
+      var points = vertex.split(' ').map(function(x){return parseInt(x);});
+      return new THREE.Vector3(points[0], points[1], points[2]);
+    });
+    geometry.computeBoundingBox();
+    geometry.faces.push(new THREE.Face3(0, 1, 2));
+    geometry.mergeVertices();
+    geometry.computeFaceNormals();
+    geometry.computeVertexNormals();
+    this.geometry = geometry;
+  }
+});
+</script>
+
+<a-scene>
+  <!-- box -->
+  <a-entity geometry="primitive: box; width: 1; height: 1; depth: 1" position="-5 2 -5"></a-entity>
+  <!-- circle -->
+  <a-entity geometry="primitive: circle; radius: 0.5; thetaStart: 45; thetaLength: 90" material="side: double" position="-4 2 -5"></a-entity>
+  <!-- cone -->
+  <a-entity geometry="primitive: cone; radiusBottom: 0.5; radiusTop: 0.1" position="-3 2 -5"></a-entity>
+  <!-- cylinder -->
+  <a-entity geometry="primitive: cylinder; height: 1; radius: 0.3" position="-2 3 -5"></a-entity>
+  <a-entity geometry="primitive: cylinder; openEnded: true; thetaLength: 180; radius: 0.3" material="side: double" position="-1 3 -5"></a-entity>
+  <a-entity geometry="primitive: cylinder; segmentsRadial: 6; radius: 0.5" position="0 3 -5"></a-entity>
+  <!-- dodecahedron -->
+  <a-entity geometry="primitive: dodecahedron; radius: 0.5" position="-2 2 -5"></a-entity>
+  <!-- octahedron -->
+  <a-entity geometry="primitive: octahedron; radius: 0.5" position="-1 2 -5"></a-entity>
+  <!-- plane -->
+  <a-entity geometry="primitive: plane; height: 10; width: 20" material="side: double" position="0 0 -10" rotation="-90 0 0"></a-entity>
+  <!-- ring -->
+  <a-entity geometry="primitive: ring; radiusInner: 0.25; radiusOuter: 0.5" material="side: double" position="0 2 -5"></a-entity>
+  <!-- sphere -->
+  <a-entity geometry="primitive: sphere; radius: 0.5" position="1 2 -5"></a-entity>
+  <a-entity geometry="primitive: sphere; radius: 0.5; segmentsWidth: 2; segmentsHeight: 8" position="1 3 -5"></a-entity>
+  <!-- tetrahedron -->
+  <a-entity geometry="primitive: tetrahedron; radius: 0.5" position="2 2 -5"></a-entity>
+  <!-- torus -->
+  <a-entity geometry="primitive: torus; radius: 0.5; radiusTubular: 0.05; arc: 180" position="3 2 -5"></a-entity>
+  <!-- torusKnot -->
+  <a-entity geometry="primitive: torusKnot; radius: 0.3; radiusTubular: 0.05; p: 3; q:7" position="4 2 -5"></a-entity>
+  <!-- triangle -->
+  <a-entity geometry="primitive: triangle" material="side: double" position="5 2 -5"></a-entity>
+
+  <!-- 自定义几何体 -->
+  <a-entity geometry="primitive: example; vertices: 1 1 -3, 3 1 -3, 2 2 -3" position="6 2 -5"></a-entity>
+
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+</body>
+</html>
