@@ -2,7 +2,7 @@
  * @Author: victorsun
  * @Date: 2022-05-01 21:41:26
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-02 02:30:31
+ * @LastEditTime: 2022-05-02 16:54:00
  * @Descripttion: 材质组件
 -->
 <html>
@@ -12,17 +12,174 @@
 <body>
 <!--
 
+[通用属性]
+alphaTest     阿尔法测试，透明度的测试阈值                                                                            0
+depthTest     深度测试，渲染材质时是否启用深度测试                                                                    true
+flatShading   是否使用 THREE.FlatShading 而非 THREE.StandardShading                                              false
+opacity       透明度，若 transparent 属性为 false，材质将保持为不透明，opacity 将只影响颜色                              1.0
+transparent   材料是否透明                                                                                       false
+shader        着色器，使用哪种材料，默认 standard，支持 standard / flat / 注册的自定义材质                            standard
+side          要渲染网格的哪些面，front / back / double                                                            front
+visible       材料是否可见，光线投射器将忽略不可见的材质                                                               true
+offset        纹理偏移                                                                                        {x: 0, y: 0}
+repeat        纹理重复                                                                                        {x: 1, y: 1}
+npot          使用非二次方（NPOT）纹理的设置                                                                        false
+vertexColors  顶点颜色，使用顶点或面的颜色来着色材质，none / vertex / face                                             none
+blending      混合，WebGLRenderer中使用的材质RGB和Alpha混合模式，none / normal / additive / subtractive / multiply   normal
+dithering     抖动，材料是否因噪声而抖动，从渐变中移除，如通过照明产生的                                                  true
 
+[事件]
+materialtextureloaded        纹理加载到材质上
+materialvideoloadeddata      视频数据已加载并将播放
+materialvideoended           对于视频纹理，在视频结束时发出（可能不适用 loop）
+
+[内置材质（Built-in Materials）]
 
 -->
 
+<!--
+
+【shader: standard】默认材质，基于 THREE.MeshStandardMaterial
+
+src                           图像或视频纹理贴图，可以是选择器、<img>、<video>或内联URL         None
+color                         基础漫反射颜色                                               #fff
+width                         视频纹理宽度（以像素为单位）                                    640
+height                        视频纹理高度（以像素为单位）                                    360
+repeat                        src定义的纹理在x,y方向的重复次数                                1 1
+metalness                     金属感，0～1                                                 0.5
+roughness                     粗糙度，0～1，较粗糙的材料比光滑的材料将反射光散射到更多的方向       0.5
+fog                           材料是否受 fog 影响                                          true
+emissive                      自发光组件的颜色，用于使对象即使在没有照明的场景中也能产生光。       #000
+emissiveIntensity             自发光组件的强度                                               1
+wireframe                     是否仅渲染几何体框线                                          false
+wireframeLinewidth            几何体框线宽度（以像素为单位）                                   2
+
+ambientOcclusionMap           环境闭塞贴图，用于向网格添加阴影，可以是选择器、<img>或内联URL      None
+ambientOcclusionMapIntensity  环境闭塞贴图强度，0～1                                          1
+ambientOcclusionTextureRepeat 环境闭塞贴图在x,y方向重复次数                                   1 1
+ambientOcclusionTextureOffset 环境闭塞贴图在x,y方向的偏移                                     0 0
+displacementMap               置换贴图，用于扭曲网格，可以是选择器、<img>或内联URL               None
+displacementScale             置换贴图效果强度                                               1
+displacementBias              置换贴图的零点                                                0.5
+displacementTextureRepeat     置换纹理在x,y方向重复多少次                                     1 1
+displacementTextureOffset     置换纹理在x,y方向的偏移                                        0 0
+normalMap                     法线贴图 用于添加复杂细节的视觉效果，可以是选择器、<img>或内联URL None
+normalScale                   法线贴图在x,y方向上的影响范围                                   1 1
+normalTextureRepeat           法线纹理在x,y方向重复次数                                      1 1
+normalTextureOffset           法线纹理在x,y方向的偏移                                        0 0
+
+envMap                        环境贴图，反射的环境立方体贴图纹理，可以是选择器或以逗号分隔的URL列表  None
+sphericalEnvMap               球形环境贴图，用于反射的环境球面纹理，可以是选择器、<img>或内联URL    None
+
+【说明】基于物理的着色，旨在使材质在光照条件下表现得逼真，必须精确控制材料的漫反射属性color、metalness、roughness
+
+【说明】shader: phong; 一种廉价的着色器模型，虽然不如标准材质逼真，但比平面着色更好
+specular               镜面反射，定义材质的光泽及其光泽的颜色                   #111111
+shininess              光泽度，定义镜面反射高光有多亮，值越高，高光越明显           30
+transparent            是否透明                                             false
+combine                环境贴图如何与材质混合 mix / add / multiply             mix
+reflectivity           反射率，环境贴图对曲面的影响程度                          0.9
+refract                折射，定义的 envMap 环境贴图是否折射                            false
+refractionRatio        折射比，1/折射率                                       0.98
+
+【说明】凹凸贴图 Distortion Maps
+有三个属性可以给几何体添加高级视觉效果：
++ ambientOcclusionMap 环境闭塞贴图 - 一种贴图方式，接近真实，创建软阴影
++ displacementMap     置换贴图 - 以高分辨率扭曲使简单模型获得更多细节，可以影响网格的轮廓，但代价可能较大
++ normalMap           法线贴图 - 定义曲面在该点的角度，在不扭曲模型的情况下呈现复杂的几何模型，这不会改变几何体，但法线贴图代价较小
+
+【说明】环境贴图 Environment Maps
+envMap 和 sphericalEnvMap 属性定义材料反射的环境，环境反射的清晰度取决于 metalness 和 roughness 属性
+sphericalEnvMap 属性采用单个球形映射纹理，可以分配给 <a-sky>
+与 textures 纹理不同，envMap 属性采用立方体贴图，将六个图像组合在一起形成一个立方体，立方体贴图环绕网格并作为纹理应用
+
+
+【shader: flat】平面材质，不受场景照明条件的影响，如用于图像或视频，基于 THREE.MeshBasicMaterial
+
+src                图像或视频纹理贴图，可以是 <img>、<video> 或内联URL   None
+color              基础漫反射颜色                                     #fff
+repeat             src定义的在X和Y方向重复的次数                        1 1
+width              视频纹理宽度（像素）                                640
+height             视频纹理高度（像素）                                360
+fog                材质是否受 fog 影响                               true
+wireframe          是否仅渲染几何体线框                               false
+wireframeLinewidth 几何体框线宽度（像素）                               2
+
+
+【Textures】贴图，使用 src 设置内置材料作为纹理，可以是资产管理器中的一个选择器、<img>、<video>
+【Video Textures】视频贴图
+【Canvas Textures】画布贴图
+-->
+
 <script>
-//
+// canvas材质作为组件注册
+AFRAME.registerComponent('draw-canvas', {
+  schema: {default: ''},
+  init: function () {
+    this.canvas = document.getElementById(this.data);
+    this.ctx = this.canvas.getContext('2d');
+    // Draw on canvas...
+  }
+});
+// 材质注册
+AFRAME.registerShader('my-custom', {
+  schema: {
+    // ...
+  }
+});
 </script>
 
 <a-scene>
+
+  <!-- 环境贴图 Environment Maps -->
+  <a-assets>
+    <a-cubemap id="sky">
+      <img src="right.png">
+      <img src="left.png">
+      <img src="top.png">
+      <img src="bottom.png">
+      <img src="front.png">
+      <img src="back.png">
+    </a-cubemap>
+
+    <img id="my-texture" src="texture.png">
+    <video id="my-video" src="video.mp4" autoplay="true"></video>
+    <canvas id="my-canvas" crossorigin="anonymous"></canvas>
+  </a-assets>
+
+  <!-- 基于物理的着色（Physically-Based Shading）精确控制材料的性质 -->
+  <a-entity geometry="primitive: cylinder" material="src: treebark.png; color: #696969; roughness: 1; metalness: 0" position="0 0 -5"></a-entity>
+
+  <!-- 基于Phong的着色（Phong-Based Shading） -->
+  <a-torus-knot position="0 3 0" material="shader: phong; reflectivity: 0.9; shininess: 30;" geometry="radius: 0.45; radiusTubular: 0.09"></a-torus-knot>
+
+  <!-- Environment Maps -->
+  <a-entity geometry="primitive: box" material="envMap: #sky; roughness: 0"></a-entity>
+
+  <!-- flat -->
+  <a-entity geometry="primitive: box" material="shader: flat; color: red" position="0 0 -5"></a-entity>
+
+  <!-- textures 贴图 -->
+  <a-entity geometry="primitive: box" material="src: #my-texture"></a-entity>
+  <a-entity geometry="primitive: box" material="src: url(texture.png)"></a-entity>
+  <a-entity geometry="primitive: box" material="src: #my-video"></a-entity>
+
+  <!-- Canvas Textures -->
+  <a-entity geometry="primitive: plane" material="src: #my-canvas" draw-canvas="my-canvas"></a-entity>
+
+  <!-- Repeating Textures -->
+  <a-entity geometry="primitive: plane; width: 100" material="src: carpet.png; repeat: 100 20"></a-entity>
+
   <a-sky src="../assets/sechelt.jpg"></a-sky>
 </a-scene>
+
+
+<script>
+// 控制视频贴图
+var videoEl = document.querySelector('#my-video');
+videoEl.currentTime = 122;  // Seek to 122 seconds.
+videoEl.pause();
+</script>
 
 </body>
 </html>
