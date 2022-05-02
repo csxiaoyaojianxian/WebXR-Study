@@ -1,0 +1,50 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-02 23:15:45
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-03 03:01:55
+ * @Descripttion: 旋转组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+[属性]
+x  0
+y  0
+z  0
+
+[tips]
+父子继承
+
+[转换顺序]
+1. scale
+2. rotation
+3. position/translation
+
+-->
+
+<a-scene>
+  <a-entity rotation="45 90 180"></a-entity>
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+<script>
+/*
+// 更新数据
+el.object3D.rotation.set( // With three.js
+  THREE.Math.degToRad(15),
+  THREE.Math.degToRad(30),
+  THREE.Math.degToRad(90)
+);
+el.object3D.rotation.x += Math.PI;
+el.setAttribute('rotation', {x: 15, y: 30, z: 90}); // With .setAttribute (less recommended).
+// 获取数据
+entityEl.getAttribute('rotation');
+*/
+</script>
+
+</body>
+</html>

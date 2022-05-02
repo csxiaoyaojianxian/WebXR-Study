@@ -1,0 +1,47 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-02 23:15:49
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-03 03:11:54
+ * @Descripttion: 截屏组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+使用键盘快捷键截取不同类型的屏幕截图
+此组件默认附加到场景中，可直接使用
+
+[360度全景截图] Equirectangular
+<ctrl> + <alt> + <shift> + s
+
+[普通透视截图] Perspective
+ctrl> + <alt> + s
+
+[属性]
+width     截屏宽度(像素)    4096
+height    截屏高度(像素)    2048
+
+[方法] equirectangular / perspective
+.getCanvas(<type>) // 返回canvas
+.capture(<type>) // 自动存文件
+
+-->
+
+<a-scene>
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+<script>
+setTimeout(() => {
+  document.querySelector('a-scene').components.screenshot.getCanvas('equirectangular');
+}, 3000);
+setTimeout(() => {
+  document.querySelector('a-scene').components.screenshot.capture('perspective');
+}, 5000);
+</script>
+
+</body>
+</html>
