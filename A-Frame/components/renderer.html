@@ -1,0 +1,40 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-02 23:15:44
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-03 14:30:59
+ * @Descripttion: 渲染器组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+配置场景的 THREE.WebGLRenderer 实例
+
+[属性] 场景初始化后属性不能改变
+antialias                抗锯齿，移动设备默认禁用                                       auto
+colorManagement          是否使用颜色管理线性工作流                                     false
+highRefreshRate          在 Oculus 浏览器上切换 72hz 模式，默认 60hz                    false
+foveationLevel           在 VR 中启用注视点以提高性能 0 none, 1 low, 2 medium, 3 high   0
+sortObjects              渲染前是否对对象进行排序，针对透明度渲染错误时的处理               false
+physicallyCorrectLights  是否使用物理正确的光衰减                                       false
+maxCanvasWidth           最大画布宽度(大小x像素比)，-1不限制                             1920
+maxCanvasHeight          最小画布宽度，同上                                            1920
+logarithmicDepthBuffer   是否使用对数深度缓冲区                                         auto
+precision                片段着色器精度: low, medium, high                             high
+alpha                    画布是否应包含 alpha 缓冲区                                    true
+-->
+
+<a-scene renderer="antialias: true;
+                   colorManagement: true;
+                   sortObjects: true;
+                   physicallyCorrectLights: true;
+                   maxCanvasWidth: 1920;
+                   maxCanvasHeight: 1920;">
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-02 23:14:40
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-03 16:17:52
+ * @Descripttion: 光线投射器组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+使用 three.js raycaster，提供基于线的相交测试
+
+cursor 和 laser-controls 都建立在 raycaster 组件上
+
+[属性]
+autoRefresh            是否自动刷新 raycaster 对象列表                      true
+direction              方向，射线应指向的相对于实体原点的方向的 Vector3 坐标    0, 0, -1
+enabled                启用，raycaster 是否正在主动检查交叉点                true
+far                    最大距离，不能低于near       Infinity
+interval               每次相交测试之间等待的毫秒数                          0
+lineColor              启用 showLine 时的 Raycaster 线条颜色               white
+lineOpacity            启用 showLine 时的 Raycaster 线不透明度              1
+near                   最小距离，不能低于0           0
+objects                查询选择器以选择要测试相交的对象，若未指定，将测试所有实体 null
+origin                 Vector3 相对于实体原点的射线起源位置的坐标             0, 0, 0
+showLine               是否使用 line 组件直观地显示 raycaster               false
+useWorldCoordinates    光线投射器的原点和方向属性是否在世界坐标中指定           false
+
+[事件]
+raycaster-intersected              相交，在相交实体上发出，事件 detail 包含 el(交叉点)，.getIntersection(el)可用于获取当前交叉点数据
+raycaster-intersected-cleared      不再相交，在相交实体上发出，事件 detail 包含 el(投射器实体)
+raycaster-intersection             相交，在投射器上发出，事件 detail 包含 els(交叉实体数组)，.getIntersection(el)可用于获取当前交叉点数据
+raycaster-intersection-cleared     不再相交，在投射器上发出，事件 detail 包含 clearedEls
+raycaster-closest-entity-changed   最近的相交实体已更改
+
+[交点对象] 事件详细信息返回的对象，直接从 three.jsRaycaster.intersectObjects 返回
+distance     射线原点与交点之间的距离
+point        交点，在世界坐标中
+face         相交的面
+faceIndex    相交面的索引
+indices      包含相交面的顶点索引
+object       相交的对象
+uv           交点处的 U,V 坐标
+
+[成员]
+intersectedEls   当前与光线投射器相交的实体
+objects          three.js 对象来测试交叉点，若 objects 属性未指定则为 scene.children
+raycaster        three.js 光线投射器对象
+
+[方法]
+getIntersection (el)    给定一个实体，如果有的话，返回当前的交叉点数据，为方便起见，此方法也传递到交叉点事件详细信息中
+refreshObjects          刷新对象，根据属性刷新对象列表objects以测试相交
+
+
+-->
+
+<script>
+AFRAME.registerComponent('raycaster-listen', {
+  init: function () {
+    this.el.addEventListener('raycaster-intersected', evt => {
+      this.raycaster = evt.detail.el;
+    });
+    this.el.addEventListener('raycaster-intersected-cleared', evt => {
+      this.raycaster = null;
+    });
+  },
+  tick: function () {
+    // 未相交
+    if (!this.raycaster) { return; }
+    let intersection = this.raycaster.components.raycaster.getIntersection(this.el);
+    if (!intersection) { return; }
+    // 相交点
+    console.log(intersection.point);
+  }
+});
+</script>
+
+<a-scene>
+
+  <a-entity camera look-controls wasd-controls>
+    <a-entity
+      raycaster="objects: .clickable; showLine: true; far: 100; lineColor: red; origin: 0.1 -0.1 -0.3"
+      cursor="fuse: true; fuseTimeout: 1500"
+      position="0 0 0"
+    ></a-entity>
+  </a-entity>
+  
+  <a-entity raycaster-listen class="clickable" geometry="primitive: box" position="1 0 -5"></a-entity>
+  <a-entity raycaster-listen class="not-clickable" geometry="primitive: sphere" position="-1 0 -5"></a-entity>
+  
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+<script>
+// 在设置 autoRefresh: false 时手动更新对象列表
+var raycasterEl = AFRAME.scenes[0].querySelector('[raycaster]');
+raycasterEl.components.raycaster.refreshObjects();
+
+</script>
+
+</body>
+</html>

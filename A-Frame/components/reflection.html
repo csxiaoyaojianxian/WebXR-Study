@@ -1,0 +1,27 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-02 23:14:42
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-03 14:37:09
+ * @Descripttion: 反射组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+反射组件为所有材质生成默认环境立方体贴图，在发现 GLB 模型最终太暗或反射材质看起来不正确的情况下很有用，因为它们没有反射环境，这将提供默认反射环境
+
+[属性]
+directionalLight   指定WebXR光照估计期间要控制的光照
+-->
+
+<a-scene reflection="directionalLight:a-light#dirlight;">
+  <a-light id="dirlight" intensity="1" light="castShadow:true;type:directional" position="1 1 1"></a-light>
+
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+</body>
+</html>
