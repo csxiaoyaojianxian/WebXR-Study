@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebXR Game</title>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-environment-component@1.3.1/dist/aframe-environment-component.min.js"></script>
+  </head>
+  <body>
+    <a-scene environment="preset: forest;">
+      <a-assets timeout="30000">
+        <img
+          id="wallImg"
+          src="https://image-1300099782.cos.ap-beijing.myqcloud.com/wall.jpeg"
+        />
+        <!-- 敌人相关资源 -->
+        <a-asset-item id="druid" src=""></a-asset-item>
+        <a-asset-item
+          id="korrigan-hat"
+          src="https://gltf-1300099782.cos.ap-beijing.myqcloud.com/korrigan-hat.gltf"
+        ></a-asset-item>
+        <a-asset-item
+          id="ankou-with-cart"
+          src="https://gltf-1300099782.cos.ap-beijing.myqcloud.com/ankou-with-cart.gltf"
+        ></a-asset-item>
+        <a-asset-item
+          id="witch"
+          src="https://gltf-1300099782.cos.ap-beijing.myqcloud.com/witch.gltf"
+        ></a-asset-item>
+        <a-asset-item
+          id="bear"
+          src="https://gltf-1300099782.cos.ap-beijing.myqcloud.com/bear.gltf"
+        ></a-asset-item>
+        <a-asset-item
+          id="korrigan-wolf"
+          src="https://gltf-1300099782.cos.ap-beijing.myqcloud.com/korrigan-wolf.gltf"
+        ></a-asset-item>
+        <!-- 攻击 -->
+        <a-asset-item
+          id="druid-attack"
+          src="https://gltf-1300099782.cos.ap-beijing.myqcloud.com/jack-o-lantern.gltf"
+        ></a-asset-item>
+        <a-asset-item
+          id="korrigan-hat-attack"
+          src="https://gltf-1300099782.cos.ap-beijing.myqcloud.com/rock.gltf"
+        ></a-asset-item>
+        <a-asset-item
+          id="ankou-with-cart-attack"
+          src="https://gltf-1300099782.cos.ap-beijing.myqcloud.com/star.gltf"
+        ></a-asset-item>
+        <a-asset-item
+          id="witch-attack"
+          src="https://gltf-1300099782.cos.ap-beijing.myqcloud.com/lightning.gltf"
+        ></a-asset-item>
+        <a-asset-item
+          id="bear-attack"
+          src="https://gltf-1300099782.cos.ap-beijing.myqcloud.com/bomb.gltf"
+        ></a-asset-item>
+        <a-asset-item
+          id="korrigan-wolf-attack"
+          src="https://gltf-1300099782.cos.ap-beijing.myqcloud.com/beach-ball.gltf"
+        ></a-asset-item>
+        <!-- 个人武器 -->
+        <a-asset-item
+          id="weapon"
+          src="https://gltf-1300099782.cos.ap-beijing.myqcloud.com/blaster.gltf"
+        ></a-asset-item>
+        <!-- 音频 -->
+        <audio
+          id="shooting-sound"
+          src="https://audio-1300099782.cos.ap-beijing.myqcloud.com/shooting.mp3"
+          preload="auto"
+        ></audio>
+        <audio
+          id="hit-sound"
+          src="https://audio-1300099782.cos.ap-beijing.myqcloud.com/hit.mp3"
+          preload="auto"
+        ></audio>
+        <audio
+          id="enemy-death-sound"
+          src="https://audio-1300099782.cos.ap-beijing.myqcloud.com/enemy-death.mp3"
+          preload="auto"
+        ></audio>
+        <audio
+          id="enemy-appear-sound"
+          src="https://audio-1300099782.cos.ap-beijing.myqcloud.com/enemy-appear.wav"
+          preload="auto"
+        ></audio>
+        <audio
+          id="gameover-sound"
+          src="https://audio-1300099782.cos.ap-beijing.myqcloud.com/gameover.mp3"
+          preload="auto"
+        ></audio>
+
+        <!-- <audio
+      src="https://image-1300099782.cos.ap-beijing.myqcloud.com/audio/8335.mp3"
+      autoplay
+      preload
+    ></audio> -->
+      </a-assets>
+      <a-box scale="30 20 4" position="0 0 -20" src="#wallImg"></a-box>
+
+      <a-text
+        id="start-text"
+        value="Start"
+        color="#BBB"
+        position="-3 6 -18"
+        scale="10 10 10"
+        font="mozillavr"
+        start-focus
+      ></a-text>
+      <a-text
+        id="end-text"
+        value=""
+        color="red"
+        position="-5.5 9 -18"
+        scale="10 10 10"
+        font="mozillavr"
+      ></a-text>
+      <a-text
+        id="restart-text"
+        value="Restart"
+        color="#BBB"
+        position="-4 3 -18"
+        scale="10 10 10"
+        font="mozillavr"
+        restart-focus
+      ></a-text>
+      <a-text
+        id="hp-text"
+        value=""
+        color="#BBB"
+        position="-4 9 -18"
+        scale="10 10 10"
+        font="mozillavr"
+      ></a-text>
+      <a-text
+        id="score-text"
+        value=""
+        color="#BBB"
+        position="-5 6 -18"
+        scale="10 10 10"
+        font="mozillavr"
+      ></a-text>
+
+      <a-entity
+        sound="src: #enemy-death-sound"
+        id="enemy_death_sound_player"
+        position="0 0 0"
+        poolSize="10"
+      ></a-entity>
+      <a-entity
+        sound="src: #gameover-sound"
+        id="gameover_sound_player"
+        position="0 0 0"
+        poolSize="10"
+      ></a-entity>
+
+      <a-camera>
+        <a-cursor color="#FAFAFA" cursor-listener></a-cursor>
+        <a-gltf-model
+          id="_weapon"
+          src="#weapon"
+          position="0.5 -0.5 -0.8"
+          scale="1 1 1"
+          rotation="0 180 0"
+        ></a-gltf-model>
+        <a-entity
+          sound="src: #shooting-sound"
+          id="shooting_sound_player"
+          position="0.5 -0.5 -0.8"
+          poolSize="10"
+        ></a-entity>
+      </a-camera>
+    </a-scene>
+  </body>
+</html>

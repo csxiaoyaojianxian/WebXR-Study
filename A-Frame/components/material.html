@@ -2,7 +2,7 @@
  * @Author: victorsun
  * @Date: 2022-05-01 21:41:26
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-03 16:25:27
+ * @LastEditTime: 2022-05-04 02:21:09
  * @Descripttion: material 材质组件
 -->
 <html>
@@ -13,31 +13,29 @@
 <!--
 
 [通用属性]
-alphaTest     阿尔法测试，透明度的测试阈值                                                                            0
-depthTest     深度测试，渲染材质时是否启用深度测试                                                                    true
-flatShading   是否使用 THREE.FlatShading 而非 THREE.StandardShading                                              false
+shader        材质类型/着色器，默认 standard                                                                     standard
+              支持 standard(MeshStandardMaterial) / flat(MeshBasicMaterial) / 注册的自定义材质
+visible       材料是否可见，false则该物体场景中不可见。光线投射器将忽略不可见的材质                                       true
+transparent   材料是否透明，决定opacity是否起作用，场景先渲染所有transparent为false的实体，再渲染为true的实体             false
 opacity       透明度，若 transparent 属性为 false，材质将保持为不透明，opacity 将只影响颜色                              1.0
-transparent   材料是否透明                                                                                       false
-shader        着色器，使用哪种材料，默认 standard，支持 standard / flat / 注册的自定义材质                            standard
-side          要渲染网格的哪些面，front / back / double                                                            front
-visible       材料是否可见，光线投射器将忽略不可见的材质                                                               true
+alphaTest     透明检测门槛，透明度的检测阈值，低于的都认为透明                                                           0
+side          要渲染网格的哪些面，几何体front/back两面默认只渲染一面，front / back / double(同时渲染两面)               front
+repeat        纹理重复次数                                                                                    {x: 1, y: 1}
 offset        纹理偏移                                                                                        {x: 0, y: 0}
-repeat        纹理重复                                                                                        {x: 1, y: 1}
-npot          使用非二次方（NPOT）纹理的设置                                                                        false
-vertexColors  顶点颜色，使用顶点或面的颜色来着色材质，none / vertex / face                                             none
-blending      混合，WebGLRenderer中使用的材质RGB和Alpha混合模式，none / normal / additive / subtractive / multiply   normal
-dithering     抖动，材料是否因噪声而抖动，从渐变中移除，如通过照明产生的                                                  true
+depthTest     深度测试，渲染材质时是否启用深度测试                                                                    true
+flatShading   平面着色，主要适用于shader参数为flat的材质，是否使用 THREE.FlatShading 而非 THREE.StandardShading         false
+              true表示两个相邻但不共面的三角形之间，光照会因为比较生硬地过度而产生棱角，false表示平滑地过度
+vertexColors  顶点颜色，使用顶点或面的颜色来着色材质，vertex表示可以给每个顶点添加指定的颜色，none / vertex / face           none
+dithering     是否启动颜色抖动模式，对于一些有渐变色的材质，启动后会减轻颜色不均匀的问题                                     true
+npot          non-power-of-two，是否允许纹理的长宽值不是2的倍数，使用非二次方（NPOT）纹理的设置                           false
+blending      混合，决定了实体上的材质如何与背景融合，none / normal / additive / subtractive / multiply                normal
 
 [事件]
 materialtextureloaded        纹理加载到材质上
 materialvideoloadeddata      视频数据已加载并将播放
 materialvideoended           对于视频纹理，在视频结束时发出（可能不适用 loop）
 
-[内置材质（Built-in Materials）]
-
--->
-
-<!--
+[内置材质额外参数（Built-in Materials）]
 
 【shader: standard】默认材质，基于 THREE.MeshStandardMaterial
 
@@ -46,56 +44,68 @@ color                         基础漫反射颜色                             
 width                         视频纹理宽度（以像素为单位）                                    640
 height                        视频纹理高度（以像素为单位）                                    360
 repeat                        src定义的纹理在x,y方向的重复次数                                1 1
-metalness                     金属感，0～1                                                 0.5
-roughness                     粗糙度，0～1，较粗糙的材料比光滑的材料将反射光散射到更多的方向       0.5
+metalness                     金属感，0～1增强                                             0.5
+roughness                     粗糙度，0～1增强，较粗糙的材料比光滑的材料将反射光散射到更多的方向    0.5
 fog                           材料是否受 fog 影响                                          true
 emissive                      自发光组件的颜色，用于使对象即使在没有照明的场景中也能产生光。       #000
 emissiveIntensity             自发光组件的强度                                               1
-wireframe                     是否仅渲染几何体框线                                          false
+wireframe                     是否仅渲染几何体框线，给对应的几何体描边，适合用于调试             false
 wireframeLinewidth            几何体框线宽度（以像素为单位）                                   2
 
-ambientOcclusionMap           环境闭塞贴图，用于向网格添加阴影，可以是选择器、<img>或内联URL      None
-ambientOcclusionMapIntensity  环境闭塞贴图强度，0～1                                          1
-ambientOcclusionTextureRepeat 环境闭塞贴图在x,y方向重复次数                                   1 1
-ambientOcclusionTextureOffset 环境闭塞贴图在x,y方向的偏移                                     0 0
-displacementMap               置换贴图，用于扭曲网格，可以是选择器、<img>或内联URL               None
-displacementScale             置换贴图效果强度                                               1
-displacementBias              置换贴图的零点                                                0.5
-displacementTextureRepeat     置换纹理在x,y方向重复多少次                                     1 1
-displacementTextureOffset     置换纹理在x,y方向的偏移                                        0 0
-normalMap                     法线贴图 用于添加复杂细节的视觉效果，可以是选择器、<img>或内联URL None
-normalScale                   法线贴图在x,y方向上的影响范围                                   1 1
-normalTextureRepeat           法线纹理在x,y方向重复次数                                      1 1
-normalTextureOffset           法线纹理在x,y方向的偏移                                        0 0
+ambientOcclusionMap           环境光遮挡贴图，用于向网格添加阴影，可以是选择器、<img>或内联URL      None
+ambientOcclusionMapIntensity  环境光遮挡贴图强度，0～1                                          1
+ambientOcclusionTextureRepeat 环境光遮挡贴图在x,y方向重复次数                                   1 1
+ambientOcclusionTextureOffset 环境光遮挡贴图在x,y方向的偏移                                     0 0
+displacementMap               移位贴图，用于扭曲网格，可以是选择器、<img>或内联URL                None
+displacementScale             移位贴图效果强度                                                 1
+displacementBias              移位贴图的零点                                                  0.5
+displacementTextureRepeat     置换纹理在x,y方向重复多少次                                       1 1
+displacementTextureOffset     置换纹理在x,y方向的偏移                                          0 0
+normalMap                     法线贴图，用于添加复杂细节的视觉效果，可以是选择器、<img>或内联URL     None
+normalScale                   法线贴图在x,y方向上的影响范围                                     1 1
+normalTextureRepeat           法线纹理在x,y方向重复次数                                        1 1
+normalTextureOffset           法线纹理在x,y方向的偏移                                          0 0
 
 envMap                        环境贴图，反射的环境立方体贴图纹理，可以是选择器或以逗号分隔的URL列表  None
 sphericalEnvMap               球形环境贴图，用于反射的环境球面纹理，可以是选择器、<img>或内联URL    None
 
-【说明】基于物理的着色，旨在使材质在光照条件下表现得逼真，必须精确控制材料的漫反射属性color、metalness、roughness
+【说明】A-Frame的material组件的默认材质为 MeshStandardMaterial，使用"基于物理的渲染（PBR）"，旨在使材质在光照条件下表现得逼真，必须精确控制材料的漫反射属性color、metalness、roughness
 
-【说明】shader: phong; 一种廉价的着色器模型，虽然不如标准材质逼真，但比平面着色更好
+【phong】shader: phong; 一种廉价的着色器模型，虽然不如标准材质逼真，但比平面着色更好
 specular               镜面反射，定义材质的光泽及其光泽的颜色                   #111111
 shininess              光泽度，定义镜面反射高光有多亮，值越高，高光越明显           30
 transparent            是否透明                                             false
 combine                环境贴图如何与材质混合 mix / add / multiply             mix
 reflectivity           反射率，环境贴图对曲面的影响程度                          0.9
-refract                折射，定义的 envMap 环境贴图是否折射                            false
+refract                折射，定义的 envMap 环境贴图是否折射                     false
 refractionRatio        折射比，1/折射率                                       0.98
 
-【说明】凹凸贴图 Distortion Maps
-有三个属性可以给几何体添加高级视觉效果：
-+ ambientOcclusionMap 环境闭塞贴图 - 一种贴图方式，接近真实，创建软阴影
-+ displacementMap     置换贴图 - 以高分辨率扭曲使简单模型获得更多细节，可以影响网格的轮廓，但代价可能较大
-+ normalMap           法线贴图 - 定义曲面在该点的角度，在不扭曲模型的情况下呈现复杂的几何模型，这不会改变几何体，但法线贴图代价较小
 
-【说明】环境贴图 Environment Maps
-envMap 和 sphericalEnvMap 属性定义材料反射的环境，环境反射的清晰度取决于 metalness 和 roughness 属性
-sphericalEnvMap 属性采用单个球形映射纹理，可以分配给 <a-sky>
-与 textures 纹理不同，envMap 属性采用立方体贴图，将六个图像组合在一起形成一个立方体，立方体贴图环绕网格并作为纹理应用
+【高级贴图——环境光遮挡贴图（Ambient occlusion maps）】
+接近真实，创建软阴影，光影实时计算消耗性能，通过环境光遮挡贴图模拟光影效果，其生效需要三个条件：
+1. 场景下要有环境光
+2. 通过材质属性给物体提供适当的环境光遮挡贴图
+3. 通过代码给对应物体的几何体属性geometry添加第二组UV映射（控制环境光遮挡贴图的每个像素与物体表面每个像素的对应关系）
+
+【高级贴图——移位贴图（displacement maps）】
+以高分辨率扭曲使简单模型获得更多细节，可以影响网格的轮廓，但代价可能较大
+与环境光遮挡贴图类似，但是移位贴图中的每个像素只对物体几何体中每个顶点的位移起控制作用
+利用提供的贴图的像素来对3D物体的每个顶点进行适当的移动，从而让物体更加具有立体感
+
+【高级贴图——法线贴图（normal maps）】
+定义曲面在该点的角度，在不扭曲模型的情况下呈现复杂的几何模型，这不会改变几何体，但法线贴图代价较小
+不需要增加额外的顶点，只需要提供和纹理大小一样的贴图，让物体表面每个像素点对光源做出不同反应，从而达到立体的效果
+这种效果不会实际改变几何体的形状，所以性能消耗相对移位贴图较低
+
+【高级贴图——环境贴图（environment maps）】
+通过计算的方式来实现物体表面的环境反光效果对CPU的损耗会非常大，可以通过环境贴图的方式来模拟对环境的反光效果
+环境贴图需要提供6张图片来模拟周边的右左上下前后6个方向的环境，将六个图像组合在一起形成一个立方体，立方体贴图环绕网格并作为纹理应用
+根据反射特性，右左两张照片以及前后两张照片需要交换，而上下图片无需交换
+采用环境贴图的物体，金属质感度（metalness）和粗糙度（roughness）这两个参数会影响反光的效果。金属质感度越大反光越明显，粗糙度越小反光效果越好
+envMap 和 sphericalEnvMap 属性定义材料反射的环境，sphericalEnvMap 属性采用单个球形映射纹理，可以分配给 <a-sky>
 
 
 【shader: flat】平面材质，不受场景照明条件的影响，如用于图像或视频，基于 THREE.MeshBasicMaterial
-
 src                图像或视频纹理贴图，可以是 <img>、<video> 或内联URL   None
 color              基础漫反射颜色                                     #fff
 repeat             src定义的在X和Y方向重复的次数                        1 1
@@ -104,7 +114,6 @@ height             视频纹理高度（像素）                               
 fog                材质是否受 fog 影响                               true
 wireframe          是否仅渲染几何体线框                               false
 wireframeLinewidth 几何体框线宽度（像素）                               2
-
 
 【Textures】贴图，使用 src 设置内置材料作为纹理，可以是资产管理器中的一个选择器、<img>、<video>
 【Video Textures】视频贴图

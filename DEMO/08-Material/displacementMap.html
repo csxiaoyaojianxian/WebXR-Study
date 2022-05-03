@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../libs/aframe.min.js"></script>
+  <title>displacementMap Material</title>
+</head>
+
+<body>
+  <a-scene>
+    <a-assets>
+      <!-- 128*128的砖块纹理 -->
+      <img id="brick" src="../assets/textures/brick.jpg" />
+      <!-- 128*128的移位贴图。（和砖块纹理大小对应） -->
+      <img id="brickDisplacement" src="../assets/material/brickDisplacementMap.jpg" />
+    </a-assets>
+    <!-- 通过参数segments-width和segments-height来提高平面的段数从而让平面的顶点数和移位贴图的像素对应起来。 -->
+    <a-plane position="0 1.6 -2" rotation="0 -45 0" scale="2 2" segments-width="127" segments-height="127"
+      material="src:#brick; displacementMap:#brickDisplacement; displacementScale:0.3 0.3;displacementBias:0"
+      animation="property: rotation; from: 0 -45 0; to: 0 45 0; dur: 3000; easing: linear; loop: true; dir:alternate">
+    </a-plane>
+
+    <a-sky color="#ECECEC"></a-sky>
+  </a-scene>
+</body>
+
+</html>

@@ -2,7 +2,7 @@
  * @Author: victorsun
  * @Date: 2022-05-03 16:34:57
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-03 19:17:33
+ * @LastEditTime: 2022-05-04 03:26:48
  * @Descripttion: 图像原语
 -->
 <html>
@@ -26,6 +26,8 @@ src               material.src             None
 transparent       material.transparent     true
 width             geometry.width           1
 
+a-image本质上就是带有纹理属性的a-plane平面几何体
+在使用 a-plane 来显示透明纹理时（png格式的图片），需要将 a-plane 的材质属性中的 transparent 参数设置为 true 才能显示透明效果
 -->
 <a-scene>
   <a-assets>

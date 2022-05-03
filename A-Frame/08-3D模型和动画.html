@@ -2,7 +2,7 @@
  * @Author: victorsun
  * @Date: 2022-05-01 00:14:21
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-01 10:22:49
+ * @LastEditTime: 2022-05-04 02:54:31
  * @Descripttion: 3D模型和动画
 -->
 <html>
@@ -18,7 +18,24 @@
 
 A-Frame 提供了加载 glTF(推荐), OBJ, COLLADA 模型的组件
 
+[gltf-model]
+在A-Frame框架中可以使用gltf-model组件来加载glTF文件（.gltf或者.glb）
+值得注意的是，A-Frame目前只支持glTF2.0，对于老版本的glTF文件，需要使用第三方组件（gltf-model-legacy）来加载
+
+[obj-model]
+obj-model组件可以加载OBJ文件。obj模型一般由两个文件组成：OBJ文件（存放几何信息）和MTL文件（存放材质信息）
+
 aframe-extras 中的 animation-mixer 组件提供了播放three.js(.json)和glTF(.gltf)模型动画的控制功能
+
+[animation-mixer 属性]
+clip                *           指定播放模型中的哪个动画剪辑
+duration            0           设置单次循环的时间，0表示使用默认值
+clampWhenFinished   false       是否在动画播放完最后一帧后自动暂停
+crossFadeDuration   0           动画淡入淡出的时间
+loop                repeat      动画循环方式，有效值有once、repeat和pingpong。once表示仅一次；repeat表示一直循环；pingpong表示动画顺序和逆序来回播放
+repetitions         Infinity    动画循环次数，有效值为0到无穷大。仅当loop为repeat或者pingpong时有效
+timeScale           1           全局时间的比例因子。当值为正数时，则顺序播放，0~1区间的值会让播放速度变慢，大于1则会让播放速度变快。值为负数时，则倒序播放
+
 
 模型动画 demo
 https://github.com/rexraptor08/animation-controls

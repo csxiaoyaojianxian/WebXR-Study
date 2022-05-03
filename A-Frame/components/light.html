@@ -2,7 +2,7 @@
  * @Author: victorsun
  * @Date: 2022-05-02 23:08:25
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-03 21:23:58
+ * @LastEditTime: 2022-05-04 01:32:13
  * @Descripttion: light 光源组件
 -->
 <html>
@@ -14,48 +14,50 @@
 灯光会影响所有非 shader: flat 的材质
 默认会添加 ambient / directional 两个灯光
 
+
 [属性]
 type        灯光类型：ambient, directional, hemisphere, point, spot, probe     directional
 color       灯光颜色                                                           #fff
 intensity   灯光强度                                                           1.0
 
-[环境光源 —— ambient] 全局影响场景中的所有实体，position、rotation、scale无效
+[环境光 —— ambient] 会影响场景中所有物体的所有表面，这种光源不会产生阴影，没有远近距离的概念，position、rotation、scale无效
 
-[平行光源 —— directional] 特定方向的无限远光源，是向场景添加实时阴影的最有效类型，使用 position指定方向，position="-100 100 0" 和 position="-1 1 0" 的强度相同
+[平行光/方向光 —— directional] 特定方向的无限远光源，到了camera的视线范围内看起来是平行的光束，可以产生阴影，是向场景添加实时阴影的最有效类型，使用 position指定方向，position="-100 100 0" 和 position="-1 1 0" 的强度相同
 
-[半球光源 —— hemisphere] 类似于环境光，但有两种不同的颜色，例如针对灰色天空下的草地的场景
+[半球光 —— hemisphere] 这是一种特殊的光源，用于模拟户外场景下的自然光照效果，这种光源不会产生阴影。虽类似环境光，但不同的是可以有两种不同的颜色，一个上一个下，例如针对灰色天空下的草地的场景
 color         来自上方的光颜色      #fff
 groundColor   来自下方的光颜色      #fff
 
-[泛/点光源 —— point] 和 directional 不同，距离越近越亮，且是全方位的
+[点/泛光源 —— point] 一种可以向四周发光的光源，例如没有任何遮挡的灯泡，可以产生阴影，和 directional 不同，距离越近越亮，且是全方位的
 decay         衰变量                                        1.0
 distance      强度变为 0 的距离。0 表示点光源不会随距离衰减       0.0
 
-[聚光灯光源 —— spot] 和 point 不同，非全方位，只向一个方向投射光
-angle         最大角度(度)                                   60
-decay         衰变量                                        1.0
-distance      强度变为 0 的距离。0 表示点光源不会随距离衰减       0.0
-penumbra      由于半影而衰减的聚光灯锥的百分比                   0.0
-target        点指向的元素，null 则按方向变换聚光灯，指向 -Z 轴   null
+[聚光灯 —— spot] 类似舞台聚光灯，将一个光束集中照射在一个较小的区域，可以产生阴影。和 point 不同，非全方位，只向一个方向投射光
+angle         聚光灯照射出去的光线的夹角(度)                                                                           60
+decay         衰变量                                                                                1.0
+distance      强度变为 0 的距离。0 表示点光源不会随距离衰减                                                0.0
+penumbra      半影区。用来设置被光照亮的区域和其他区域边缘的平滑衰减速度。范围是0.0~1.0。0表示没有过度，界线分明   0.0
+target        点指向的元素，默认 null 指向 -Z 轴                                                       null
 
 [探测灯光源 —— probe] 类似环境照明，但会分析立方体贴图生成球谐函数，对每个角度进行不同的着色
 intensity     强度          1
 envMap        立方体贴图     null
 
 
-[为灯光配置阴影属性]
-castShadow                             此灯光是否在场景上投射阴影                      false
-shadowBias                             阴影偏差，确定表面是否处于阴影中时的偏移深度        0
-shadowCameraBottom   directional       阴影相机平截头体的底平面                         -5
-shadowCameraFar                        阴影相机平截头体的远平面                         500
-shadowCameraFov      point, spot       阴影相机的 FOV      50
-shadowCameraLeft     directional       阴影相机平截头体的左平面                         -5
-shadowCameraNear                       阴影相机平截头体平面附近                         0.5
-shadowCameraRight    directional       阴影相机平截头体的右平面                          5
-shadowCameraTop      directional       阴影相机平截头体的顶部平面                        5
-shadowCameraVisible                    显示一个视觉辅助工具，显示阴影相机的位置和截锥体     false
-shadowMapHeight                        阴影贴图的垂直分辨率                             512
-shadowMapWidth                         阴影贴图的水平分辨率                             512
+[为灯光配置阴影属性] 不标注表示三种光源都可以
+castShadow                             光源是否在场景中投放阴影   false
+shadowBias                             阴影偏移，用来偏移阴影的位置，如果看到一些奇怪的阴影效果，可以通过细微调整（大约+/-0.0001）来解决   0
+shadowCameraFar                        投影远点，在距离光源多远范围内会产生投影   500
+shadowCameraNear                       投影近点，距离光源多远开始产生投影   0.5
+shadowCameraVisible                    显示整个投影范围的视觉辅助   false
+shadowMapHeight                        阴影地图的垂直分辨率（即每一列多少个像素来生成阴影）值越大，阴影显示更清晰，但是更损耗性能   512
+shadowMapWidth                         阴影地图的水平分辨率   512
+shadowCameraFov      point, spot       投影视场，阴影相机的 FOV，决定生成阴影的大小   50
+shadowCameraTop      directional       投影顶部界限，从光源位置往上偏移多远开始产生投影，可以控制阴影范围   5
+shadowCameraBottom   directional       投影底部界限，从光源位置往下偏移多远开始产生投影   -5
+shadowCameraRight    directional       投影右边界限，从光源位置往右偏移多远开始产生投影   5
+shadowCameraLeft     directional       投影左部界限，从光源位置往左偏移多远开始产生投影   -5
+
 -->
 
 <!-- 禁用默认灯光 -->

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../libs/aframe.min.js"></script>
+  <script src="../libs/aframe-environment-component.min.js"></script>
+  <title>Environment</title>
+</head>
+
+<!--
+[参数]
+active         true        是否显示组件。有效值为：true或false。分别表示显示或隐藏组件
+preset         default     预设环境。有效的值为：none，default，contact，egypt，checkerboard，forest，goaland，yavapai，goldmine，threetowers，poison，arches，tron，japan，dream，volcano，starry，osiris。
+                           它们代表了不同风格的周边环境，通过设置这个参数就可以指定当前环境的风格。例如forest表示森林，starry表示星空。
+seed           1           随机种子。用来确定随机生成的环境的样子。例如森林环境下，改变seed的值，会发现树木的样子和位置都发生了变化。
+skyType        atmosphere  天空类型。有效值为：color，gradient，atmosphere。
+                           color表示天空是一种颜色。gradient表示从地平线到天空是一组渐变的颜色。atmosphere则模拟实际中有大气层的天空
+skyColor                   天空的主颜色。当skyType设置为color或者gradient才有效。
+horizonColor               水平线上的颜色，当skyType设置为gradient才 有效。此时，该颜色从水平线开始渐变成顶端的skyColor颜色
+lighting       distant     光源。有效值为：none，distant，point。它们分别表示无关，直线光源和点光源。后续会有一篇文章专门介绍光源。
+lightPosition  0 1 -0.2    光源的位置。通过天空类型，颜色和光源位置(例如把Y坐标调成负数），可以产生夜晚的效果。
+playArea       1           以原点为准，平地的半径。这个值越大，那么原点周边的平面和空地就越大，环境所产生物体的位置就越远，例如在森林环境下，这个值越大，树木就会在越远的地方产生。
+dressingAmount             物体数量。这个数量根据不同的环境下会有不同的默认值。例如森林环境下，默认有500颗树。物体的数量会影响整个网页的性能，所以在保持一定效果的情况下，尽量减少物体的总数。
+-->
+<body>
+  <a-scene>
+    <a-entity environment="preset: forest;"> </a-entity>
+  </a-scene>
+</body>
+
+</html>

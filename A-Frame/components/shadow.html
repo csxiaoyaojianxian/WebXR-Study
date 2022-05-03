@@ -2,7 +2,7 @@
  * @Author: victorsun
  * @Date: 2022-05-02 23:15:51
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-03 16:23:25
+ * @LastEditTime: 2022-05-04 01:19:50
  * @Descripttion: shadow 阴影组件(需要配合灯光)
 -->
 <html>
@@ -12,25 +12,50 @@
 <body>
 <!--
 为实体及其子项启用阴影
+默认情况下阴影处于非激活状态，因为产生阴影效果会影响性能
 如果没有此组件，实体将不会投射或接收阴影
 仅添加shadow组件不足以在场景中显示阴影，必须至少启用一盏灯并配置 castShadow: true
 
+阴影产生三要素：
+1. 能产生阴影的光
+2. 可以产生阴影的实体
+3. 可以接收阴影的实体
+
+[灯光属性] 参见light
+castShadow  需要设置为 true
+shadowBias
+shadowCameraFar
+shadowCameraNear
+shadowCameraVisible
+shadowMapHeight
+shadowMapWidth
+shadowCameraFov
+shadowCameraTop      可以控制阴影范围
+shadowCameraBottom   可以控制阴影范围
+shadowCameraRight    可以控制阴影范围
+shadowCameraLeft     可以控制阴影范围
+
 [实体属性]
-cast       实体是否向周围场景投射阴影        true
-receive    实体是否接收到来自周围场景的阴影   true
+cast       实体是否向周围场景实体投射阴影        true
+receive    实体是否接收到来自周围场景实体的阴影   true
 
 [场景属性]
-enabled    启用全局阴影，无论是否有castShadow: true启用的阴影组件和灯光                                   true
-autoUpdate 是否每帧动态更新阴影贴图，禁用并手动更新 renderer.shadowMap.needsUpdate = true 以获得最佳性能    true
-type       阴影类型 pcf, basic, pcfsoft                                                              pcf (percentage closer filtering)
+enabled    启用全局阴影，若为 false，即使灯光设置了 castShadow: true 也不渲染阴影                          true
+autoUpdate 是否每帧动态更新阴影贴图，禁用并手动更新 renderer.shadowMap.needsUpdate = true 以获得最佳性能     true
+type       阴影类型 pcf, basic, pcfsoft                                                              pcf
+             pcf(percentage closer filtering)主要描述阴影的边界   
+             basic的阴影边界较为明显，pcf的阴影边界较模糊，pcfsoft的阴影边界更模糊  
+             阴影边界越模糊越接近真实效果，但是带来的性能消耗也越大                                                         
 -->
 
-<a-scene shadow="autoUpdate: false">
+<a-scene shadow="autoUpdate: true">
 
-  <a-entity light="type:directional; castShadow:true;" position="1 2 -6"></a-entity>
+  <a-entity light="type:directional; castShadow:true" position="10 14 -16"></a-entity>
+  <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" shadow></a-box>
   <!-- 投射阴影但本身不接收阴影 -->
   <a-box shadow="receive: false" position="0 0 -5" material="shader: phong; color: red"></a-box>
 
+  <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4" shadow></a-plane>
 </a-scene>
 
 </body>
