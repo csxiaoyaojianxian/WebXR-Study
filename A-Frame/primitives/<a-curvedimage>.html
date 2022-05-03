@@ -1,0 +1,49 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-03 16:34:57
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-03 17:25:23
+ * @Descripttion: 曲线图像原语
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+创建围绕用户弯曲的图像，由于每个像素与用户的距离相同，因此围绕相机排列的弯曲图像可以令人愉悦
+在引擎盖下，由两个双面开放式圆柱体组成，纹理映射到圆柱体内部
+
+[属性映射]
+color             material.color             #FFF
+height            geometry.height            1
+metalness         material.metalness         0
+opacity           material.opacity           1
+open-ended        geometry.openEnded         true
+radius            geometry.radius            2
+repeat            material.repeat            None
+roughness         material.roughness         0.5
+segments-height   geometry.segmentsHeight    18
+segments-radial   geometry.segmentsRadial    48
+shader            material.shader            flat
+side              material.side              double
+src               material.src               None
+theta-length      geometry.thetaLength       270
+theta-start       geometry.thetaStart        0
+transparent       material.transparent       true
+-->
+
+<a-scene>
+  <a-assets>
+    <img id="my-image" src="../assets/sechelt.jpg">
+  </a-assets>
+
+  <!-- Using the asset management system. -->
+  <a-curvedimage src="#my-image" height="3.0" radius="5.7" theta-length="72"
+                 rotation="0 100 0" scale="0.8 0.8 0.8"></a-curvedimage>
+
+  <a-curvedimage src="../assets/material.jpg"></a-curvedimage>
+</a-scene>
+
+</body>
+</html>

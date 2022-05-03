@@ -1,0 +1,41 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-03 16:34:57
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-03 17:02:24
+ * @Descripttion: 相机原语
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+[属性映射]
+far                     camera.far                      10000
+fov                     camera.fov                      80
+look-controls-enabled   look-controls.enabled           true
+near                    camera.near                     0.5
+reverse-mouse-drag      look-controls.reverseMouseDrag  false
+wasd-controls-enabled   wasd-controls.enabled           true
+
+默认情况下，摄像头位于人眼的平均高度（1.6 米），当与接收旋转或位置（例如来自 VR 设备）的控件一起使用时，该位置将被覆盖
+
+-->
+<a-scene>
+  <a-box></a-box>
+  <!-- 相机放在地上，会被VR设备覆盖 -->
+  <a-camera position="0 0 0"></a-camera>
+
+  <!-- When moving or rotating the camera relative to the scene, use a camera rig.
+       By doing so, the camera’s height offset can be updated by roomscale devices,
+       while still allowing the tracked area to be moved independently around the scene. -->
+  <a-entity id="rig" position="25 10 0">
+    <a-camera id="camera"></a-camera>
+  </a-entity>
+
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+</body>
+</html>
