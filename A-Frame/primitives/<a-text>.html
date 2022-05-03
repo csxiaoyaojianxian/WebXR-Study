@@ -2,8 +2,8 @@
  * @Author: victorsun
  * @Date: 2022-05-03 16:34:57
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-03 17:42:29
- * @Descripttion: 原语
+ * @LastEditTime: 2022-05-03 20:12:10
+ * @Descripttion: 文本原语
 -->
 <html>
 <head>
@@ -12,9 +12,33 @@
 <body>
 <!--
 [属性映射]
+align          text.align
+alpha-test     text.alphaTest
+anchor         text.anchor
+baseline       text.baseline
+color          text.color
+font           text.font
+font-image     text.fontImage
+height         text.height
+letter-spacing text.letterSpacing
+line-height    text.lineHeight
+opacity        text.opacity
+shader         text.shader
+side           text.side
+tab-size       text.tabSize
+transparent    text.transparent
+value          text.value
+white-space    text.whiteSpace
+width          text.width
+wrap-count     text.wrapCount
+wrap-pixels    text.wrapPixels
+z-offset       text.zOffset
 
 -->
 <a-scene>
+  <a-text value="Hello, World!"></a-text>
+  <!-- 要通过raycaster或光标与文本交互，需要在文本中添加像几何图形 -->
+  <a-text value="Now Interactable" geometry="primitive:plane" position="0 0 -2"></a-text>
 
   <a-sky src="../assets/sechelt.jpg"></a-sky>
 </a-scene>

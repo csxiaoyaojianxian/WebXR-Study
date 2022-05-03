@@ -9,3 +9,4 @@ TODO list:
 
 参考阅读：
 https://blog.mozvr.com/a-saturday-night-gltf-workflow/
+AFrame射击小游戏

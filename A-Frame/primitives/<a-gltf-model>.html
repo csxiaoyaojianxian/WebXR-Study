@@ -2,8 +2,8 @@
  * @Author: victorsun
  * @Date: 2022-05-03 16:34:57
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-03 17:41:51
- * @Descripttion: 原语
+ * @LastEditTime: 2022-05-03 19:10:10
+ * @Descripttion: gltf模型原语
 -->
 <html>
 <head>
@@ -12,10 +12,18 @@
 <body>
 <!--
 [属性映射]
-
+src    gltf-model.src    null
 -->
 <a-scene>
-
+  <a-scene>
+    <a-assets>
+      <a-asset-item id="cat" src="../models/toon_cat_free/scene.gltf"></a-asset-item>
+    </a-assets>
+  
+    <a-gltf-model src="#cat"></a-gltf-model>
+  
+    <a-gltf-model src="../models/toon_cat_free/scene.gltf"></a-gltf-model>
+  </a-scene>
   <a-sky src="../assets/sechelt.jpg"></a-sky>
 </a-scene>
 

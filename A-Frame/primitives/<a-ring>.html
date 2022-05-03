@@ -2,8 +2,8 @@
  * @Author: victorsun
  * @Date: 2022-05-03 16:34:57
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-03 17:42:12
- * @Descripttion: 原语
+ * @LastEditTime: 2022-05-03 19:47:56
+ * @Descripttion: 环原语
 -->
 <html>
 <head>
@@ -12,9 +12,45 @@
 <body>
 <!--
 [属性映射]
-
+ambient-occlusion-map                material.ambientOcclusionMap                 None
+ambient-occlusion-map-intensity      material.ambientOcclusionMapIntensity        1
+ambient-occlusion-texture-offset     material.ambientOcclusionTextureOffset       0 0
+ambient-occlusion-texture-repeat     material.ambientOcclusionTextureRepeat       1 1
+color                                material.color                               #FFF
+displacement-bias                    material.displacementBias                    0.5
+displacement-map                     material.displacementMap                     None
+displacement-scale                   material.displacementScale                   1
+displacement-texture-offset          material.displacementTextureOffset           0 0
+displacement-texture-repeat          material.displacementTextureRepeat           1 1
+env-map                              material.envMap                              None
+fog                                  material.fog                                 true
+height                               material.height                              256
+metalness                            material.metalness                           0
+normal-map                           material.normalMap                           None
+normal-scale                         material.normalScale                         1 1
+normal-texture-offset                material.normalTextureOffset                 0 0
+normal-texture-repeat                material.normalTextureRepeat                 1 1
+radius-inner                         geometry.radiusInner                         0.8
+radius-outer                         geometry.radiusOuter                         1.2
+repeat                               material.repeat                              1 1
+roughness                            material.roughness                           0.5
+segments-phi                         geometry.segmentsPhi                         10
+segments-theta                       geometry.segmentsTheta                       32
+spherical-env-map                    material.sphericalEnvMap                     None
+src                                  material.src                                 None
+theta-length                         geometry.thetaLength                         360
+theta-start                          geometry.thetaStart                          0
+width                                material.width                               512
+wireframe                            material.wireframe                           false
+wireframe-linewidth                  material.wireframeLinewidth                  2
 -->
 <a-scene>
+  <a-assets>
+    <img id="texture" src="../assets/material.jpg">
+  </a-assets>
+  
+  <a-ring color="teal" radius-inner="1" radius-outer="2"></a-ring>
+  <a-ring src="#texture"></a-ring>
 
   <a-sky src="../assets/sechelt.jpg"></a-sky>
 </a-scene>

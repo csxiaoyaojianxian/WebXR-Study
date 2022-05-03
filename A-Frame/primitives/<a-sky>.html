@@ -2,8 +2,8 @@
  * @Author: victorsun
  * @Date: 2022-05-03 16:34:57
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-03 17:42:14
- * @Descripttion: 原语
+ * @LastEditTime: 2022-05-03 19:53:28
+ * @Descripttion: 天空原语
 -->
 <html>
 <head>
@@ -11,12 +11,33 @@
 </head>
 <body>
 <!--
+天空是一个大球体，其内部映射有颜色或360图像纹理。
+
 [属性映射]
+color             material.color            #FFF
+metalness         material.metalness        0
+opacity           material.opacity          1
+phi-length        geometry.phiLength        360
+phi-start         geometry.phiStart         0
+radius            geometry.radius           500
+repeat            material.repeat           None
+roughness         material.roughness        0.5
+segments-height   geometry.segmentsHeight   32
+segments-width    geometry.segmentsWidth    64
+shader            material.shader           flat
+side              material.side             back
+src               material.src              None
+theta-length      geometry.thetaLength      180
+theta-start       geometry.thetaStart       0
+transparent       material.transparent      false
 
 -->
 <a-scene>
-
-  <a-sky src="../assets/sechelt.jpg"></a-sky>
+  <a-assets>
+    <img id="sky" src="../assets/sechelt.jpg">
+  </a-assets>
+  <a-sky src="#sky"></a-sky>
+  <!-- <a-sky color="#6EBAA7"></a-sky> -->
 </a-scene>
 
 </body>

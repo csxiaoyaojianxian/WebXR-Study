@@ -2,8 +2,8 @@
  * @Author: victorsun
  * @Date: 2022-05-03 16:34:57
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-03 17:42:38
- * @Descripttion: 原语
+ * @LastEditTime: 2022-05-03 20:46:45
+ * @Descripttion: 球形视频原语
 -->
 <html>
 <head>
@@ -12,12 +12,27 @@
 <body>
 <!--
 [属性映射]
-
+autoplay         <video>.autoplay         true
+crossOrigin      <video>.crossOrigin      anonymous
+loop             <video>.loop             true
+radius           geometry.radius          5000
+segments-height  geometry.segmentsHeight  64
+segments-width   geometry.segmentsWidth   64
 -->
 <a-scene>
+  <a-assets>
+    <video id="video" autoplay loop="true" src="../assets/video.mp4"> </video>
+  </a-assets>
+  <a-videosphere radius="50" src="#video"></a-videosphere>
 
   <a-sky src="../assets/sechelt.jpg"></a-sky>
 </a-scene>
 
+<script>
+document.querySelector('a-videosphere').addEventListener('loaded', function() {
+  document.querySelector("a-videosphere").components.material.data.src.currentTime = 0 // start of video
+  document.querySelector("a-videosphere").components.material.material.map.image.play();
+});
+</script>
 </body>
 </html>

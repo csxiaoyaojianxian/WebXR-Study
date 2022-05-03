@@ -2,8 +2,8 @@
  * @Author: victorsun
  * @Date: 2022-05-03 16:34:57
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-03 17:41:59
- * @Descripttion: 原语
+ * @LastEditTime: 2022-05-03 19:26:11
+ * @Descripttion: 灯光原语 TODO
 -->
 <html>
 <head>
@@ -13,10 +13,46 @@
 <!--
 [属性映射]
 
+angle        light.angle        60
+color        light.color        #fff
+decay        light.decay        1
+distance     light.distance     0.0
+envmap       light.envMap       null
+ground-color light.groundColor  #fff
+intensity    light.intensity    1.0
+penumbra     light.penumbra     0.0
+type         light.type         directional
+target       light.target       null
+
 -->
 <a-scene>
 
-  <a-sky src="../assets/sechelt.jpg"></a-sky>
+  <!-- Red directional light shining from the top left. -->
+  <a-light color="red" position="-1 1 0"></a-light>
+
+  <!-- Blue point light, 5 meters in the air. -->
+  <a-light type="point" color="blue" position="0 5 0"></a-light>
+
+  <!-- Dim ambient lighting. -->
+  <a-light type="ambient" color="#222"></a-light>
+
+  <!-- Probe light using the #pisa environment map -->
+  <a-assets>
+    <a-cubemap id="pisa">
+    <img src="../assets/cube/px.png">
+    <img src="../assets/cube/nx.png">
+    <img src="../assets/cube/py.png">
+    <img src="../assets/cube/ny.png">
+    <img src="../assets/cube/pz.png">
+    <img src="../assets/cube/nz.png">
+    </a-cubemap>
+  </a-assets>
+
+  <a-light type="probe" envMap="#pisa"></a-light>
+
+  <a-box position="0 0 -5"></a-box>
+
+  <!-- <a-sky src="../assets/sechelt.jpg"></a-sky> -->
 </a-scene>
 
 </body>

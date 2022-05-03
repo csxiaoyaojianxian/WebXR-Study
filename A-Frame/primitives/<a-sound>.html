@@ -2,8 +2,8 @@
  * @Author: victorsun
  * @Date: 2022-05-03 16:34:57
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-03 17:42:16
- * @Descripttion: 原语
+ * @LastEditTime: 2022-05-03 19:59:49
+ * @Descripttion: 声音原语
 -->
 <html>
 <head>
@@ -12,10 +12,14 @@
 <body>
 <!--
 [属性映射]
-
+autoplay    sound.autoplay     false
+loop        sound.loop         false
+on          sound.on           null
+src         sound.src          null
+volume      sound.volume       1
 -->
 <a-scene>
-
+  <a-sound src="src: url(../assets/backgroundnoise.wav)" autoplay="true" position="0 2 5"></a-sound>
   <a-sky src="../assets/sechelt.jpg"></a-sky>
 </a-scene>
 

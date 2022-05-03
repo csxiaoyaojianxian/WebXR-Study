@@ -2,19 +2,37 @@
  * @Author: victorsun
  * @Date: 2022-05-03 16:34:57
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-03 17:42:36
- * @Descripttion: 原语
+ * @LastEditTime: 2022-05-03 20:32:15
+ * @Descripttion: 视频原语
 -->
 <html>
 <head>
+<!-- 针对iOS的限制添加 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
 <script src="../lib/1.3.0/aframe.js"></script>
 </head>
 <body>
 <!--
 [属性映射]
-
+color            material.color           #FFF
+height           geometry.height          1.75
+metalness        material.metalness       0
+opacity          material.opacity         1
+repeat           material.repeat          None
+roughness        material.roughness       0.5
+segments-height  geometry.segmentsHeight  1
+segments-width   geometry.segmentsWidth   1
+shader           material.shader          flat
+side             material.side            front
+src              material.src             None
+transparent      material.transparent     false
+width            geometry.width           3
 -->
 <a-scene>
+  <a-assets>
+    <video id="video" autoplay loop="true" src="../assets/video.mp4"></video>
+  </a-assets>
+  <a-video src="#video" width="16" height="9" position="0 0 -20"></a-video>
 
   <a-sky src="../assets/sechelt.jpg"></a-sky>
 </a-scene>

@@ -2,8 +2,8 @@
  * @Author: victorsun
  * @Date: 2022-05-03 16:34:57
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-03 17:41:57
- * @Descripttion: 原语
+ * @LastEditTime: 2022-05-03 19:17:33
+ * @Descripttion: 图像原语
 -->
 <html>
 <head>
@@ -12,9 +12,28 @@
 <body>
 <!--
 [属性映射]
+color             material.color           #FFF
+height            geometry.height          1
+metalness         material.metalness       0
+opacity           material.opacity         1
+repeat            material.repeat          None
+roughness         material.roughness       0.5
+segments-height   geometry.segmentsHeight  1
+segments-width    geometry.segmentsWidth   1
+shader            material.shader          flat
+side              material.side            front
+src               material.src             None
+transparent       material.transparent     true
+width             geometry.width           1
 
 -->
 <a-scene>
+  <a-assets>
+    <img id="my-image" src="../assets/material.jpg">
+  </a-assets>
+
+  <a-image src="#my-image" position="0 0 -5"></a-image>
+  <a-image src="../assets/material.jpg" position="0 2 -5"></a-image>
 
   <a-sky src="../assets/sechelt.jpg"></a-sky>
 </a-scene>

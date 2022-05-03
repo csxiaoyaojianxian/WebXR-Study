@@ -2,8 +2,8 @@
  * @Author: victorsun
  * @Date: 2022-05-03 16:34:57
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-03 17:42:03
- * @Descripttion: 原语
+ * @LastEditTime: 2022-05-03 19:30:43
+ * @Descripttion: OBJ模型原语
 -->
 <html>
 <head>
@@ -12,9 +12,17 @@
 <body>
 <!--
 [属性映射]
-
+mtl    obj-model.mtl    null
+src    obj-model.obj    null
 -->
 <a-scene>
+  <a-assets>
+    <a-asset-item id="crate-obj" src="../models/mario-sculpture-obj/mario-sculpture.obj"></a-asset-item>
+    <a-asset-item id="crate-mtl" src="../models/mario-sculpture-obj/mario-sculpture.mtl"></a-asset-item>
+  </a-assets>
+
+  <a-obj-model src="#crate-obj" mtl="#crate-mtl"></a-obj-model>
+  <a-obj-model src="../models/mario-sculpture-obj/mario-sculpture.obj" mtl="../models/mario-sculpture-obj/mario-sculpture.mtl"></a-obj-model>
 
   <a-sky src="../assets/sechelt.jpg"></a-sky>
 </a-scene>
