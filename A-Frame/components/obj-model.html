@@ -1,0 +1,38 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-02 23:13:40
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-03 11:43:01
+ * @Descripttion: OBJ模型组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+使用 Wavefront (.OBJ) 文件和 .MTL 文件加载 3D 模型和材料
+
+[属性]
+obj           .OBJ资源
+mtl           .MTL资源
+
+[事件]
+model-loaded  .OBJ模型加载完成
+-->
+
+<a-scene>
+  <a-scene>
+    <a-assets>
+      <a-asset-item id="mario-obj" src="../models/mario-sculpture-obj/mario-sculpture.obj"></a-asset-item>
+      <a-asset-item id="mario-mtl" src="../models/mario-sculpture-obj/mario-sculpture.mtl"></a-asset-item>
+    </a-assets>
+  
+    <a-entity obj-model="obj: #mario-obj; mtl: #mario-mtl" scale="0.04 0.04 0.04" position="0 0 -5"></a-entity>
+  </a-scene>
+
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+</body>
+</html>

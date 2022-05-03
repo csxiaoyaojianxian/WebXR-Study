@@ -1,0 +1,45 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-02 23:14:36
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-03 11:55:06
+ * @Descripttion: 实体池组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+可重用的实体池，有助于减少垃圾收集，从池中请求的实体默认情况下会暂停，需要调用 .play() 激活
+
+[属性]
+container   容器用于存储池化实体的选择器，默认为场景      ''
+dynamic     超出size后动态生成                        false
+mixin       初始化池中实体                            ''
+size        池中预分配的实体数                         0
+
+[方法]
+.requestEntity ()  请求可用实体，如果用完了且 dynamic 为 false，则返回 undefined 并记录 warning
+.returnEntity (entityEl)  实体放回池，若尝试返回不属于此池的实体，将记录警告
+-->
+
+<a-scene pool__enemy="mixin: enemy; size: 10">
+  <a-assets>
+    <a-mixin id="enemy"></a-mixin>
+  </a-assets>
+
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+<script>
+var sceneEl = document.querySelector('a-scene');
+sceneEl.addEventListener('loaded', function() {
+  var el = sceneEl.components.pool__enemy.requestEntity();
+  el.play();
+  sceneEl.components.pool__enemy.returnEntity(el);
+});
+</script>
+
+</body>
+</html>
