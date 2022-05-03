@@ -1,0 +1,46 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-01 21:41:26
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-03 10:58:11
+ * @Descripttion: 链接组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+链接组件就像普通的网页重定向一样，目前，Quest 上的 Oculus 浏览器是唯一支持 VR 导航方案的浏览器
+
+backgroundColor            入口背景色                              red
+borderColor                入口边框色                              white
+highlighted                是否高亮                               false
+highlightedColor           高亮色                                 '#24CAFF'
+href                       链接                                   ''
+image                      360° 入口图像，可以是选择权、<img>或URL    ''
+on                         触发链接遍历的监听事件                    'click'
+peekMode                   窥视模式，360° 图像是否完全展开供预览       false
+title                      标题                                   ''
+titleColor                 标题色                                 white
+visualAspectEnabled        使用入口默认外观                         true
+
+-->
+<a-scene>
+  <a-assets>
+    <img id="homeThumbnail" src="../assets/material.jpg">
+  </a-assets>
+
+  <a-entity link="href: index.html; title: My Homepage; image: #homeThumbnail" position="-1 1 -5"></a-entity>
+
+  <a-link href="index.html" title="My Homepage" image="#homeThumbnail" position="1 1 -5"></a-link>
+
+</a-scene>
+
+<script>
+// [手动导航]
+// window.location.href = 'https://supermedium.com/supercraft/'; // or window.location.replace
+</script>
+
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-02 23:08:25
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-03 10:31:16
+ * @Descripttion: light 光源组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+灯光会影响所有非 shader: flat 的材质
+默认会添加 ambient / directional 两个灯光
+
+[属性]
+type        灯光类型：ambient, directional, hemisphere, point, spot, probe     directional
+color       灯光颜色                                                           #fff
+intensity   灯光强度                                                           1.0
+
+[环境光源 —— ambient] 全局影响场景中的所有实体，position、rotation、scale无效
+
+[平行光源 —— directional] 特定方向的无限远光源，是向场景添加实时阴影的最有效类型，使用 position指定方向，position="-100 100 0" 和 position="-1 1 0" 的强度相同
+
+[半球光源 —— hemisphere] 类似于环境光，但有两种不同的颜色，例如针对灰色天空下的草地的场景
+color         来自上方的光颜色      #fff
+groundColor   来自下方的光颜色      #fff
+
+[泛/点光源 —— point] 和 directional 不同，距离越近越亮，且是全方位的
+decay         衰变量                                        1.0
+distance      强度变为 0 的距离。0 表示点光源不会随距离衰减       0.0
+
+[聚光灯光源 —— spot] 和 point 不同，非全方位，只向一个方向投射光
+angle         最大角度(度)                                   60
+decay         衰变量                                        1.0
+distance      强度变为 0 的距离。0 表示点光源不会随距离衰减       0.0
+penumbra      由于半影而衰减的聚光灯锥的百分比                   0.0
+target        点指向的元素，null 则按方向变换聚光灯，指向 -Z 轴   null
+
+[探测灯光源 —— probe] 类似环境照明，但会分析立方体贴图生成球谐函数，对每个角度进行不同的着色
+intensity     强度          1
+envMap        立方体贴图     null
+
+
+[为灯光配置阴影属性]
+castShadow                             此灯光是否在场景上投射阴影                      false
+shadowBias                             阴影偏差，确定表面是否处于阴影中时的偏移深度        0
+shadowCameraBottom   directional       阴影相机平截头体的底平面                         -5
+shadowCameraFar                        阴影相机平截头体的远平面                         500
+shadowCameraFov      point, spot       阴影相机的 FOV      50
+shadowCameraLeft     directional       阴影相机平截头体的左平面                         -5
+shadowCameraNear                       阴影相机平截头体平面附近                         0.5
+shadowCameraRight    directional       阴影相机平截头体的右平面                          5
+shadowCameraTop      directional       阴影相机平截头体的顶部平面                        5
+shadowCameraVisible                    显示一个视觉辅助工具，显示阴影相机的位置和截锥体     false
+shadowMapHeight                        阴影贴图的垂直分辨率                             512
+shadowMapWidth                         阴影贴图的水平分辨率                             512
+-->
+
+<!-- 禁用默认灯光 -->
+<a-scene light="defaultLightsEnabled: false">
+
+  <!-- probe -->
+  <!-- <a-assets>
+    <a-cubemap id="pisa">
+    <img src="https://threejs.org/examples/textures/cube/pisa/px.png">
+    <img src="https://threejs.org/examples/textures/cube/pisa/nx.png">
+    <img src="https://threejs.org/examples/textures/cube/pisa/py.png">
+    <img src="https://threejs.org/examples/textures/cube/pisa/ny.png">
+    <img src="https://threejs.org/examples/textures/cube/pisa/pz.png">
+    <img src="https://threejs.org/examples/textures/cube/pisa/nz.png">
+    </a-cubemap>
+  </a-assets>
+  <a-light type="probe" envMap="#pisa"></a-light> -->
+
+  <!-- 默认会添加 ambient / directional 两个灯光，手动添加灯光时会移除这两个灯光 -->
+  <a-entity light="type: ambient; color: #BBB"></a-entity>
+  <a-entity light="type: directional; color: #FFF; intensity: 0.6" position="-0.5 1 1"></a-entity>
+
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+</body>
+</html>

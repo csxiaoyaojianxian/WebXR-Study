@@ -1,0 +1,37 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-02 23:15:51
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-03 10:35:57
+ * @Descripttion: 阴影组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+为实体及其子项启用阴影
+如果没有此组件，实体将不会投射或接收阴影
+仅添加shadow组件不足以在场景中显示阴影，必须至少启用一盏灯并配置 castShadow: true
+
+[实体属性]
+cast       实体是否向周围场景投射阴影        true
+receive    实体是否接收到来自周围场景的阴影   true
+
+[场景属性]
+enabled    启用全局阴影，无论是否有castShadow: true启用的阴影组件和灯光                                   true
+autoUpdate 是否每帧动态更新阴影贴图，禁用并手动更新 renderer.shadowMap.needsUpdate = true 以获得最佳性能    true
+type       阴影类型 pcf, basic, pcfsoft                                                              pcf (percentage closer filtering)
+-->
+
+<a-scene shadow="autoUpdate: false">
+
+  <a-entity light="type:directional; castShadow:true;" position="1 2 -6"></a-entity>
+  <!-- 投射阴影但本身不接收阴影 -->
+  <a-box shadow="receive: false" position="0 0 -5" material="shader: phong; color: red"></a-box>
+
+</a-scene>
+
+</body>
+</html>

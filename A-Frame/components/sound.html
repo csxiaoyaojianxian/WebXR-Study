@@ -1,0 +1,63 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-02 23:15:53
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-03 11:24:18
+ * @Descripttion: 声音组件
+-->
+<html>
+<head>
+<script src="../lib/1.3.0/aframe.js"></script>
+</head>
+<body>
+<!--
+[属性]
+autoplay         自动播放                                 false
+distanceModel    距离模型 linear, inverse, exponential    inverse
+loop             循环                                    false
+maxDistance      音频源和听者之间的最大距离，超过后音量不降低   10000
+on               实体监听的播放事件                         null
+poolSize         同时播放此声音的最大实例数                  1
+positional       音频是否位置性的(可移动)                   true
+refDistance      当音频源远离听众时降低音量的参考距离          1
+rolloffFactor    远离听者时音量降低的速度                    1
+src              音频资源，选择器、<audio>或url()           null
+volume           音量                                    1
+
+[方法]
+pauseSound       暂停
+playSound        播放
+stopSound        停止
+
+[事件]
+sound-loaded     音频加载成功，事件 detail 包含音频的 name 和 id
+sound-ended      音频播放结束，事件 detail 包含音频的 name 和 id
+
+-->
+
+<a-scene>
+  <!-- 预加载资源 -->
+  <a-assets>
+    <audio id="backgroundnoise" src="../assets/backgroundnoise.wav" preload="auto"></audio>
+  </a-assets>
+
+  <a-entity cursor="rayOrigin: mouse" position="0 0 -5"></a-entity>
+  <a-entity sound="src: #backgroundnoise"></a-entity>
+
+  <!-- 点击播放 -->
+  <a-entity geometry="primitive: box" sound="src: url(../assets/backgroundnoise.wav); on: click" position="0 0 -5"></a-entity>
+          
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
+</a-scene>
+
+<script>
+var entity = document.querySelector('[sound]');
+entity.addEventListener('sound-loaded', function() {
+  entity.components.sound.playSound();
+  // entity.components.sound.stopSound();
+  // entity.components.sound.pauseSound();
+});
+</script>
+
+</body>
+</html>
