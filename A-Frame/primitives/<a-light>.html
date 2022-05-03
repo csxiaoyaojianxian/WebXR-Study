@@ -2,7 +2,7 @@
  * @Author: victorsun
  * @Date: 2022-05-03 16:34:57
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-03 19:26:11
+ * @LastEditTime: 2022-05-03 21:24:20
  * @Descripttion: 灯光原语 TODO
 -->
 <html>
@@ -23,18 +23,16 @@ intensity    light.intensity    1.0
 penumbra     light.penumbra     0.0
 type         light.type         directional
 target       light.target       null
-
 -->
 <a-scene>
-
   <!-- Red directional light shining from the top left. -->
-  <a-light color="red" position="-1 1 0"></a-light>
+  <!-- <a-light color="red" position="-1 1 0"></a-light> -->
 
   <!-- Blue point light, 5 meters in the air. -->
-  <a-light type="point" color="blue" position="0 5 0"></a-light>
+  <!-- <a-light type="point" color="blue" position="0 5 0"></a-light> -->
 
   <!-- Dim ambient lighting. -->
-  <a-light type="ambient" color="#222"></a-light>
+  <!-- <a-light type="ambient" color="#222"></a-light> -->
 
   <!-- Probe light using the #pisa environment map -->
   <a-assets>
@@ -50,9 +48,9 @@ target       light.target       null
 
   <a-light type="probe" envMap="#pisa"></a-light>
 
-  <a-box position="0 0 -5"></a-box>
+  <a-entity geometry="primitive: box; width: 20; height: 20" position="0 0.2 0" material="envMap: #pisa; roughness: 0" rotation="-90 0 0"></a-entity>
 
-  <!-- <a-sky src="../assets/sechelt.jpg"></a-sky> -->
+  <a-sky src="../assets/sechelt.jpg"></a-sky>
 </a-scene>
 
 </body>

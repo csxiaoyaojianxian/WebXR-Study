@@ -2,7 +2,7 @@
  * @Author: victorsun
  * @Date: 2022-05-02 23:08:25
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-03 10:31:16
+ * @LastEditTime: 2022-05-03 21:23:58
  * @Descripttion: light 光源组件
 -->
 <html>
@@ -62,21 +62,25 @@ shadowMapWidth                         阴影贴图的水平分辨率           
 <a-scene light="defaultLightsEnabled: false">
 
   <!-- probe -->
-  <!-- <a-assets>
+  <a-assets>
     <a-cubemap id="pisa">
-    <img src="https://threejs.org/examples/textures/cube/pisa/px.png">
-    <img src="https://threejs.org/examples/textures/cube/pisa/nx.png">
-    <img src="https://threejs.org/examples/textures/cube/pisa/py.png">
-    <img src="https://threejs.org/examples/textures/cube/pisa/ny.png">
-    <img src="https://threejs.org/examples/textures/cube/pisa/pz.png">
-    <img src="https://threejs.org/examples/textures/cube/pisa/nz.png">
+    <img src="../assets/cube/px.png">
+    <img src="../assets/cube/nx.png">
+    <img src="../assets/cube/py.png">
+    <img src="../assets/cube/ny.png">
+    <img src="../assets/cube/pz.png">
+    <img src="../assets/cube/nz.png">
     </a-cubemap>
   </a-assets>
-  <a-light type="probe" envMap="#pisa"></a-light> -->
+  <a-light type="probe" envMap="#pisa"></a-light>
 
   <!-- 默认会添加 ambient / directional 两个灯光，手动添加灯光时会移除这两个灯光 -->
+  <!--
   <a-entity light="type: ambient; color: #BBB"></a-entity>
   <a-entity light="type: directional; color: #FFF; intensity: 0.6" position="-0.5 1 1"></a-entity>
+  -->
+
+  <a-entity geometry="primitive: box; width: 20; height: 20" position="0 0.2 0" material="envMap: #pisa; roughness: 0" rotation="-90 0 0"></a-entity>
 
   <a-sky src="../assets/sechelt.jpg"></a-sky>
 </a-scene>
