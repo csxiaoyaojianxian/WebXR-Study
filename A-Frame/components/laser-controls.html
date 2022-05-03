@@ -2,8 +2,8 @@
  * @Author: victorsun
  * @Date: 2022-05-02 22:47:30
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-02 23:00:13
- * @Descripttion: laser-controls 激光控制组件 TODO
+ * @LastEditTime: 2022-05-03 16:30:52
+ * @Descripttion: laser-controls 激光控制组件
 -->
 <html>
 <head>
@@ -32,16 +32,12 @@ defaultModelColor   默认控制器模型的颜色
 [自定义 raycaster]
 参考 raycaster 组件属性
 
+当激光与实体相交时，线的长度会被截断为到相交点的距离
+
 -->
 
-<script>
-//
-</script>
-
 <a-scene>
-
   <a-entity laser-controls="hand: left" raycaster="lineColor: red; lineOpacity: 0.5"></a-entity>
-
   <a-sky src="../assets/sechelt.jpg"></a-sky>
 </a-scene>
 
