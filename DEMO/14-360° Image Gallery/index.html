@@ -1,0 +1,99 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-04 10:54:28
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-04 11:41:49
+ * @Descripttion: demo
+-->
+
+<html>
+<head>
+
+<script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+<!-- 模板 -->
+<script src="https://unpkg.com/aframe-template-component@3.x.x/dist/aframe-template-component.min.js"></script>
+<!-- 布局 -->
+<script src="https://unpkg.com/aframe-layout-component@4.x.x/dist/aframe-layout-component.min.js"></script>
+<!-- 事件集 -->
+<script src="https://unpkg.com/aframe-event-set-component@5.x.x/dist/aframe-event-set-component.min.js"></script>
+<!-- 代理事件 -->
+<script src="https://unpkg.com/aframe-proxy-event-component@2.1.0/dist/aframe-proxy-event-component.min.js"></script>
+
+<!-- 1. template -->
+<!-- 2. 事件集 event-set，需要向 data-src 链接实体添加属性以在单击时加载完整图像 -->
+<!-- 3. proxy-event 向指定目标代理事件 fade 触发淡入淡出效果 -->
+<script id="plane" type="text/html">
+  <a-entity class="link"
+    geometry="primitive: plane; height: 1; width: 1"
+    material="shader: flat; src: ${thumb}"
+    sound="on: click; src: #click-sound"
+    event-set__mouseenter="scale: 1.2 1.2 1"
+    event-set__mouseleave="scale: 1 1 1"
+    event-set__click="_target: #image-360; _delay: 300; material.src: ${src}"
+    proxy-event="event: click; to: #image-360; as: fade"></a-entity>
+</script>
+
+</head>
+<body>
+
+<a-scene>
+  <a-assets>
+    <audio id="click-sound" src="https://cdn.aframe.io/360-image-gallery-boilerplate/audio/click.ogg"></audio>
+    <!-- Images. -->
+    <img id="city" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/city.jpg">
+    <img id="city-thumb" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/thumb-city.jpg">
+    <img id="cubes" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/cubes.jpg">
+    <img id="cubes-thumb" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/thumb-cubes.jpg">
+    <img id="sechelt" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg">
+    <img id="sechelt-thumb" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/thumb-sechelt.jpg">
+  </a-assets>
+
+  <!-- 360-degree image. -->
+  <!-- animation__fade设置为黑色，监听代理的事件fade -->
+  <a-sky
+    id="image-360" radius="10" src="#city"
+    animation__fade="property: components.material.material.color; type: color; from: #FFF; to: #000; dur: 300; startEvents: fade"
+    animation__fadeback="property: components.material.material.color; type: color; from: #000; to: #FFF; dur: 300; startEvents: animationcomplete__fade"
+  ></a-sky>
+
+
+  <!-- Link template we will build. -->
+
+  <!-- step1: 原始link，点击发声 -->
+  <!-- <a-entity class="link"
+    geometry="primitive: plane; height: 1; width: 1"
+    material="shader: flat; src: #cubes-thumb"
+    sound="on: click; src: #click-sound"
+  ></a-entity> -->
+
+  <!-- step2: template link -->
+  <!-- <a-entity template="src: #plane" data-thumb="#city-thumb"></a-entity>
+  <a-entity template="src: #plane" data-thumb="#cubes-thumb"></a-entity>
+  <a-entity template="src: #plane" data-thumb="#sechelt-thumb"></a-entity> -->
+
+  <!-- step3: 布局组件 -->
+  <!-- <a-entity id="links" layout="type: line; margin: 1.5" position="-3 -1 -4">
+    <a-entity template="src: #plane" data-thumb="#city-thumb"></a-entity>
+    <a-entity template="src: #plane" data-thumb="#cubes-thumb"></a-entity>
+    <a-entity template="src: #plane" data-thumb="#sechelt-thumb"></a-entity>
+  </a-entity> -->
+
+  <!-- step4: 添加链接 -->
+  <a-entity id="links" layout="type: line; margin: 1.5" position="-3 -1 -4">
+    <a-entity template="src: #plane" data-src="#city" data-thumb="#city-thumb"></a-entity>
+    <a-entity template="src: #plane" data-src="#cubes" data-thumb="#cubes-thumb"></a-entity>
+    <a-entity template="src: #plane" data-src="#sechelt" data-thumb="#sechelt-thumb"></a-entity>
+  </a-entity>
+
+  <!-- Camera + Cursor. -->
+  <a-camera>
+    <a-cursor
+      id="cursor"
+      animation__click="property: scale; from: 0.1 0.1 0.1; to: 1 1 1; easing: easeInCubic; dur: 150; startEvents: click"
+      animation__clickreset="property: scale; to: 0.1 0.1 0.1; dur: 1; startEvents: animationcomplete__click"
+      animation__fusing="property: scale; from: 1 1 1; to: 0.1 0.1 0.1; easing: easeInCubic; dur: 150; startEvents: fusing"></a-cursor>
+  </a-camera>
+</a-scene>
+
+</body>
+</html>

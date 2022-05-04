@@ -1,12 +1,9 @@
 # WebXR 学习笔记
 
-本项目是对 WebXR 学习时的部分笔记记录
+本项目是对 WebXR 学习时的部分笔记记录  
 学习资料主要来源于 A-Frame 官方文档
 
-TODO list:
-1. 一些官方案例，首页中
-2. 2个官方指南
+https://aframe.io/
 
-参考阅读：
+参考阅读清单：
 https://blog.mozvr.com/a-saturday-night-gltf-workflow/
-AFrame射击小游戏

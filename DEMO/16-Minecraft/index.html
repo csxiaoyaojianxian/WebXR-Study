@@ -1,0 +1,92 @@
+<!--
+ * @Author: victorsun
+ * @Date: 2022-05-04 10:54:28
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-04 15:38:00
+ * @Descripttion: demo
+-->
+
+<html>
+<head>
+
+<script src="./assets/aframe.min.js"></script>
+<script src="./random-color.js"></script>
+<script src="./snap.js"></script>
+<script src="./intersection-spawn.js"></script>
+<script src="https://unpkg.com/aframe-teleport-controls@0.3.x/dist/aframe-teleport-controls.min.js"></script>
+<script src="https://unpkg.com/aframe-controller-cursor-component@0.2.x/dist/aframe-controller-cursor-component.min.js"></script>
+
+</head>
+<body>
+
+<a-scene>
+  <a-assets>
+    <img id="groundTexture" src="./assets/floor.jpg">
+    <img id="skyTexture" src="./assets/sky.jpg">
+    <a-mixin id="voxel"
+       geometry="primitive: box; height: 0.5; width: 0.5; depth: 0.5"
+       material="shader: standard"
+       random-color
+       snap="offset: 0.25 0.25 0.25; snap: 0.5 0.5 0.5"></a-mixin>
+  </a-assets>
+  
+  <a-cylinder id="ground" src="#groundTexture" radius="30" height="0.1"></a-cylinder>
+  <a-sky id="background" src="#skyTexture" theta-length="90" radius="30"></a-sky>
+
+  <!-- Box with random color. -->
+  <!-- <a-entity mixin="voxel" position="-1 0 -2"></a-entity>
+  <a-entity mixin="voxel" position="0 0 -2"></a-entity>
+  <a-entity mixin="voxel" position="0 1 -2"
+            animation="property: rotation; to: 0 360 0; loop: true"></a-entity>
+  <a-entity mixin="voxel" position="1 0 -2"></a-entity> -->
+
+  <!-- Vive. -->
+  <!-- <a-entity vive-controls="hand: left"></a-entity>
+  <a-entity vive-controls="hand: right"></a-entity> -->
+
+  <!-- Or Rift. -->
+  <!-- <a-entity oculus-touch-controls="hand: left"></a-entity>
+  <a-entity oculus-touch-controls="hand: right"></a-entity> -->
+
+  <!-- 兼容的控制器代替上面的 vive 和 rift Hands. -->
+  <!-- 使用 teleport-controls 组件为左手添加弧线传送的功能 -->
+  <a-entity id="teleHand" hand-controls="left" teleport-controls="type: parabolic; collisionEntities: [mixin='voxel'], #ground"></a-entity>
+  <!-- 自定义 intersection-spawn 组件为右手添加点击生成元素功能 -->
+  <a-entity id="blockHand" hand-controls="right" controller-cursor intersection-spawn="event: click; mixin: voxel"></a-entity>
+
+
+  <!-- Camera. -->
+  <a-camera>
+    <!-- 同时将 intersection-spawn 应用于 cursor 兼容移动和pc设备 -->
+    <a-cursor intersection-spawn="event: click; mixin: voxel"></a-cursor>
+  </a-camera>
+
+</a-scene>
+
+<script>
+// document.querySelector('#blockHand').addEventListener(`click`, function (evt) {
+//   // Create a blank entity.
+//   var newVoxelEl = document.createElement('a-entity');
+
+//   // Use the mixin to make it a voxel.
+//   newVoxelEl.setAttribute('mixin', 'voxel');
+
+//   // Get normal of the face of intersection and scale it down a bit
+//   var normal = evt.detail.intersection.face.normal;
+//   normal.multiplyScalar(0.25);
+
+//   // Get the position of the intersection and add our scaled normal
+//   var position = evt.detail.intersection.point;
+//   position.add(normal);
+
+//   // Set the position using intersection point. The `snap` component above which
+//   // is part of the mixin will snap it to the closest half meter.
+//   newVoxelEl.setAttribute('position', position);
+
+//   // Add to the scene with `appendChild`.
+//   this.appendChild(newVoxelEl);
+// });
+</script>
+
+</body>
+</html>

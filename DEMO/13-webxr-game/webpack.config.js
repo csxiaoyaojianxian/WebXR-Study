@@ -9,7 +9,7 @@ module.exports = {
   },
   mode: 'development',
   devServer: {
-    port: 7000,
+    port: 8888,
     hot: true,
   },
   resolve: {},

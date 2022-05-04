@@ -1,3 +1,10 @@
+/*
+ * @Author: victorsun
+ * @Date: 2022-02-16 11:44:51
+ * @LastEditors: victorsun
+ * @LastEditTime: 2022-05-04 16:38:58
+ * @Descripttion: 
+ */
 // @ts-nocheck
 import { attack } from './attack';
 
@@ -75,7 +82,6 @@ AFRAME.registerComponent('start-focus', {
 AFRAME.registerComponent('restart-focus', {
   init: function () {
     this.el.addEventListener('mouseenter', function () {
-      console.log(111);
       if (window.restartLeaveTimer) {
         clearTimeout(window.restartLeaveTimer);
         window.restartLeaveTimer = null;
