@@ -2,18 +2,18 @@
  * @Author: victorsun
  * @Date: 2022-05-04 17:08:06
  * @LastEditors: victorsun
- * @LastEditTime: 2022-05-04 17:15:41
+ * @LastEditTime: 2022-05-05 22:52:41
  * @Descripttion: 空间限制组件，建议加到 camera 上
  */
 AFRAME.registerComponent('position-limit', {
   schema: {
     maxPos: {
       type: 'vec3',
-      default: '5 10 5',
+      default: { x: 5, y: 10, z: 5 },
     },
     minPos: {
       type: 'vec3',
-      default: '-5 0 -5',
+      default: { x: -5, y: 0, z: -5 },
     }
   },
   init() {

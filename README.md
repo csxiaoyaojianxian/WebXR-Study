@@ -5,5 +5,5 @@
 
 https://aframe.io/
 
-参考阅读清单：
+推荐阅读清单：
 https://blog.mozvr.com/a-saturday-night-gltf-workflow/

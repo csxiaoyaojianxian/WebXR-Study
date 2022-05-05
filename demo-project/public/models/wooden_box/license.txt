@@ -1,0 +1,11 @@
+Model Information:
+* title:	Wooden Box
+* source:	https://sketchfab.com/3d-models/wooden-box-8c2d0108d70b4dc0a4f4bc58a31ed765
+* author:	PathOut (https://sketchfab.com/PepsiTetraHepta)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Wooden Box" (https://sketchfab.com/3d-models/wooden-box-8c2d0108d70b4dc0a4f4bc58a31ed765) by PathOut (https://sketchfab.com/PepsiTetraHepta) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

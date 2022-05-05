@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="./public/lib/aframe.min.js"></script>
+  <script src="./public/lib/aframe-extras.min.js"></script>
+  <title>WebXR-DEMO</title>
+</head>
+<body>
+
+<a-scene>
+  <a-assets>
+    <img id="floor" src="./public/textures/floor.jpg">
+    <img id="wall" src="./public/textures/wall.jpg">
+    <img id="ceil" src="./public/textures/ceil.jpg">
+    <a-asset-item id="model4" src="./public/models/wooden_box/scene.gltf"></a-asset-item>
+    <a-asset-item id="model2" src="./public/models/box2/scene.gltf"></a-asset-item>
+    <a-asset-item id="model1" src="./public/models/box1/scene.gltf"></a-asset-item>
+    <a-asset-item id="mario-obj" src="./public/models/mario-sculpture-obj/mario-sculpture.obj"></a-asset-item>
+    <a-asset-item id="mario-mtl" src="./public/models/mario-sculpture-obj/mario-sculpture.mtl"></a-asset-item>
+    <a-mixin id="wall-mixin" geometry="width: 30; height: 5; depth: 0.2" material="src: #wall; repeat: 6 1"></a-mixin>
+    <a-mixin id="wireframe" material="wireframe: true"></a-mixin>
+  </a-assets>
+
+  <a-plane class="floor" width="30" height="30" material="src: #floor; repeat: 5 5" rotation="-90 0 0" position="0 0 0" shadow="receive: true; cast: false"></a-plane>
+
+  <a-box class="wall-1" mixin="wall-mixin" position="0 2.5 15" rotation="0 180 0">
+    
+  </a-box>
+
+  <a-box class="wall-2" mixin="wall-mixin" position="0 2.5 -15" rotation="0 180 0">
+    
+  </a-box>
+
+  <a-box class="wall-3" mixin="wall-mixin" position="15 2.5 0" rotation="180 90 0">
+    
+  </a-box>
+
+  <a-box class="wall-4" mixin="wall-mixin" position="-15 2.5 0" rotation="180 90 0">
+    
+  </a-box>
+
+  <a-box class="ceil" width="30" depth="30" height="0.5" position="0 5 0" material="src: #ceil; color: #d6d6d6; emissive: #d6d6d6; repeat: 8 8">
+
+  </a-box>
+
+  <a-entity id="model-4" class="box" scale="4 4.6 4" position="-7 0 -7" rotation="0 30 0" gltf-model="#model4" material="shader: flat" shadow animation-control="target: #model-4; clip: Take 01; duration: 3; loop: once"></a-entity>
+  <a-entity obj-model="obj: #mario-obj; mtl: #mario-mtl" scale="0.005 0.005 0.005" position="-7.076 0.325 -7.063" rotation="0 50 0"></a-entity>
+
+  <a-entity id="model-2" class="box" scale="0.5 0.5 0.5" position="-3 0 -7" rotation="0 180 0" gltf-model="#model2" material="shader: flat" shadow animation-control="target: #model-2; clip: Take 01; duration: 3; loop: once"></a-entity>
+  <a-entity id="model-1" scale="0.5 0.5 0.5" position="-7 0.28 -3.5" rotation="0 180 0" gltf-model="#model1" material="shader: flat" shadow></a-entity>
+
+
+  <a-entity light="type: ambient; color: #BBB"></a-entity>
+  <!-- <a-entity position="-7.5 4.8 -7.5" light="type: point; intensity: 0.3; castShadow: true"></a-entity>
+  <a-entity position="7.5 4.8 7.5" light="type: point; intensity: 0.3; castShadow: true"></a-entity>
+  <a-entity position="-7.5 4.8 7.5" light="type: point; intensity: 0.3; castShadow: true"></a-entity>
+  <a-entity position="7.5 4.8 -7.5" light="type: point; intensity: 0.3; castShadow: true"></a-entity> -->
+  <a-entity position="0 4.8 0" light="type: point; intensity: 0.7; castShadow: true"></a-entity>
+
+  <a-entity camera position="-8 1.6 1.15" look-controls wasd-controls position-limit="maxPos: 14 5 14; minPos: -14 0.1 -14">
+    <a-entity
+      cursor="fuse: true; fuseTimeout: 1500"
+      position="0 0 -1"
+      raycaster="far: 20; interval: 1000; objects: .box"
+      animation__click="property: scale; startEvents: click; easing: easeInCubic; dur: 150; from: 0.1 0.1 0.1; to: 1 1 1"
+      animation__fusing="property: scale; startEvents: fusing; easing: easeInCubic; dur: 1500; from: 1 1 1; to: 0.1 0.1 0.1"
+      animation__mouseleave="property: scale; startEvents: mouseleave; easing: easeInCubic; dur: 500; to: 1 1 1"
+      geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: red; shader: flat">
+    </a-entity>
+  </a-entity>
+
+</a-scene>
+
+
+</body>
+</html>
