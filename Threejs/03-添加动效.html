@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+</head>
+
+<body>
+  <div id="webgl-output"></div>
+
+  <div id="myStats"></div>
+
+  <script type="module">
+    import {Scene,PerspectiveCamera,WebGLRenderer,BoxGeometry,
+                MeshBasicMaterial,Mesh,PlaneGeometry,MeshLambertMaterial,
+                AmbientLight,SpotLight,Vector2,AxesHelper,Color} from "./libs/three.js/three.js"
+
+    // 检测运行帧数
+    import {Stats} from "./libs/Stats/Stats.js"
+
+    import {dat} from "./libs/dat.gui/dat.gui.js"
+
+    var scene = new Scene();
+    var camera = new PerspectiveCamera(75,window.innerWidth / window.innerHeight,0.1,1000);
+
+    var render = new WebGLRenderer();
+    render.setClearColor(new Color(0x000000));
+    render.setSize(window.innerWidth,window.innerHeight);
+    render.shadowMap.enabled = true;
+    document.getElementById("webgl-output").appendChild(render.domElement);
+
+      // show axes in the screen
+    var axes = new AxesHelper(50);
+    // axes.setColors(0xff00ff,0x0000ff,0x00ff00);
+    scene.add(axes);
+
+    var geometry = new BoxGeometry(8,8,8);
+    var material = new MeshLambertMaterial({color:0xff2288});
+    var cube = new Mesh(geometry,material);
+    cube.castShadow = true;
+
+    cube.position.x = 4;
+    cube.position.y = 8;
+    cube.position.z = 10;
+
+    scene.add(cube);
+
+    var planeGeometry = new PlaneGeometry(100,100);
+    var planeMaterial = new MeshLambertMaterial({color:0xAAAAAA});
+    var plane = new Mesh(planeGeometry,planeMaterial);
+
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.set(15,0,0);
+    plane.receiveShadow = true;
+
+    scene.add(plane);
+
+    camera.position.x = -30;
+    camera.position.y = 40;
+    camera.position.z = 30;
+    camera.lookAt(scene.position);
+    
+    cube.rotation.x += 0.80;
+    cube.rotation.y += 0.80;
+
+    var spotLight = new SpotLight(0xFFFFFF);
+    spotLight.position.set(-60, 40, -65);
+    spotLight.castShadow = true;
+    spotLight.shadow.mapSize = new Vector2(1024, 1024);
+    spotLight.shadow.camera.far = 130;
+    spotLight.shadow.camera.near = 40;
+
+    // If you want a more detailled shadow you can increase the 
+    // mapSize used to draw the shadows.
+    // spotLight.shadow.mapSize = new THREE.Vector2(1024, 1024);
+    scene.add(spotLight);
+
+    var ambienLight = new AmbientLight(0xcccccc);
+    scene.add(ambienLight);
+
+    var stats = addStats();
+
+    // 保存速度值
+    var ctrlObj = {rotationSpeed:0.01,jumpSpeed:0.01};
+    var ctrl = new dat.GUI();
+    ctrl.add(ctrlObj,"rotationSpeed",0,1);
+    ctrl.add(ctrlObj,"jumpSpeed",0,1);
+
+    // render.render(scene,camera);
+    renderScene();
+
+    var gap = 0;
+    function renderScene(){
+        // cube.rotation.x += 0.01;
+        // cube.rotation.y += 0.01;
+        // cube.rotation.z += 0.01;
+
+        cube.rotation.x += ctrlObj.rotationSpeed;
+        cube.rotation.y += ctrlObj.rotationSpeed;
+        cube.rotation.z += ctrlObj.rotationSpeed;
+
+        //gap += 0.01
+        gap += ctrlObj.jumpSpeed;
+        cube.position.x = 25 + (20 * (Math.sin(gap)));
+        cube.position.y = 6 + (20 * Math.abs(Math.cos(gap)));
+
+        // 动画实现
+        stats.update();
+        requestAnimationFrame(renderScene);
+        render.render(scene,camera);
+    }
+
+    function addStats(){
+        var stats = new Stats();
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.left = '0px';
+        stats.domElement.style.top = '0px';
+        stats.setMode(0);
+
+        document.getElementById("myStats").appendChild(stats.domElement);
+        return stats;
+    }
+
+    window.addEventListener('resize',onWindowResize,false);
+
+    function onWindowResize(){
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        render.setSize(window.innerWidth,window.innerHeight);
+    }
+
+  </script>
+
+</body>
+
+</html>

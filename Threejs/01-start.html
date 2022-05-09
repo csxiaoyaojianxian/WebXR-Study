@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+</head>
+
+<body>
+
+<div id="webgl-output"></div>
+
+<script type="module">
+import {REVISION,Scene,PerspectiveCamera,WebGLRenderer,BoxGeometry,MeshBasicMaterial,Mesh} from "./libs/three.js/three.js";
+
+console.log("当前使用的three.js的版本号：",window.__THREE__);
+
+var scene = new Scene();
+var camera = new PerspectiveCamera(75,window.innerWidth / window.innerHeight,0.1,1000);
+
+var render = new WebGLRenderer();
+render.setSize(window.innerWidth,window.innerHeight);
+document.getElementById("webgl-output").appendChild(render.domElement);
+
+var geometry = new BoxGeometry();
+var material = new MeshBasicMaterial({color:0xff2288});
+var cube = new Mesh(geometry,material);
+scene.add(cube);
+
+camera.position.z = 5;
+
+cube.rotation.x += 0.80;
+cube.rotation.y += 0.80;
+
+render.render(scene,camera);
+
+</script>
+</body>
+
+</html>
