@@ -1,10 +1,3 @@
-<!--
- * @Author: victorsun
- * @Date: 2022-04-26 21:17:30
- * @LastEditors: victorsun
- * @LastEditTime: 2022-05-06 14:39:29
- * @Descripttion: 
--->
 # WebXR 学习笔记
 
 本项目是对 WebXR 学习时的部分笔记记录  
