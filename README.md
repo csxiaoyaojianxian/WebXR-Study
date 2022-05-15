@@ -14,4 +14,5 @@ https://immersive-web.github.io/webxr-samples/
 
 推荐阅读清单：
 
+https://threejs.org/docs/index.html
 https://blog.mozvr.com/a-saturday-night-gltf-workflow/

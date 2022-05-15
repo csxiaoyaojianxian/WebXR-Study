@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>3D Character</title>
+    <link href="styles/main.css" rel="stylesheet" />
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js"></script>
+    <!-- AR.js -->
+    <script src="https://raw.githack.com/AR-js-org/AR.js/3.1.0/aframe/build/aframe-ar.js"></script>
+  </head>
+  <body>
+    <div class="buttons">
+      <button class="switch-button">Next</button>
+    </div>
+
+    <!--
+      embedded
+      arjs
+      vr-mode-ui="enabled: false"
+    -->
+    <a-scene
+      renderer="antialias: auto;"
+      tune-renderer
+      embedded
+      arjs
+      vr-mode-ui="enabled: false"
+    >
+      <a-assets>
+        <a-asset-item id="bot_dance" src="models/multi.glb"></a-asset-item>
+      </a-assets>
+
+      <!-- a-marker 包裹，设置识别标记，如 hiro -->
+      <a-marker id="animated-marker" preset="hiro">
+
+        <!-- modify-materials 修改当前模型材质，一般不需要 -->
+        <a-entity
+          id="bot"
+          gltf-model="#bot_dance"
+          position="0 0.8 -1"
+          scale="1 1 1"
+          animation-mixer="clip: CatWalk"
+          modify-materials
+        ></a-entity>
+        <a-light type="ambient" color="#ffffff" intensity="1"></a-light>
+        <a-light
+          type="directional"
+          color="#ffffff"
+          position="0 400 350"
+          intensity="2"
+        ></a-light>
+        <a-camera></a-camera>
+      </a-marker>
+
+    </a-scene>
+    <script src="scripts/ar-main.js"></script>
+  </body>
+</html>

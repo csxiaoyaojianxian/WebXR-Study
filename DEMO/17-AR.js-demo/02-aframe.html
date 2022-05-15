@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>3D Character</title>
+    <link href="styles/main.css" rel="stylesheet" />
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.0/dist/aframe-extras.min.js"></script>
+    <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
+  </head>
+  <body>
+    <div class="buttons">
+      <button class="switch-button">Next</button>
+    </div>
+
+    <a-scene
+      renderer="antialias: auto;"
+      tune-renderer
+    >
+      <a-assets>
+        <a-asset-item id="bot_dance" src="models/multi.glb"></a-asset-item>
+      </a-assets>
+        <a-entity
+          id="bot"
+          gltf-model="#bot_dance"
+          position="0 1 -2.1"
+          scale="2 2 2"
+          animation-mixer="clip: CatWalk"
+        ></a-entity>
+        <a-entity
+          environment="preset: forest; groundColor: #445; groundTexture: checkerboard;"></a-entity>
+        <a-light type="ambient" color="#ffffff" intensity="1"></a-light>
+        <a-light
+          type="directional"
+          color="#ffffff"
+          position="0 400 350"
+          intensity="2"
+        ></a-light>
+        <a-camera fov="45" near="1" far="2000"></a-camera>
+    </a-scene>
+    <script src="scripts/aframe-main.js"></script>
+  </body>
+</html>
