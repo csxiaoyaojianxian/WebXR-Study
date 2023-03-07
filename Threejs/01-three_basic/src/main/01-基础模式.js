@@ -9,10 +9,10 @@ const scene = new THREE.Scene();
 
 // 2. 创建相机
 const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
+  75, // fov 摄像机视锥体垂直视野角度
+  window.innerWidth / window.innerHeight, // aspect 摄像机视锥体长宽比
+  0.1, // near 摄像机视锥体近端面
+  1000, // far 摄像机视锥体远端面
 );
 // 设置相机位置
 camera.position.set(0, 0, 10);

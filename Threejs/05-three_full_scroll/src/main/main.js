@@ -1,3 +1,6 @@
+/**
+ * 3D翻屏效果
+ */
 import * as THREE from "three";
 import gsap from "gsap";
 const scene = new THREE.Scene();
