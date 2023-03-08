@@ -18,21 +18,23 @@ const positions = new Float32Array(count * 3);
 const colors = new Float32Array(count * 3);
 // 设置顶点
 for (let i = 0; i < count * 3; i++) {
-  positions[i] = (Math.random() - 0.5) * 100;
+  positions[i] = (Math.random() - 0.5) * 100; // -50～50
   colors[i] = Math.random();
 }
 particlesGeometry.setAttribute(
   "position",
   new THREE.BufferAttribute(positions, 3)
 );
-particlesGeometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+particlesGeometry.setAttribute(
+  "color",
+  new THREE.BufferAttribute(colors, 3)
+);
 
 // 设置点材质
 const pointsMaterial = new THREE.PointsMaterial();
 pointsMaterial.size = 0.5;
 pointsMaterial.color.set(0xfff000);
-
-pointsMaterial.sizeAttenuation = true;
+pointsMaterial.sizeAttenuation = true; // 大小随相机深度而衰减
 const textureLoader = new THREE.TextureLoader();
 const texture = textureLoader.load("./textures/particles/zs2.png");
 pointsMaterial.map = texture;
@@ -42,7 +44,7 @@ pointsMaterial.depthWrite = false;
 pointsMaterial.blending = THREE.AdditiveBlending;
 // 设置启动顶点颜色
 pointsMaterial.vertexColors = true;
-
+// 创建点
 const points = new THREE.Points(particlesGeometry, pointsMaterial);
 scene.add(points);
 

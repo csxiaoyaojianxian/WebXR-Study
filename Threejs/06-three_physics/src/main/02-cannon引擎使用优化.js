@@ -58,7 +58,7 @@ world.addBody(sphereBody);
 // 物理世界创建地面
 const floorShape = new CANNON.Plane();
 const floorBody = new CANNON.Body();
-const floorMaterial = new CANNON.Material("floor");
+const floorMaterial = new CANNON.Material("floor"); // floor只是一个名字
 floorBody.material = floorMaterial;
 floorBody.mass = 0; // 当质量为0的时候，可以使得物体保持不动
 floorBody.addShape(floorShape);

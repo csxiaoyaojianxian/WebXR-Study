@@ -48,6 +48,23 @@ window.addEventListener("dblclick", () => {
   }
 });
 
+document.querySelector('h1').style.display = 'block';
+window.addEventListener("click", () => {
+  // 操作css
+  gsap.fromTo(
+    'body h1',
+    { x: -360, rotate: 0 },
+    { x: 0, rotate: "+=360", duration: 1 }
+  );
+
+  // fromTo 支持设置起始
+  gsap.fromTo(cube.position, {
+    x: -5,
+  }, {
+    x: 5,
+  });
+});
+
 function render() {
   renderer.render(scene, camera);
   requestAnimationFrame(render);

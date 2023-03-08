@@ -8,10 +8,15 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 camera.position.set(0, 0, 40);
 scene.add(camera);
 
+/**
+ * 创建1w个雪花
+ * @param {string} url 贴图名
+ * @param {number} size 尺寸
+ * @returns 
+ */
 function createPoints(url, size = 0.5) {
   const particlesGeometry = new THREE.BufferGeometry();
   const count = 10000;
-
   // 设置缓冲区数组
   const positions = new Float32Array(count * 3);
   // 设置粒子顶点颜色
@@ -31,7 +36,7 @@ function createPoints(url, size = 0.5) {
   const pointsMaterial = new THREE.PointsMaterial();
   pointsMaterial.size = size;
   pointsMaterial.color.set(0xfff000);
-  // 相机深度而衰减
+  // 大小随相机深度而衰减
   pointsMaterial.sizeAttenuation = true;
 
   // 载入纹理
@@ -52,6 +57,7 @@ function createPoints(url, size = 0.5) {
   return points;
 }
 
+// 创建3w个不同尺寸形状的雪花
 const points = createPoints("1", 0.5);
 const points2 = createPoints("xh", 0.3);
 const points3 = createPoints("xh", 1);
@@ -67,7 +73,7 @@ const clock = new THREE.Clock();
 function render() {
   let time = clock.getElapsedTime();
   // 设置旋转
-  points.rotation.x = time * 0.3;
+  points.rotation.x = time * 0.3; // 沿x轴旋转
   points.rotation.y = time * 0.1;
   points2.rotation.x = time * 0.5;
   points2.rotation.y = time * 0.2;

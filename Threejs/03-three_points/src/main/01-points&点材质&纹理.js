@@ -18,23 +18,24 @@ const material = new THREE.MeshBasicMaterial({
 const mesh = new THREE.Mesh(sphereGeometry, material);
 // scene.add(mesh);
 
-// 设置point点材质
+// 【重要】设置point点材质
 const pointsMaterial = new THREE.PointsMaterial();
 pointsMaterial.size = 0.1; // 点大小，默认1
 pointsMaterial.color.set(0xfff000);
-// 相机深度而衰减
+// 指定点的大小是否因相机深度而衰减，仅限透视摄像头，默认 true
 pointsMaterial.sizeAttenuation = true;
 
 // 载入纹理
 const textureLoader = new THREE.TextureLoader();
 const texture = textureLoader.load("./textures/particles/2.png");
 // 设置点材质纹理
-pointsMaterial.map = texture;
-pointsMaterial.alphaMap = texture;
-pointsMaterial.transparent = true; //【重要】
+pointsMaterial.map = texture; // 纹理贴图
+pointsMaterial.alphaMap = texture; // 透明度贴图
+pointsMaterial.transparent = true; //【重要】包含alpha通道
 pointsMaterial.depthWrite = false; // 默认后方遮挡的粒子不展示
 pointsMaterial.blending = THREE.AdditiveBlending; // 叠加算法，避免后面的点过亮
 
+// 创建粒子
 const points = new THREE.Points(sphereGeometry, pointsMaterial);
 scene.add(points);
 
