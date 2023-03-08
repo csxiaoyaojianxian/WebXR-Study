@@ -1,6 +1,7 @@
 /**
  * 将glsl代码抽取到文件
  * 注意安装 vscode shader 插件
+ * 注意：导入的glsl是字符串的形式
  */
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -16,8 +17,6 @@ camera.position.set(0, 0, 2);
 camera.aspect = window.innerWidth / window.innerHeight;
 camera.updateProjectionMatrix();
 scene.add(camera);
-const axesHelper = new THREE.AxesHelper(5);
-scene.add(axesHelper);
 
 // 创建着色器
 const shaderMaterial = new THREE.ShaderMaterial({
@@ -41,6 +40,8 @@ window.addEventListener("resize", () => {
   renderer.setPixelRatio(window.devicePixelRatio);
 });
 document.body.appendChild(renderer.domElement);
+const axesHelper = new THREE.AxesHelper(5);
+scene.add(axesHelper);
 const controls = new OrbitControls(camera, renderer.domElement);
 function animate(t) {
   requestAnimationFrame(animate);
