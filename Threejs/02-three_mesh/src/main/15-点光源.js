@@ -37,6 +37,7 @@ pointLight.castShadow = true;
 pointLight.shadow.radius = 20;
 // 设置阴影贴图的分辨率
 pointLight.shadow.mapSize.set(512, 512);
+// 随距离的衰减量
 pointLight.decay = 0;
 // 在发光体上绑定点光源
 smallBall.add(pointLight);
@@ -53,9 +54,11 @@ controls.enableDamping = true;
 const clock = new THREE.Clock();
 function render() {
   let time = clock.getElapsedTime(); // 获取自时钟启动后的秒数
-  smallBall.position.x = Math.sin(time) * 3;
-  smallBall.position.z = Math.cos(time) * 3;
+  // 控制发光体小球绕圈运动
+  smallBall.position.x = Math.sin(time) * 3; // x轴往返运动距离
+  smallBall.position.z = Math.cos(time) * 3; // z轴往返运动距离
   smallBall.position.y = 2 + Math.sin(time * 10) / 2;
+
   controls.update();
   renderer.render(scene, camera);
   requestAnimationFrame(render);

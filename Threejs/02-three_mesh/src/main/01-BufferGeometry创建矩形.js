@@ -1,5 +1,8 @@
 /**
  * BufferGeometry 通过缓冲区几何体6个顶点参数创建一个矩形
+ * 
+ * BufferGeometry 是面片、线或点几何体的有效表述。包括顶点位置，面片索引、法相量、颜色值、UV 坐标和自定义缓存属性值
+ * 使用 BufferGeometry 可以有效减少向 GPU 传输上述数据所需的开销
  */
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -13,10 +16,10 @@ scene.add(camera);
 一个矩形由两个三角形组成，包含6个顶点
 
 ***********
-* *       *
-*   *     *
-*     *   *
 *       * *
+*     *   *
+*   *     *
+* *       *
 ***********
 
 */
@@ -25,9 +28,11 @@ scene.add(camera);
 const geometry = new THREE.BufferGeometry();
 // 定义顶点，每三个为一组xyz，使用32位浮点数数组创建
 const vertices = new Float32Array([
+  // 右下三角形
   -1.0, -1.0, 1.0,
   1.0, -1.0, 1.0,
   1.0, 1.0, 1.0,
+  // 左上三角形
   1.0, 1.0, 1.0,
   -1.0, 1.0, 1.0,
   -1.0, -1.0, 1.0,

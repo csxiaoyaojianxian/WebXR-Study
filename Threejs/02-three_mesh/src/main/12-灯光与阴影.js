@@ -9,11 +9,11 @@ camera.position.set(0, 0, 10);
 scene.add(camera);
 
 // 阴影需要满足以下条件，缺一不可
-// 1. 材质要满足能够对光照有反应
-// 2. 设置渲染器开启阴影的计算 renderer.shadowMap.enabled = true;
-// 3. 设置光照投射阴影 directionalLight.castShadow = true;
-// 4. 设置物体投射阴影 sphere.castShadow = true;
-// 5. 设置物体接收阴影 plane.receiveShadow = true;
+// 1. [材质]要满足能够对光照有反应，如 MeshBasicMaterial 基础材质不受光照影响，推荐用 MeshStandardMaterial
+// 2. 设置[渲染器]开启阴影的计算 renderer.shadowMap.enabled = true;
+// 3. 设置[光照]投射阴影 directionalLight.castShadow = true;
+// 4. 设置[物体]投射阴影 sphere.castShadow = true;
+// 5. 设置[物体]接收阴影 plane.receiveShadow = true;
 
 // 创建球体
 const sphereGeometry = new THREE.SphereBufferGeometry(1, 20, 20);

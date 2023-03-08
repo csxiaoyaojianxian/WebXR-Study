@@ -47,6 +47,7 @@ const doorColorTexture = textureLoader.load(
   // onProgress,
   // onError
 );
+
 const doorAplhaTexture = textureLoader.load("./textures/door/alpha.jpg");
 const doorAoTexture = textureLoader.load("./textures/door/ambientOcclusion.jpg");
 const doorHeightTexture = textureLoader.load("./textures/door/height.jpg");
@@ -70,12 +71,11 @@ const material = new THREE.MeshStandardMaterial({
   metalnessMap: metalnessTexture,
   normalMap: normalTexture,
 });
-const light = new THREE.AmbientLight(0xffffff, 0.5); // soft white light
+const light = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(light);
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
 directionalLight.position.set(10, 10, 10);
 scene.add(directionalLight);
-
 const cube = new THREE.Mesh(cubeGeometry, material);
 scene.add(cube);
 cubeGeometry.setAttribute("uv2", new THREE.BufferAttribute(cubeGeometry.attributes.uv.array, 2));
@@ -84,7 +84,6 @@ const plane = new THREE.Mesh(planeGeometry, material);
 plane.position.set(1.5, 0, 0);
 scene.add(plane);
 planeGeometry.setAttribute("uv2", new THREE.BufferAttribute(planeGeometry.attributes.uv.array, 2));
-
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);

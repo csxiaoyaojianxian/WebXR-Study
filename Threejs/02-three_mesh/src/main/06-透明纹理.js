@@ -17,7 +17,7 @@ const cubeGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
 const basicMaterial = new THREE.MeshBasicMaterial({
   color: "#ffff00",
   map: doorColorTexture,
-  alphaMap: doorAplhaTexture,
+  alphaMap: doorAplhaTexture, // 透明贴图
   transparent: true, // 【重要】允许透明，否则透明材质不生效
   // opacity: 0.3,
   // side: THREE.DoubleSide, // 渲染面
@@ -27,7 +27,7 @@ basicMaterial.side = THREE.DoubleSide; // 渲染面
 // 添加平面
 const plane = new THREE.Mesh(
   new THREE.PlaneBufferGeometry(1, 1),
-  basicMaterial
+  basicMaterial,
 );
 plane.position.set(3, 0, 0);
 scene.add(plane);

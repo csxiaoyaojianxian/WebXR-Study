@@ -47,7 +47,7 @@ scene.add(spotLight);
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
-// 使用物理上正确的光照模式
+// 【重要】使用物理上正确的光照模式，更加真实
 renderer.physicallyCorrectLights = true;
 
 gui.add(sphere.position, "x").min(-5).max(5).step(0.1);

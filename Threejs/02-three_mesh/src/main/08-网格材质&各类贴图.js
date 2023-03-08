@@ -12,8 +12,8 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 camera.position.set(0, 0, 10);
 scene.add(camera);
 
-// 导入纹理
 const textureLoader = new THREE.TextureLoader();
+// 导入纹理贴图
 const doorColorTexture = textureLoader.load("./textures/door/color.jpg");
 // 导入透明度贴图
 const doorAplhaTexture = textureLoader.load("./textures/door/alpha.jpg");
@@ -28,13 +28,12 @@ const metalnessTexture = textureLoader.load("./textures/door/metalness.jpg");
 // 导入法线贴图，记录面的切线方向，rgb彩色表示xyz朝向
 const normalTexture = textureLoader.load("./textures/door/normal.jpg");
 
-// 添加物体
-const cubeGeometry = new THREE.BoxBufferGeometry(1, 1, 1, 100, 100, 100);
 // 材质
 const material = new THREE.MeshStandardMaterial({
   color: "#ffff00",
-  map: doorColorTexture,
   side: THREE.DoubleSide,
+  // 纹理贴图
+  map: doorColorTexture,
   // 透明度贴图
   transparent: true,
   alphaMap: doorAplhaTexture,
@@ -62,14 +61,16 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
 directionalLight.position.set(10, 10, 10);
 scene.add(directionalLight);
 
+const cubeGeometry = new THREE.BoxBufferGeometry(1, 1, 1, 100, 100, 100);
+cubeGeometry.setAttribute("uv2", new THREE.BufferAttribute(cubeGeometry.attributes.uv.array, 2));
 const cube = new THREE.Mesh(cubeGeometry, material);
 scene.add(cube);
-cubeGeometry.setAttribute("uv2", new THREE.BufferAttribute(cubeGeometry.attributes.uv.array, 2));
+
 const planeGeometry = new THREE.PlaneBufferGeometry(1, 1, 200, 200);
+planeGeometry.setAttribute("uv2", new THREE.BufferAttribute(planeGeometry.attributes.uv.array, 2));
 const plane = new THREE.Mesh(planeGeometry, material);
 plane.position.set(1.5, 0, 0);
 scene.add(plane);
-planeGeometry.setAttribute("uv2", new THREE.BufferAttribute(planeGeometry.attributes.uv.array, 2));
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);

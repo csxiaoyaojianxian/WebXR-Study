@@ -15,7 +15,7 @@ for (let i = 0; i < 50; i++) {
   // 每一个三角形，需要3个顶点，每个顶点需要3个值
   const positionArray = new Float32Array(9);
   for (let j = 0; j < 9; j++) {
-    // 随机 0-5 
+    // 随机9个值 [0-5]
     positionArray[j] = Math.random() * 10 - 5;
   }
   geometry.setAttribute(
@@ -23,7 +23,7 @@ for (let i = 0; i < 50; i++) {
     new THREE.BufferAttribute(positionArray, 3)
   );
   // 生成随机颜色 rgb
-  let color = new THREE.Color(Math.random(), Math.random(), Math.random());
+  let color = new THREE.Color(Math.random(), Math.random(), Math.random()); // RGB values between 0 and 1
   const material = new THREE.MeshBasicMaterial({
     color: color,
     transparent: true,

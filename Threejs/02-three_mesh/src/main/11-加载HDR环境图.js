@@ -10,6 +10,7 @@ const rgbeLoader = new RGBELoader();
 rgbeLoader.loadAsync("textures/hdr/002.hdr").then((texture) => {
   // 指明贴图方式
   texture.mapping = THREE.EquirectangularReflectionMapping;
+  // 修改场景
   scene.background = texture;
   scene.environment = texture;
 });
@@ -23,7 +24,7 @@ const sphereGeometry = new THREE.SphereBufferGeometry(1, 20, 20);
 const material = new THREE.MeshStandardMaterial({
   metalness: 0.7,
   roughness: 0.1,
-  // envMap: envMapTexture,
+  // envMap: envMapTexture, // 此处物体不再需要设置贴图，直接被 scene.environment 影响
 });
 const sphere = new THREE.Mesh(sphereGeometry, material);
 scene.add(sphere);

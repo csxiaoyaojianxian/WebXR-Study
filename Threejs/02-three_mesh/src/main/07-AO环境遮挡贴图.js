@@ -1,5 +1,6 @@
 /**
  * AO环境遮挡贴图
+ * 用于遮挡环境光,白色为不遮挡,黑色为全遮挡
  */
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -15,8 +16,6 @@ const doorAplhaTexture = textureLoader.load("./textures/door/alpha.jpg");
 // AO环境遮挡贴图，环境光黑色遮挡，白色穿透
 const doorAoTexture = textureLoader.load("./textures/door/ambientOcclusion.jpg");
 
-// 添加物体
-const cubeGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
 // 材质
 const basicMaterial = new THREE.MeshBasicMaterial({
   color: "#ffff00",
@@ -28,20 +27,17 @@ const basicMaterial = new THREE.MeshBasicMaterial({
   side: THREE.DoubleSide,
 });
 
-// 给cube添加第二组uv
+const cubeGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
+// 【重要】在 new THREE.Mesh 前给几何体添加第二组uv
 cubeGeometry.setAttribute(
   "uv2",
-  // 将原来的几何体自带的uv复制过来，按照 vector2 解析
+  // 将原来的几何体自带的uv复制过来，按照 vector2 解析，BufferAttribute用于存储属性值
   new THREE.BufferAttribute(cubeGeometry.attributes.uv.array, 2)
 );
 
-// 添加平面
 const planeGeometry = new THREE.PlaneBufferGeometry(1, 1);
-
-// 给平面设置第二组uv
-planeGeometry.setAttribute(
+planeGeometry.setAttribute( // 同上，给平面设置第二组uv
   "uv2",
-  // 将原来的几何体自带的uv复制过来，按照 vector2 解析
   new THREE.BufferAttribute(planeGeometry.attributes.uv.array, 2)
 );
 

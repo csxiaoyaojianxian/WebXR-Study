@@ -12,7 +12,7 @@ scene.add(camera);
 const textureLoader = new THREE.TextureLoader();
 const texture = textureLoader.load("./textures/minecraft.png");
 
-// 设置当一个纹素覆盖小于一个像素时，贴图的采样方式
+// 设置当一个纹素覆盖小于一个像素时，贴图的采样方式 LinearFilter / NearestFilter
 texture.minFilter = THREE.LinearFilter; // 默认值，返回距离指定的纹理坐标最近的四个纹理元素的加权平均值
 texture.magFilter = THREE.LinearFilter;
 // texture.minFilter = THREE.NearestFilter; // 返回与指定纹理坐标最接近的纹理元素的值
@@ -23,10 +23,8 @@ const basicMaterial = new THREE.MeshBasicMaterial({
   color: "#ffff00",
   map: texture,
 });
-
 const cube = new THREE.Mesh(cubeGeometry, basicMaterial);
 scene.add(cube);
-
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);

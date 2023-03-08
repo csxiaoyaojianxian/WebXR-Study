@@ -18,6 +18,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 
+// 和时间关联后形成连续动画
 function render(time) { // time 当前毫秒时间戳
   // s=vt 路程=速度x时间
   let t = (time / 1000) % 5; // 当前时间秒数
