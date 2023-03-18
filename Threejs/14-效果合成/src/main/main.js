@@ -219,6 +219,7 @@ function animate(t) {
   requestAnimationFrame(animate);
 
   const time = clock.getElapsedTime();
+  // 更新shader中的time，用于水波纹动画
   techPass.material.uniforms.uTime.value = time;
   // 不再使用webgl渲染器，使用合成效果渲染器
   // renderer.render(scene, camera);

@@ -194,7 +194,7 @@ https://www.poliigon.com/
 
 ## 17. 形变动画
 
-如做出开花效果，先导出多个顶点个数相同的glb模型(后续变形模型仅需顶点数据)，再使用three的形变动画，设置原物体的变形顶点数据 morphAttributes，然后调用 updateMorphTargets 更新，最后使用gasp动画设置影响程度参数(morphTargetInfluences)从0到1
+如做出开花效果，先导出多个顶点个数相同的glb模型(后续变形模型仅需顶点数据)，再使用three的形变动画，设置原物体的变形顶点数据 morphAttributes，然后调用 updateMorphTargets 更新，最后使用gsap动画设置影响程度参数(morphTargetInfluences)从0到1
 
 ## 18. 模型优化
 

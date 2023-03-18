@@ -154,7 +154,7 @@ window.addEventListener("scroll", () => {
         console.log("旋转完成");
       },
     });
-    // gasp操作css，文本进入旋转
+    // gsap操作css，文本进入旋转
     gsap.fromTo(
       `.page${currentPage} h1`,
       { x: -360, rotate: 0 },
