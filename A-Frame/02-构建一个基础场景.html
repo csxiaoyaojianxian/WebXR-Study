@@ -16,6 +16,8 @@
 
 <a-scene> 是场景容器，用来包含所有实体，会自动处理所有3D所需要的设置：建立WebGL上下文，画布，相机，光照，渲染器
 
+指定视觉检查器
+inspector="url: https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js"
 -->
 
 <script>
@@ -49,7 +51,7 @@ AFRAME.registerComponent('scale-on-mouseenter', {
 });
 </script>
 
-<a-scene log="Scene1 加载完毕!" stats>
+<a-scene log="Scene1 加载完毕!" stats inspector="url: https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js">
   <!-- 资源管理系统 -->
   <a-assets>
     <img id="boxTexture" src="./assets/material.jpg">
