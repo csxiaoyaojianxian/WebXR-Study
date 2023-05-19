@@ -13,6 +13,8 @@ https://immersive-web.github.io/webxr-samples/
 
 **其他**
 
+https://gltf.report/
+
 https://blog.mozvr.com/a-saturday-night-gltf-workflow/
 
 一些资源，如手模型等
