@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>03 - camera</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+}
+.webgl {
+  position: fixed;
+  top: 0;
+  left: 0;
+  outline: none;
+}
+html, body {
+  overflow: hidden;
+}
+</style>
+</head>
+<body>
+<canvas class="webgl"></canvas>
+<script src="//cdn.bootcdn.net/ajax/libs/three.js/0.151.3/three.min.js"></script>
+<script>
+const scene = new THREE.Scene()
+const geometry = new THREE.BoxGeometry(1, 1, 1)
+const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
+const mesh = new THREE.Mesh(geometry, material)
+scene.add(mesh)
+const sizes = {
+  width: window.innerWidth,
+  height: window.innerHeight
+}
+
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height)
+camera.position.z = 3
+scene.add(camera)
+
+const canvas = document.querySelector('canvas.webgl')
+const renderer = new THREE.WebGLRenderer({
+  canvas
+})
+renderer.setSize(sizes.width, sizes.height)
+renderer.render(scene, camera)
+
+
+window.addEventListener('resize', () => {
+  console.log('window has been resized')
+
+  sizes.width = window.innerWidth
+  sizes.height = window.innerHeight
+
+  camera.aspect = sizes.width / sizes.height
+  camera.updateProjectionMatrix()
+
+  // Update renderer
+  renderer.setSize(sizes.width, sizes.height)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+})
+
+window.addEventListener('dblclick', () => {
+  const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement
+  if (!fullscreenElement) {
+    if (canvas.requestFullscreen) {
+      canvas.requestFullscreen()
+    } else if (canvas.webkitRequestFullscreen) {
+      canvas.webkitRequestFullscreen()
+    }
+  } else {
+    if(document.exitFullscreen) {
+      document.exitFullscreen()
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen()
+    }
+  }
+})
+
+// Cursor
+const cursor = { x: 0, y: 0 }
+window.addEventListener('mousemove', (event) => {
+  // [-0.5, 0.5]
+  cursor.x = event.clientX / sizes.width - 0.5
+  cursor.y = - (event.clientY / sizes.height - 0.5)
+  console.log(cursor.x, cursor.y)
+})
+
+const tick = () => {
+
+  /**
+   * 相机跟随鼠标
+   */
+  // camera.position.x = cursor.x * 5 // 增加振幅
+  // camera.position.y = cursor.y * 5
+
+  /**
+   * 相机跟随鼠标围绕圆圈进行完整旋转
+   */
+  camera.position.x = Math.sin(cursor.x * Math.PI * 2) * 2
+  camera.position.z = Math.cos(cursor.x * Math.PI * 2) * 2
+  camera.position.y = cursor.y * 3
+  camera.lookAt(mesh.position)
+
+  renderer.render(scene, camera)
+  window.requestAnimationFrame(tick)
+
+  
+}
+
+/**
+ * 内置控件
+ */
+// DeviceOrientationControls 设备方向控件
+// 自动检索设备方向并相应地旋转相机
+
+// FlyControls 飞控
+// 像在宇宙飞船上一样移动相机，在所有 3 个轴上旋转，前进和后退
+
+// FirstPersonControls 第一人称控制
+
+// PointerLockControls 指针锁定控件，FPS游戏，鼠标居中，必须自己处理摄像机位置和游戏物理
+
+// OrbitControls 轨道控制，可以使用鼠标左键围绕一个点旋转，使用鼠标右键横向平移，并使用滚轮放大或缩小
+
+// TrackballControls 轨迹球控件，类似 OrbitControls，但在垂直角度方面没有限制
+
+// TransformControls 变换控件
+
+// DragControls 拖动控件
+// const controls = new OrbitControls(camera, canvas)
+// controls.target.y = 2
+
+tick()
+</script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>RC Time Trial - a 3d racing game</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<meta name="description" content="RC Time Trial is a racing 3d game. Using the Three.js library. author:Nik Lever ©2018 category:application-javascript" />
+		<meta property="og:url" content="http://niklever.com/games/rctimetrial" />
+		<meta property="og:type" content="product" />
+		<meta property="og:title" content="RC Time Trial - a 3d racing game" />
+		<meta property="og:description" content="RC Ttime Trial is a 3d racing game. Using the Three.js library. author:Nik Lever ©2018 category:application-javascript" />
+		<meta property="og:image" content="http://niklever.com/games/rctimetrial/assets/rctimetrial-og.jpg" />
+		<meta property="og:image:secure_url" content="https://niklever.com/games/skyblade/assets/rctimetrial-og.jpg" />
+		<meta property="og:image:type" content="image/jpeg" />
+		<meta property="og:image:width" content="1254" />
+		<meta property="og:image:height" content="698" />
+		<meta property="og:image:alt" content="RC Time Trial - a 3d racing game" />
+		<meta property='og:video' content='https://youtu.be/mjQqqEUPBko' />
+		<link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans|Kavivanar" rel="stylesheet">
+		<style>
+            @font-face {
+                font-family: "usuzi";
+                src: url("USUZI.woff") format('woff');
+            }
+			body {
+				font-family: Monospace;
+				background-color: #000;
+				color: #fff;
+				margin: 0px;
+				overflow: hidden;
+			}
+            
+            button{
+                font-family: "usuzi";
+                background: url(../assets/images/button.png);
+                width: 181px;
+                height: 43px;
+                border: none;
+                color: #888;
+                text-decoration: none;
+                font-size: 20px;
+            }
+            
+            button:hover{
+                color:#fff;
+            }
+			
+			#reset-btn{
+                display: none;
+				position: absolute;
+				left: 15px;
+				bottom: 15px;
+				width: 40px;
+				height: 40px;
+				border: none;
+				border-radius: 50%;
+				background:#3B53A2;
+				font-size: 25px;
+				color: #fff;
+				padding: 0;
+			}
+			
+			#logo{
+				position: absolute;
+				left: 15px;
+				top: 15px;
+			}
+            
+            #car-parts{
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                width: 343px;
+                height: 220px;
+                transform: translateX(-50%) translateY(-50%);
+            }
+            
+            #car-parts img{
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+            
+            #part-select{
+                position: absolute;
+				right: 0px;
+                padding: 15px;
+                width: 181px;
+            }
+            
+            #play-btn{
+                position: absolute;
+                bottom: 50px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            #message{
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translateX(-50%) translateY(120px);
+                width: 300px;
+                font-family: "usuzi";
+                color: #fff;
+                font-size: 16px;
+                text-align: center;
+            }
+			
+			@media only screen and (max-width: 720px) { 
+				#part-select {
+					display: flex;
+					flex-wrap: wrap;
+					width: calc(100% - 30px);
+					justify-content: center;
+				}
+				
+				#part-select button{
+					width: calc(50% - 4px);
+					max-width: 181px;
+					margin: 0 auto 0 auto;
+					padding: 2px 2px;
+					background-size: calc(100% + 2px) 43px;
+					background-repeat: no-repeat;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="logo"><img src="../assets/images/logo.png"></div>
+        <div id="part-select">
+            <button>Body</button>
+            <button>Aerial</button>
+            <button>Engine</button>
+            <button>Exhaust</button>
+            <button>Wheels</button>
+        </div>
+        <div id="car-parts">
+            <img src="../assets/images/carparts0001.png">
+            <img src="../assets/images/carparts0000.png">
+            <img src="../assets/images/carparts0000.png">
+            <img src="../assets/images/carparts0000.png">
+            <img src="../assets/images/carparts0000.png">
+            <img src="../assets/images/carparts0000.png">
+        </div>
+        <div id="message">Press the buttons above to customise your car.</div>
+        <button id="play-btn">PLAY</button>
+        
+		<button id="reset-btn"><i class="fas fa-car"></i></button>
+		
+		<script src="../../libs/three.min.js"></script>
+		<script src="../../libs/inflate.min.js"></script>
+		<script src="../../libs/FBXLoader.js"></script>
+		<script src="../../libs/OrbitControls.js"></script>
+		<script src="../../libs/Detector.js"></script>
+		<script src="../../libs/stats.min.js"></script>
+		<script src="../../libs/cannon.min.js"></script>
+		<script src="../../libs/CannonDebugRenderer.js"></script>
+		<script src="game.js"></script>
+		<script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js" integrity="sha384-xymdQtn1n3lH2wcu0qhcdaOpQwyoarkgLVxC/wZ5q7h9gHtxICrpcaSUfygqZGOe" crossorigin="anonymous"></script>
+	
+		<script>
+			document.addEventListener("DOMContentLoaded", function(){
+				const game = new Game();
+				window.game = game;//For debugging only
+			});
+		</script>
+	</body>
+</html>
+
+
