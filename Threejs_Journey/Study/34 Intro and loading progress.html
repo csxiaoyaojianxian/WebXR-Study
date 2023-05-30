@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<section class="text js-text">
+    <h2>Introduction</h2>
+<p>Until now, all we had was a WebGL canvas on our page with things showing up once they are ready.</p>
+<p>In this lesson, we will learn how to add a very simple loader composed of a bar that fills while the assets are loading. The whole scene will be black and only show once everything is loaded with a nice fade.</p>
+<p>For the loader, we will use HTML and CSS. That is an excellent opportunity to see how to combine HTML with WebGL.</p>
+<h2>Setup</h2>
+<p>Our starter contains what we did in the Realistic Render lesson with the Flight Helmet.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/step-01.png" src="./assets/lessons/34/step-01.png" width="1792" height="1120" alt="./assets/lessons/34/step-01.png" class="is-loaded"></span></p>
+<h2>Overlay</h2>
+<p>First, we need a way to fade the scene. There are many ways of doing so. We could animate the <code spellcheck="false">&lt;canvas&gt;</code>'s CSS <code spellcheck="false">opacity</code>. We could also put a black  <code spellcheck="false">&lt;div&gt;</code> above the <code spellcheck="false">&lt;canvas&gt;</code> and animate its CSS <code spellcheck="false">opacity</code>. But instead, we are going to keep things inside the WebGL and draw a black rectangle that covers the whole render and fade it out when we need it.</p>
+<p>The problem is: how do we draw a rectangle in front of the camera. With the knowledge we have now, we could create a plane and put it right inside of the <code spellcheck="false">camera</code> instead of the <code spellcheck="false">scene</code>, it should work fine because <code spellcheck="false">camera</code> inherit from <code spellcheck="false">Object3D</code>, but it looks a bit patched up.</p>
+<p>Instead, we will draw a plane that doesn't follow the rules of position, perspective, and projection so that it just get drawn in front of the view. Don't worry; it's easier than what you might think.</p>
+<h3>Base plane</h3>
+<p>First, we are going to start from a classic plane.</p>
+<p>Create a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/geometries/PlaneGeometry">PlaneGeometry</a>, a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a> and a <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a>. Then add it all to the scene:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Overlay
+*/</span>
+<span class="token keyword">const</span> overlayGeometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PlaneGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> overlayMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> color<span class="token operator">:</span> <span class="token number">0xff0000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> overlay <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>overlayGeometry<span class="token punctuation">,</span> overlayMaterial<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>overlay<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/step-02.png" src="./assets/lessons/34/step-02.png" width="1792" height="1120" alt="./assets/lessons/34/step-02.png" class="is-loaded"></span></p>
+<p>The plane should be visible from the other side of the helmet.</p>
+<h3>Fill the render</h3>
+<p>We now want this plane to be always in front of the camera. We want it to fill the render regardless of the camera position. To do that, we are going to use a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a>.</p>
+<p>Replace the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a> by a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a> and write the default shaders that we have learned previously with the <code spellcheck="false">vertexShader</code> property and the <code spellcheck="false">fragmentShader</code> property. You can try to do this from memory but don't be frustrated if you can't. It takes time:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> overlayMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+void main()
+{
+gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+void main()
+{
+gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+}
+</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/step-03.png" src="./assets/lessons/34/step-03.png" width="1792" height="1120" alt="./assets/lessons/34/step-03.png" class="is-loaded"></span></p>
+<p>You should get the same result, but this time, we have control over the shaders.</p>
+<p>To make the plane fill the render, we need to <strong>not</strong> apply the matrices:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> overlayMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+void main()
+{
+gl_Position = vec4(position, 1.0);
+}
+</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+void main()
+{
+gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+}
+</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/step-04.png" src="./assets/lessons/34/step-04.png" width="1792" height="1120" alt="./assets/lessons/34/step-04.png" class="is-loaded"></span></p>
+<p>Now you get a big rectangle in the middle. Neither its position, the camera position, the field of view or anything else transform it because none of the matrices are used.</p>
+<p>The coordinates of the plane's vertices go from <code spellcheck="false">-0.5</code> to <code spellcheck="false">+0.5</code> because our plane has a size of <code spellcheck="false">1</code>.</p>
+<p>The vertex shader, stripped like that, draws the triangles on the screen in the specified coordinates without considering anything else. We can see these triangles by setting the <code spellcheck="false">wireframe</code> property to <code spellcheck="false">true</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> overlayMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+wireframe<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/step-05.png" src="./assets/lessons/34/step-05.png" width="1792" height="1120" alt="./assets/lessons/34/step-05.png" class="is-loaded"></span></p>
+<p>Comment or remove the <code spellcheck="false">wireframe</code>.</p>
+<p>To get a bigger rectangle, we need the coordinates to go from <code spellcheck="false">-1</code> to <code spellcheck="false">+1</code>. To do that, double the size of the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/geometries/PlaneGeometry">PlaneGeometry</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> overlayGeometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PlaneGeometry</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/step-06.png" src="./assets/lessons/34/step-06.png" width="1792" height="1120" alt="./assets/lessons/34/step-06.png" class="is-loaded"></span></p>
+<p>The rectangle is now filling the whole render.</p>
+<h3>Color and alpha</h3>
+<p>Let's say instead of this red color, we want black.</p>
+<p>Change the <code spellcheck="false">gl_FragColor</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> overlayMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+fragmentShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+void main()
+{
+gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+}
+</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/step-07.png" src="./assets/lessons/34/step-07.png" width="1792" height="1120" alt="./assets/lessons/34/step-07.png" class="is-loaded"></span></p>
+<p>Everything appears to be black.</p>
+<p>Now, we want to be able to control the alpha. As you know, the fourth value of the <code spellcheck="false">gl_FragColor</code>.</p>
+<p>Set this fourth parameter to <code spellcheck="false">0.5</code> to see if it's working:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> overlayMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+fragmentShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+void main()
+{
+gl_FragColor = vec4(0.0, 0.0, 0.0, 0.5);
+}
+</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/step-08.png" src="./assets/lessons/34/step-08.png" width="1792" height="1120" alt="./assets/lessons/34/step-08.png" class="is-loaded"></span></p>
+<p>Unfortunately, everything is still fully black, and it's because we forgot an easy to forget a thing. We need to set the <code spellcheck="false">transparent</code> property to <code spellcheck="false">true</code> on our <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> overlayMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+transparent<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/step-09.png" src="./assets/lessons/34/step-09.png" width="1792" height="1120" alt="./assets/lessons/34/step-09.png" class="is-loaded"></span></p>
+<p>The whole scene should look darker.</p>
+<h3>Uniform</h3>
+<p>Now that we have our overlay set, we need a way to control the alpha value. We are going to use a uniform.</p>
+<p>Add a <code spellcheck="false">uAlpha</code> uniform as we did before:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> overlayMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+uAlpha<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then use it in the <code spellcheck="false">fragmentShader</code> instead of the raw <code spellcheck="false">0.5</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> overlayMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+fragmentShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+uniform float uAlpha;
+
+void main()
+{
+gl_FragColor = vec4(0.0, 0.0, 0.0, uAlpha);
+}
+</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/step-10.png" src="./assets/lessons/34/step-10.png" width="1792" height="1120" alt="./assets/lessons/34/step-10.png" class="is-loaded"></span></p>
+<p>You should get the same result, but we can control the alpha directly from the JavaScript with the <code spellcheck="false">uAlpha</code> uniform this time.</p>
+<p>Let's change the value of that uniform to <code spellcheck="false">1</code> to start with an entirely black screen.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> overlayMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+uAlpha<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h3>Loading</h3>
+<p>Now that we have our overlay ready to be animated, we want to know when everything is loaded.</p>
+<p>While there is only one model in the scene, we are genuinely loading many assets. We are loading the 6 images that compose the environment map, the model's geometries, and all the textures used in the model.</p>
+<p>To load these assets, we used a <a target="_blank" href="https://threejs.org/docs/#examples/en/loaders/GLTFLoader">GLTFLoader</a> and a <a target="_blank" href="https://threejs.org/docs/#api/en/loaders/CubeTextureLoader">CubeTextureLoader</a>. Both can receive a <a target="_blank" href="https://threejs.org/docs/#api/en/loaders/managers/LoadingManager">LoadingManager</a> as parameter. That <a target="_blank" href="https://threejs.org/docs/#api/en/loaders/managers/LoadingManager">LoadingManager</a> —as we saw at the beginning of the course— can be used to stay informed of the global loading progress.</p>
+<p>Instantiate a <a target="_blank" href="https://threejs.org/docs/#api/en/loaders/managers/LoadingManager">LoadingManager</a> and use it in the <a target="_blank" href="https://threejs.org/docs/#examples/en/loaders/GLTFLoader">GLTFLoader</a> and <a target="_blank" href="https://threejs.org/docs/#api/en/loaders/CubeTextureLoader">CubeTextureLoader</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Loaders
+*/</span>
+<span class="token keyword">const</span> loadingManager <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>LoadingManager</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> gltfLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">GLTFLoader</span><span class="token punctuation">(</span>loadingManager<span class="token punctuation">)</span>
+<span class="token keyword">const</span> cubeTextureLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>CubeTextureLoader</span><span class="token punctuation">(</span>loadingManager<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Nothing should have changed, but we can now send two functions to the <a target="_blank" href="https://threejs.org/docs/#api/en/loaders/managers/LoadingManager">LoadingManager</a>.</p>
+<p>The first one will be triggered when everything is loaded, and the second one will be trigger when the loading progress.</p>
+<p>Add these two functions with the following parameters:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> loadingManager <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>LoadingManager</span><span class="token punctuation">(</span>
+<span class="token comment">// Loaded</span>
+<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'loaded'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+<span class="token comment">// Progress</span>
+<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'progress'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You should get multiple <code spellcheck="false">"progress"</code> in the logs and one <code spellcheck="false">"loaded"</code> at the end.</p>
+<p>The progress function will be helpful later. For now, all we need is the loaded function.</p>
+<h3>Animate</h3>
+<p>To fade out the overlay, we need a way to animate the <code spellcheck="false">uAlpha</code> uniform value. While this is a little far-fetched, just for that, we will use the GSAP library as we did at the beginning of the course.</p>
+<p>First, in the terminal, install the <code spellcheck="false">gsap</code> library with <code spellcheck="false">npm install --save gsap@3.5.1</code> —relaunch the server if you stopped it.</p>
+<p>Now that we have <code spellcheck="false">gsap</code> in the dependencies, we can import it:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token punctuation">{</span> gsap <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'gsap'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Finally, we can use it to animate the <code spellcheck="false">uAlpha</code> uniform value in the loaded function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> loadingManager <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>LoadingManager</span><span class="token punctuation">(</span>
+<span class="token comment">// Loaded</span>
+<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+gsap<span class="token punctuation">.</span><span class="token function">to</span><span class="token punctuation">(</span>overlayMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uAlpha<span class="token punctuation">,</span> <span class="token punctuation">{</span> duration<span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span> value<span class="token operator">:</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/34/step-11.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The overlay should fade out nicely once everything is loaded.</p>
+<h2>Loading bar</h2>
+<p>The assets are quite heavy, and the whole project weighs around 50MB. The model could use some optimizations, but this is not the subject of the lesson. It's the perfect opportunity to see the assets loading with a nice loading bar.</p>
+<h3>Simulating a normal bandwidth</h3>
+<p>The problem is that we are testing in local, and everything loads remarkably fast. If you are using Chrome, you can simulate a slower bandwidth.</p>
+<p>The following instructions concern Chrome, but all those features are available in Firefox too.</p>
+<p>In the <strong>Developer Tools</strong> panel, go to the <strong>Network</strong> tab.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/network-throttle-01.png" src="./assets/lessons/34/network-throttle-01.png" width="145" height="86" alt="./assets/lessons/34/network-throttle-01.png" class="is-loaded"></span></p>
+<p>First, check the <strong>Disable cache</strong>.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/network-throttle-02.png" src="./assets/lessons/34/network-throttle-02.png" width="180" height="54" alt="./assets/lessons/34/network-throttle-02.png" class="is-loaded"></span></p>
+<p>This will force the assets to load without cache like if it was the first time you visite the website.</p>
+<p>Then, we need a way to throttle the bandwidth. To do that, click on the dropdown menu with the <strong>Online</strong> value.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/network-throttle-03.png" src="./assets/lessons/34/network-throttle-03.png" width="289" height="88" alt="./assets/lessons/34/network-throttle-03.png" class="is-loaded"></span></p>
+<p>Here, we can choose various throttle values. Unfortunately, the available options don't fit the project.</p>
+<p>To add a custom value, click on <strong>Add</strong>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/network-throttle-04.png" src="./assets/lessons/34/network-throttle-04.png" width="227" height="104" alt="./assets/lessons/34/network-throttle-04.png" class="is-loaded"></span></p>
+<p>In the panel that should open, click on <strong>Add custom profile...</strong>, choose a name like "Pretty fast" and set the <strong>Download</strong> value to <code spellcheck="false">100000</code>.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/network-throttle-05.png" src="./assets/lessons/34/network-throttle-05.png" width="655" height="278" alt="./assets/lessons/34/network-throttle-05.png" class="is-loaded"></span></p>
+<p>The meaning of this value isn't that important as long as we have time to see the assets loading. For a typical project, you should create a lower value that simulates an ADSL connexion.</p>
+<p>Save it, close the panel, and choose this value in the dropdown menu.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/network-throttle-06.png" src="./assets/lessons/34/network-throttle-06.png" width="211" height="235" alt="./assets/lessons/34/network-throttle-06.png" class="is-loaded"></span></p>
+<p>The network now simulates a pretty fast bandwidth.</p>
+<p>If you reload, you'll see that you now have to wait for something like 3 seconds before the overlay fade out.</p>
+<h3>Create the HTML loading bar</h3>
+<p>Now that we can test the loading progress, it's time to add the loading bar. This time, for the sake of the lesson, we will add this bar in HTML but we could have create a new plane with a shader animating it like we did for the overlay.</p>
+<p>Open the <code spellcheck="false">/src/index.html</code> file and add a <code spellcheck="false">&lt;div&gt;</code> with a <code spellcheck="false">loading-bar</code> class right after the <code spellcheck="false">&lt;canvas&gt;</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-html"><code spellcheck="false" class=" language-html"><span class="token comment">&lt;!-- ... --&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canvas</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>webgl<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canvas</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>loading-bar<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>html</span><span class="token punctuation">&gt;</span></span></code></pre><div class="toolbar"><div class="toolbar-item"><span>HTML</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, in the <code spellcheck="false">/src/style.css</code> file, position the bar, so it fits the whole width in the middle of the screen:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-css"><code spellcheck="false" class=" language-css"><span class="token selector">.loading-bar</span>
+<span class="token punctuation">{</span>
+<span class="token property">position</span><span class="token punctuation">:</span> absolute<span class="token punctuation">;</span>
+<span class="token property">top</span><span class="token punctuation">:</span> 50%<span class="token punctuation">;</span>
+<span class="token property">width</span><span class="token punctuation">:</span> 100%<span class="token punctuation">;</span>
+<span class="token property">height</span><span class="token punctuation">:</span> 2px<span class="token punctuation">;</span>
+<span class="token property">background</span><span class="token punctuation">:</span> #ffffff<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>CSS</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/step-12.png" src="./assets/lessons/34/step-12.png" width="1792" height="1120" alt="./assets/lessons/34/step-12.png" class="is-loaded"></span></p>
+<p>That is classic CSS and we won't explain it.</p>
+<p>We want the bar to fill from the left. To do that, we are going to scale it using the <code spellcheck="false">transform</code> CSS property.</p>
+<p>Set a <code spellcheck="false">transform</code> property with a <code spellcheck="false">scaleX</code>, and a value of <code spellcheck="false">0.3</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token punctuation">.</span>loading<span class="token operator">-</span>bar
+<span class="token punctuation">{</span>
+<span class="token comment">/* ... */</span>
+transform<span class="token operator">:</span> <span class="token function">scaleX</span><span class="token punctuation">(</span><span class="token number">0.3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/step-13.png" src="./assets/lessons/34/step-13.png" width="1792" height="1120" alt="./assets/lessons/34/step-13.png" class="is-loaded"></span></p>
+<p>The scale worked; sadly, the bar seems to scale in its middle. To change that, use the <code spellcheck="false">transform-origin</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token punctuation">.</span>loading<span class="token operator">-</span>bar
+<span class="token punctuation">{</span>
+<span class="token comment">/* ... */</span>
+transform<span class="token operator">:</span> <span class="token function">scaleX</span><span class="token punctuation">(</span><span class="token number">0.3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+transform<span class="token operator">-</span>origin<span class="token operator">:</span> top left<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/34/step-14.png" src="./assets/lessons/34/step-14.png" width="1792" height="1120" alt="./assets/lessons/34/step-14.png" class="is-loaded"></span></p>
+<p>The bar should stay on the left.</p>
+<p>Finally, set the <code spellcheck="false">scaleX</code> value to <code spellcheck="false">0</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token punctuation">.</span>loading<span class="token operator">-</span>bar
+<span class="token punctuation">{</span>
+<span class="token comment">/* ... */</span>
+transform<span class="token operator">:</span> <span class="token function">scaleX</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+transform<span class="token operator">-</span>origin<span class="token operator">:</span> top left<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h3>Update the bar</h3>
+<p>Now that we have the bar let's get back to the <code spellcheck="false">/src/script.js</code> and animate it when the loading progress.</p>
+<p>To know when the loading progress, we can use the second function we sent to the <a target="_blank" href="https://threejs.org/docs/#api/en/loaders/managers/LoadingManager">LoadingManager</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> loadingManager <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>LoadingManager</span><span class="token punctuation">(</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Progress</span>
+<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'progress'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>This function will be triggered each time an asset has been loaded and can have 3 arguments:</p>
+<ul>
+<li>The URL of the assets</li>
+<li>How much assets were loaded</li>
+<li>The total number of assets to load</li>
+</ul>
+<p>You can test these values:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> loadingManager <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>LoadingManager</span><span class="token punctuation">(</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Progress</span>
+<span class="token punctuation">(</span><span class="token parameter">itemUrl<span class="token punctuation">,</span> itemsLoaded<span class="token punctuation">,</span> itemsTotal</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>itemUrl<span class="token punctuation">,</span> itemsLoaded<span class="token punctuation">,</span> itemsTotal<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You should see each asset load in the logs.</p>
+<p>Now, we need to update the <code spellcheck="false">scaleX</code> value. To do that, we just need to update the <code spellcheck="false">loading-bar</code> element style.</p>
+<p>First, let's retrieve that element. To do so, we will use <code spellcheck="false">document.querySelector</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> loadingBarElement <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">querySelector</span><span class="token punctuation">(</span><span class="token string">'.loading-bar'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>That is classic JavaScript technique to get an element with a selector—like in CSS.</p>
+<p>In the progress function, we first need to calculate the progress ratio. This value should go from <code spellcheck="false">0</code> when no asset is loaded to <code spellcheck="false">1</code> when all assets are loaded.</p>
+<p>To calculate this ratio, we can simply divide  <code spellcheck="false">itemsLoaded</code> by <code spellcheck="false">itemsTotal</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> loadingManager <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>LoadingManager</span><span class="token punctuation">(</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Progress</span>
+<span class="token punctuation">(</span><span class="token parameter">itemUrl<span class="token punctuation">,</span> itemsLoaded<span class="token punctuation">,</span> itemsTotal</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> progressRatio <span class="token operator">=</span> itemsLoaded <span class="token operator">/</span> itemsTotal
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>progressRatio<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You should see the <code spellcheck="false">progressRatio</code> going from <code spellcheck="false">0</code> to <code spellcheck="false">1</code> in the logs.</p>
+<p>We can now update the <code spellcheck="false">transform</code> of the <code spellcheck="false">loadingBarElement</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> loadingManager <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>LoadingManager</span><span class="token punctuation">(</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Progress</span>
+<span class="token punctuation">(</span><span class="token parameter">itemUrl<span class="token punctuation">,</span> itemsLoaded<span class="token punctuation">,</span> itemsTotal</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> progressRatio <span class="token operator">=</span> itemsLoaded <span class="token operator">/</span> itemsTotal
+loadingBarElement<span class="token punctuation">.</span>style<span class="token punctuation">.</span>transform <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">scaleX(</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>progressRatio<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">)</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/34/step-15.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The bar should fill according to the loading progress.</p>
+<p>Don't forget to keep the <strong>Developer tools</strong> open with the <strong>Disable cache</strong> checked and the throttling set to the <strong>Pretty fast</strong>.</p>
+<h3>Smooth the animation</h3>
+<p>Let's make the animation a little more flowing by smoothing the transition. There are many ways of doing so, but the most simplistic solution is to add a <code spellcheck="false">transition</code> to the CSS.</p>
+<p>In the <code spellcheck="false">/src/style.css</code> file, add a <code spellcheck="false">0.5s</code> transition on the <code spellcheck="false">transform</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-css"><code spellcheck="false" class=" language-css"><span class="token selector">.loading-bar</span>
+<span class="token punctuation">{</span>
+<span class="token comment">/* ... */</span>
+<span class="token property">transition</span><span class="token punctuation">:</span> transform 0.5s<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>CSS</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/34/step-16.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You should have the same result but with a smoother animation on the bar.</p>
+<h3>Hide the bar</h3>
+<p>There are many ways to hide the bar once everything is loaded, but to make it cool and keep the flow, we will make the bar disappear on the right.</p>
+<p>First, in the <code spellcheck="false">/src/style.css</code> file, add a new selector with the following properties:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-css"><code spellcheck="false" class=" language-css"><span class="token selector">.loading-bar.ended</span>
+<span class="token punctuation">{</span>
+<span class="token property">transform</span><span class="token punctuation">:</span> <span class="token function">scaleX</span><span class="token punctuation">(</span>0<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token property">transform-origin</span><span class="token punctuation">:</span> 100% 0<span class="token punctuation">;</span>
+<span class="token property">transition</span><span class="token punctuation">:</span> transform 1.5s ease-in-out<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>CSS</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Be sure not to add a space between <code spellcheck="false">.loading-bar</code> and <code spellcheck="false">.ended</code> so that the properties only apply when both classes are present on the element.</p>
+<p>The properties simply scale the bar to <code spellcheck="false">0</code> with a transformation aligned to the right and a more extended transition using an <code spellcheck="false">ease-in-out</code> timing function.</p>
+<p>All we need to do now is add the <code spellcheck="false">ended</code> class to the element when everything is loaded.</p>
+<p>We can do that in the loaded function with the <code spellcheck="false">classList.add(...)</code> method:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> loadingManager <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>LoadingManager</span><span class="token punctuation">(</span>
+<span class="token comment">// Loaded</span>
+<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+gsap<span class="token punctuation">.</span><span class="token function">to</span><span class="token punctuation">(</span>overlayMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uAlpha<span class="token punctuation">,</span> <span class="token punctuation">{</span> duration<span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span> value<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> delay<span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+loadingBarElement<span class="token punctuation">.</span>classList<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">'ended'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Unfortunately, this won't work because there is still a <code spellcheck="false">scaleX</code> applied to the element from the progress function.</p>
+<p>We simply need to set the transform to an empty string to solve that:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> loadingManager <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>LoadingManager</span><span class="token punctuation">(</span>
+<span class="token comment">// Loaded</span>
+<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+gsap<span class="token punctuation">.</span><span class="token function">to</span><span class="token punctuation">(</span>overlayMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uAlpha<span class="token punctuation">,</span> <span class="token punctuation">{</span> duration<span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span> value<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> delay<span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+loadingBarElement<span class="token punctuation">.</span>classList<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">'ended'</span><span class="token punctuation">)</span>
+loadingBarElement<span class="token punctuation">.</span>style<span class="token punctuation">.</span>transform <span class="token operator">=</span> <span class="token string">''</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/34/step-17.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The bar should disappear on the right as planned. The animation looks a little jumpy, which isn't ideal.</p>
+<p>There are two reasons for that. First, it takes time to render the elements on the scene for the first time, and the computer freeze for a moment. Secondly, we added a <code spellcheck="false">0.5s</code> transition to the bar. That means that when the loaded function is triggered, the bar didn't finish its transition to the end.</p>
+<p>To solve these problems, we can ask the JavaScript to wait for <code spellcheck="false">0.5s</code> before starting the intro animation with a <code spellcheck="false">setTimeout(...)</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> loadingManager <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>LoadingManager</span><span class="token punctuation">(</span>
+<span class="token comment">// Loaded</span>
+<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+window<span class="token punctuation">.</span><span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+gsap<span class="token punctuation">.</span><span class="token function">to</span><span class="token punctuation">(</span>overlayMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uAlpha<span class="token punctuation">,</span> <span class="token punctuation">{</span> duration<span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span> value<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> delay<span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+loadingBarElement<span class="token punctuation">.</span>classList<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">'ended'</span><span class="token punctuation">)</span>
+loadingBarElement<span class="token punctuation">.</span>style<span class="token punctuation">.</span>transform <span class="token operator">=</span> <span class="token string">''</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">500</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/34/step-18.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The bar now disappears more smoothly.</p>
+<p>And that's it. You now have a less brutal intro with an HTML loading bar.</p>
+</section>
+</body>
+
+</html>

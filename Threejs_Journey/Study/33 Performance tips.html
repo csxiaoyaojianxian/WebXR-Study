@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<section class="text js-text">
+    <h2>Introduction</h2>
+<p>As we said in one of the first lessons, you should target a 60fps experience, at least. Some users might even have configurations where the experience should run at a higher frame rate. Those are usually gamers and are even more exigent in terms of performances and frame rate.</p>
+<p>There can be two main limitations:</p>
+<ul>
+<li>The CPU</li>
+<li>The GPU</li>
+</ul>
+<p>You need to keep an eye on the performances and test across multiple devices with different setups and don't forget mobile devices if your website is supposed to be compatible with those.</p>
+<p>It would help if you also kept an eye on the overall weight of the website. When we are developing in local, things load remarkably fast, but once online, it depends on the user connection and the server speed. We need to keep the assets as light as possible.</p>
+<p>There are many tips to improve both performances and weight, and we've already seen most of them, but here's an exhaustive list.</p>
+<h2>Setup</h2>
+<p>Some of the following tips have code examples in the starter, and each tip has a number. Uncomment the corresponding code part if you want to test it.</p>
+<h2>Monitoring</h2>
+<p>First, we need to measure the performance and not just eyeball it.</p>
+<h3>1 - Monitor FPS</h3>
+<p>Chrome used to have a nice FPS meter but not anymore. Instead, we can use a JavaScript FPS meter like <a target="_blank" href="https://github.com/mrdoob/stats.js/">stats.js</a>.</p>
+<p>Add it to the dependencies with <code spellcheck="false">npm install --save  stats.js</code>.</p>
+<p>Import it and instantiate it</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> Stats <span class="token keyword">from</span> <span class="token string">'stats.js'</span>
+
+<span class="token keyword">const</span> stats <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Stats</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+stats<span class="token punctuation">.</span><span class="token function">showPanel</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span> <span class="token comment">// 0: fps, 1: ms, 2: mb, 3+: custom</span>
+document<span class="token punctuation">.</span>body<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span>stats<span class="token punctuation">.</span>dom<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Call it's <code spellcheck="false">begin()</code> and <code spellcheck="false">end()</code> methods in the <code spellcheck="false">tick</code> function</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+stats<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+
+stats<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You should get a nice looking FPS meter.</p>
+<h3>2 - Disable FPS limit</h3>
+<p>There is a way to unlock Chrome frame rate regardless of the screen capabilities.</p>
+<p>That will enable frame rate monitoring even on good computers. For example, if you are developing on a good computer and you see <code spellcheck="false">60fps</code>, you might think it's okay. But maybe your website can only run at <code spellcheck="false">70~80fps</code> on that good computer, but the frame rate will drop below <code spellcheck="false">60fps</code> on other computers, and you won't know it.</p>
+<p>If you unlock the frame rate limit, you'll see that the performances aren't good enough, and you should run at something like <code spellcheck="false">150~200fps</code> on this computer to be safe.</p>
+<p>To unlock Chrome framerate:</p>
+<ul>
+<li>Close it completely —write the following instructions somewhere else if you are looking at this lesson on Chrome.</li>
+<li>Open the terminal.</li>
+<li>Open the following Github gist and launch the right command —Mac or Windows: <a target="_blank" href="https://gist.github.com/brunosimon/c15e7451a802fa8e34c0678620022f7d">https://gist.github.com/brunosimon/c15e7451a802fa8e34c0678620022f7d</a></li>
+</ul>
+<p>Chrome should open without the frame rate limit. You can test it on with the exercise by opening the <strong>FPS meter</strong> again. If it didn't work, close it and retry. If it still doesn't work, you'll have to do without it.</p>
+<p>Be careful; doing this will draw much more power from your computer and might result on Chrome crashing.</p>
+<h3>3 - Monitoring draw calls</h3>
+<p>Draw calls are actions of drawing triangles by the GPU. There will be many draw calls when we have a complex scene with many objects, geometries, materials, etc.</p>
+<p>Usually, we can say that the less draw calls you have, the better. We will see some tips to reduce these, but first, we would like to monitor them.</p>
+<p>There is a great Chrome extension named <strong>Spector.js</strong> that can help you with that.</p>
+<ul>
+<li>Install the extension: <a target="_blank" href="https://chrome.google.com/webstore/detail/spectorjs/denbgaamihkadbghdceggmchnflmhpmk">https://chrome.google.com/webstore/detail/spectorjs/denbgaamihkadbghdceggmchnflmhpmk</a></li>
+<li>On the WebGL page, click on the extension icon to activate it.</li>
+<li>Click again to open the extension panel.</li>
+<li>Click on the red circle to record the frame.</li>
+</ul>
+<p>Wait a little, and a new page will open with many intricate details about the recorded frame.</p>
+<p>In the <strong>Commands</strong> tab, you'll see how the frame has been drawn step by step. We won't explain everything here, but the blue steps are draw calls, and the other steps are usually data sent to the GPU such as the matrices, attributes, uniforms, etc.</p>
+<p>The less you have, the better.</p>
+<h3>4 - Renderer informations</h3>
+<p>The <code spellcheck="false">renderer</code> can provide some information about what's in the scene and what's being drawn.</p>
+<p>Just log the <code spellcheck="false">renderer.info</code> to get this information:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>renderer<span class="token punctuation">.</span>info<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h2>General</h2>
+<h3>5 - Good JavaScript code</h3>
+<p>This one goes without saying, but we must keep a performant native JavaScript code. That is even more important in the <code spellcheck="false">tick</code> function because this one will be called on each frame.</p>
+<h3>6 - Dispose of things</h3>
+<p>Once you are absolutely sure you don't need a resource like a geometry or a material, dispose of it. If you create a game with levels, once the user goes to the next level, dispose of things from the previous level.</p>
+<p>To do that, there is a dedicated page on the Three.js documentation: <a target="_blank" href="https://threejs.org/docs/#manual/en/introduction/How-to-dispose-of-objects">https://threejs.org/docs/#manual/en/introduction/How-to-dispose-of-objects</a></p>
+<p>Here's an example with the cube:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">scene<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>cube<span class="token punctuation">)</span>
+cube<span class="token punctuation">.</span>geometry<span class="token punctuation">.</span><span class="token function">dispose</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+cube<span class="token punctuation">.</span>material<span class="token punctuation">.</span><span class="token function">dispose</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h2>Lights</h2>
+<h3>7 - Avoid them</h3>
+<p>If possible, try to avoid using Three.js lights. These are useful and simple to use, but they can steadily suck the computer's performance.</p>
+<p>If you don't have a choice, try to use as few lights as possible and use the cheapest ones like the <a target="_blank" href="https://threejs.org/docs/#api/en/lights/AmbientLight">AmbientLight</a> or the <a target="_blank" href="https://threejs.org/docs/#api/en/lights/DirectionalLight">DirectionalLight</a></p>
+<h3>8 - Avoid adding or removing lights</h3>
+<p>When you add or remove light from the scene, all the materials supporting lights will have to be recompiled. That is how Three.js works, and this can freeze the screen for a moment if you have a complex scene.</p>
+<h2>Shadows</h2>
+<h3>9 - Avoid them</h3>
+<p>Like the lights, shadows are handy, but they are bad for performances. Avoid them and try to find alternatives like baked shadows — for instance when the shadow is directly in the texture.</p>
+<h3>10 - Optimize shadow maps</h3>
+<p>If you don't have any other choice, try to optimize the shadow maps so they look good but fit perfectly with the scene.</p>
+<p>Use the <a target="_blank" href="https://threejs.org/docs/#api/en/helpers/CameraHelper">CameraHelper</a> to see the area that will be renderer by the shadow map camera and reduce it to the smallest area possible:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>top <span class="token operator">=</span> <span class="token number">3</span>
+directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>right <span class="token operator">=</span> <span class="token number">6</span>
+directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>left <span class="token operator">=</span> <span class="token operator">-</span> <span class="token number">6</span>
+directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>bottom <span class="token operator">=</span> <span class="token operator">-</span> <span class="token number">3</span>
+directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>far <span class="token operator">=</span> <span class="token number">10</span>
+
+<span class="token keyword">const</span> cameraHelper <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>CameraHelper</span><span class="token punctuation">(</span>directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>cameraHelper<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Also try to use the smallest possible resolution with a descent result for the <code spellcheck="false">mapSize</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>mapSize<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">1024</span><span class="token punctuation">,</span> <span class="token number">1024</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h3>11 - Use castShadow and receiveShadow wisely</h3>
+<p>Some objects can cast shadows, some objects can receive shadows, and some might do both. Try to activate <code spellcheck="false">castShadow</code> and <code spellcheck="false">receiveShadow</code> on as few objects as possible:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">cube<span class="token punctuation">.</span>castShadow <span class="token operator">=</span> <span class="token boolean">true</span>
+cube<span class="token punctuation">.</span>receiveShadow <span class="token operator">=</span> <span class="token boolean">false</span>
+
+torusKnot<span class="token punctuation">.</span>castShadow <span class="token operator">=</span> <span class="token boolean">true</span>
+torusKnot<span class="token punctuation">.</span>receiveShadow <span class="token operator">=</span> <span class="token boolean">false</span>
+
+sphere<span class="token punctuation">.</span>castShadow <span class="token operator">=</span> <span class="token boolean">true</span>
+sphere<span class="token punctuation">.</span>receiveShadow <span class="token operator">=</span> <span class="token boolean">false</span>
+
+floor<span class="token punctuation">.</span>castShadow <span class="token operator">=</span> <span class="token boolean">false</span>
+floor<span class="token punctuation">.</span>receiveShadow <span class="token operator">=</span> <span class="token boolean">true</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h3>12 - Deactivate shadow auto update</h3>
+<p>Currently, shadow maps get updated before each render. You can deactivate this auto-update and alert Three.js that the shadow maps needs update only when necessary:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">renderer<span class="token punctuation">.</span>shadowMap<span class="token punctuation">.</span>autoUpdate <span class="token operator">=</span> <span class="token boolean">false</span>
+renderer<span class="token punctuation">.</span>shadowMap<span class="token punctuation">.</span>needsUpdate <span class="token operator">=</span> <span class="token boolean">true</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>As you can see, we don't see the <code spellcheck="false">torusKnot</code> shadow rotating anymore.</p>
+<h2>Textures</h2>
+<h3>13 - Resize textures</h3>
+<p>Textures take a lot of space in the GPU memory. It's even worst with the mipmaps (the automatically generated smaller versions for minification filtering and magnification filtering).</p>
+<p>The texture file weight has nothing to do with that, and only the resolution matters.</p>
+<p>Try to reduce the resolution to the minimum while keeping a decent result.</p>
+<h3>14 - Keep a power of 2 resolutions</h3>
+<p>When resizing, remember to keep a power of 2 resolution. That is important for mipmaps.</p>
+<p>The resolution doesn't have to be a square; you can have a width different from the height.</p>
+<p>If you don't do this and the render needs the mipmap, Three.js will try to fix it by resizing the image to the closest power of 2 resolution, but this process will take resources and might result in bad quality textures.</p>
+<h3>15 - Use the right format</h3>
+<p>We said that the format doesn't change the memory usage on the GPU, but using the right format may reduce the loading time.</p>
+<p>You can use <code spellcheck="false">.jpg</code> or <code spellcheck="false">.png</code> according to the image and the compression but also the alpha channel.</p>
+<p>You can use online tools like <a target="_blank" href="https://tinypng.com/">TinyPNG</a> to reduce the weight even more. And you can also try special formats like basis.</p>
+<p>Basis is a format just like <code spellcheck="false">.jpg</code> and <code spellcheck="false">.png</code> but the compression is powerful, and the format can be read by the GPU more easily. We won't cover it because it's pretty hard to generate, but give it a try if you want. You can find information and tools to create <code spellcheck="false">.basis</code> files here: <a target="_blank" href="https://github.com/BinomialLLC/basis_universal">https://github.com/BinomialLLC/basis_universal</a></p>
+<h2>Geometries</h2>
+<h3>16 - Use BufferGeometries</h3>
+<p>Old versions of Three.js (before 125) used to have "non buffer" geometries. Those were bad for performances and you should avoid them.</p>
+<p>If you are using a recent version of Three.js, no need to worry, all geometries are buffer geometries.</p>
+<h3>17 - Do not update vertices</h3>
+<p>Updating the vertices of a geometry is terrible for the performances. You can do it once when you create the geometry, but avoid doing it in the <code spellcheck="false">tick</code> function.</p>
+<p>If you need to animate the vertices, do it with a vertex shader.</p>
+<h3>18 - Mutualize geometries</h3>
+<p>If you have multiple <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Meshes</a> using the same geometry shape, create only one geometry, and use it on all the meshes:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Tip 17</span>
+<span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BoxGeometry</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">)</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">50</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshNormalMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> mesh <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>geometry<span class="token punctuation">,</span> material<span class="token punctuation">)</span>
+mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span>
+mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span>
+mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span>z <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span>
+mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">2</span>
+mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>z <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">2</span>
+
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh<span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You can still change the <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a> position, rotation and scale.</p>
+<h3>19 - Merge geometries</h3>
+<p>If the geometries aren't supposed to move, you can also merge them by using the <a target="_blank" href="https://threejs.org/docs/#examples/en/utils/BufferGeometryUtils">BufferGeometryUtils</a>. This class isn't available by default, and we need to import it:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token punctuation">{</span> BufferGeometryUtils <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'three/examples/jsm/utils/BufferGeometryUtils.js'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We don't need to instantiate it, and we can use its methods directly.</p>
+<p>Use the <code spellcheck="false">mergeBufferGeometries(...)</code> method with an array of geometries as parameter to get one merged geometry in return. We can then use that geometry with a single <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> geometries <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">50</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BoxGeometry</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">)</span>
+
+geometry<span class="token punctuation">.</span><span class="token function">rotateX</span><span class="token punctuation">(</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">2</span><span class="token punctuation">)</span>
+geometry<span class="token punctuation">.</span><span class="token function">rotateY</span><span class="token punctuation">(</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">2</span><span class="token punctuation">)</span>
+
+geometry<span class="token punctuation">.</span><span class="token function">translate</span><span class="token punctuation">(</span>
+<span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span>
+<span class="token punctuation">)</span>
+
+geometries<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>geometry<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> mergedGeometry <span class="token operator">=</span> BufferGeometryUtils<span class="token punctuation">.</span><span class="token function">mergeBufferGeometries</span><span class="token punctuation">(</span>geometries<span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>mergedGeometry<span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshNormalMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> mesh <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>mergedGeometry<span class="token punctuation">,</span> material<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>That is harder because we have to twist the way we create things and move all the meshes transformations into the geometries, but this worth it because, in the end, we only have one draw call.</p>
+<h2>Materials</h2>
+<h3>20 - Mutualize materials</h3>
+<p>Like for the geometries, if you are using the same type of material for multiple meshes, try to create only one and use it multiple times:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BoxGeometry</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshNormalMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">50</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> mesh <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>geometry<span class="token punctuation">,</span> material<span class="token punctuation">)</span>
+mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span>
+mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span>
+mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span>z <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span>
+mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">2</span>
+mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">2</span>
+
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh<span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h3>21 - Use cheap materials</h3>
+<p>Some materials like <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshStandardMaterial">MeshStandardMaterial</a> or <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshPhysicalMaterial">MeshPhysicalMaterial</a> need more resources than materials such as <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a>, <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshLambertMaterial">MeshLambertMaterial</a> or <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshPhongMaterial">MeshPhongMaterial</a>.</p>
+<p>Try to use the cheapest materials when you can.</p>
+<h2>Meshes</h2>
+<h3>22 - Use InstancedMesh</h3>
+<p>If you cannot merge the geometries because you need to have control over the meshes independently, but they are using the same geometry and same material, you can use an <a target="_blank" href="https://threejs.org/docs/#api/en/objects/InstancedMesh">InstancedMesh</a>.</p>
+<p>It's like a mesh, but you create only one <a target="_blank" href="https://threejs.org/docs/#api/en/objects/InstancedMesh">InstancedMesh</a>, and then you provide a transformation matrix for each "instance" of that mesh.</p>
+<p>The matrix has to be a <a target="_blank" href="https://threejs.org/docs/#api/en/math/Matrix4">Matrix4</a>, and you can apply any transformation by using the various available methods:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BoxGeometry</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshNormalMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> mesh <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>InstancedMesh</span><span class="token punctuation">(</span>geometry<span class="token punctuation">,</span> material<span class="token punctuation">,</span> <span class="token number">50</span><span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh<span class="token punctuation">)</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">50</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> position <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Vector3</span><span class="token punctuation">(</span>
+<span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span>
+<span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> quaternion <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Quaternion</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+quaternion<span class="token punctuation">.</span><span class="token function">setFromEuler</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Euler</span><span class="token punctuation">(</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> matrix <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Matrix4</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+matrix<span class="token punctuation">.</span><span class="token function">makeRotationFromQuaternion</span><span class="token punctuation">(</span>quaternion<span class="token punctuation">)</span>
+matrix<span class="token punctuation">.</span><span class="token function">setPosition</span><span class="token punctuation">(</span>position<span class="token punctuation">)</span>
+
+mesh<span class="token punctuation">.</span><span class="token function">setMatrixAt</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> matrix<span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We get a result almost as good as merge geometries, but we can still move the meshes by changing the matrices.</p>
+<p>If you intend to change these matrices in the <code spellcheck="false">tick</code> function, add this to the <a target="_blank" href="https://threejs.org/docs/#api/en/objects/InstancedMesh">InstancedMesh</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">mesh<span class="token punctuation">.</span>instanceMatrix<span class="token punctuation">.</span><span class="token function">setUsage</span><span class="token punctuation">(</span><span class="token constant">THREE</span><span class="token punctuation">.</span>DynamicDrawUsage<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h2>Models</h2>
+<h3>23 - Low poly</h3>
+<p>Use low poly models. The fewer polygons, the better the frame rate. If you need details, try to use normal maps. They are cheap in terms of performances and can get you great details at the texture cost.</p>
+<h3>24 - Draco compression</h3>
+<p>If the model has a lot of details with very complex geometries, use the Draco compression. It can reduce weight drastically. The drawbacks are a potential freeze when uncompressing the geometry, and you also have to load the Draco libraries.</p>
+<h3>25 - Gzip</h3>
+<p>Gzip is a compression happening on the server side. Most of the servers don't gzip files such as <code spellcheck="false">.glb</code>, <code spellcheck="false">.gltf</code>, <code spellcheck="false">.obj</code>, etc.</p>
+<p>See if you can figure out how to fix that, depending on the server you are using.</p>
+<h2>Cameras</h2>
+<h3>26 - Field of view</h3>
+<p>When objects are not in the field of view, they won't be rendered. That is called frustum culling.</p>
+<p>That can seem like a tawdry solution, but you can just reduce the camera's field of view. The fewer objects on the screen, the fewer triangles to render.</p>
+<h3>27 - Near and far</h3>
+<p>Just like the field of view, you can reduce the <code spellcheck="false">near</code> and <code spellcheck="false">far</code> properties of the camera. If you have a vast world with mountains, trees, structures, etc., the user probably can't see those small houses out of sight far behind the mountains. Reduce the <code spellcheck="false">far</code> to a decent value and those houses won't even try to be rendered.</p>
+<h2>Renderer</h2>
+<h3>29 - Pixel ratio</h3>
+<p>Some devices have a very high pixel ratio. It's just a marketing argument, but the more pixels to render, to worst the frame rate.</p>
+<p>Try to limit the pixel ratio of the renderer to something like <code spellcheck="false">2</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">renderer<span class="token punctuation">.</span><span class="token function">setPixelRatio</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span>window<span class="token punctuation">.</span>devicePixelRatio<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h3>30 - Power preferences</h3>
+<p>Some devices may be able to switch between different GPU or different GPU usage. We can give a hint on what power is required when instantiating the <a target="_blank" href="https://threejs.org/docs/#api/en/renderers/WebGLRenderer">WebGLRenderer</a> by specifying a <code spellcheck="false">powerPreference</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> renderer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>WebGLRenderer</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+canvas<span class="token operator">:</span> canvas<span class="token punctuation">,</span>
+powerPreference<span class="token operator">:</span> <span class="token string">'high-performance'</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>If you don't have performance issues, set this property to <code spellcheck="false">'default'</code>. </p>
+<h3>31 - Antialias</h3>
+<p>The default antialias is performant, but still, it's less performant than no antialias. Only add it if you have visible aliasing and no performance issue.</p>
+<h2>Postprocessing</h2>
+<h3>32 - Limit passes</h3>
+<p>Each post-processing pass will take as many pixels as the render's resolution (including the pixel ratio) to render. If you have a <code spellcheck="false">1920x1080</code> resolution with 4 passes and a pixel ratio of <code spellcheck="false">2</code>, that makes <code spellcheck="false">1920 * 2 * 1080 * 2 * 4 = 33&nbsp;177&nbsp;600</code> pixels to render. Be reasonable, and try to regroup your custom passes into one.</p>
+<h2>Shaders</h2>
+<h3>31 - Specify the precision</h3>
+<p>You can force the precision of the shaders in the materials by changing their  <code spellcheck="false">precision</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> shaderMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+precision<span class="token operator">:</span> <span class="token string">'lowp'</span><span class="token punctuation">,</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Check the result for any quality downgrade or glitches.</p>
+<p>That won't work with the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/RawShaderMaterial">RawShaderMaterial</a>, and you'll have to add the <code spellcheck="false">precision</code> by yourself on the shaders like we did on the first shaders lesson.</p>
+<h3>32 - Keep code simple</h3>
+<p>It's laborious to monitor the difference, but try to keep your shader codes as simple as possible. Avoid <code spellcheck="false">if</code> statements. Make good use of swizzles and built-in functions.</p>
+<p>As in the vertex shader, instead of the <code spellcheck="false">if</code> statement:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl">modelPosition<span class="token punctuation">.</span>y <span class="token operator">+=</span> <span class="token function">clamp</span><span class="token punctuation">(</span>elevation<span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span> <span class="token operator">*</span> uDisplacementStrength<span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Or as in the fragment shader, instead of these complex formulas for <code spellcheck="false">r</code>, <code spellcheck="false">g</code> and <code spellcheck="false">b</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">vec3</span> depthColor <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">0.1</span><span class="token punctuation">,</span> <span class="token number">0.1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> surfaceColor <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span><span class="token number">0.1</span><span class="token punctuation">,</span> <span class="token number">0.0</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> finalColor <span class="token operator">=</span> <span class="token function">mix</span><span class="token punctuation">(</span>depthColor<span class="token punctuation">,</span> surfaceColor<span class="token punctuation">,</span> elevation<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h3>33 - Use textures</h3>
+<p>Employing perlin noise functions is cool, but it can affect your performance considerably. Sometimes, you better use a texture representing the noise. Using <code spellcheck="false">texture2D()</code> is way cheaper than a perlin noise function, and you can produce these textures quite efficiently with tools like photoshop.</p>
+<h3>34 - Use defines</h3>
+<p>Uniforms are beneficial because we can tweak them and animate the values in the JavaScript. But uniforms have a performance cost. If the value isn't supposed to change, you can use defines. There are two ways of creating a <code spellcheck="false">define</code>.</p>
+<p>Directly in the shader code:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token expression">uDisplacementStrength <span class="token number">1.5</span></span></span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Or in the <code spellcheck="false">defines</code> property of the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">const</span> shaderMaterial <span class="token operator">=</span> new THREE<span class="token punctuation">.</span><span class="token function">ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+
+<span class="token comment">// ...</span>
+
+defines<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+uDisplacementStrength<span class="token operator">:</span> <span class="token number">1.5</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Those <code spellcheck="false">defines</code> will automatically be added to the GLSL code if you are using a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a>.</p>
+<h3>35 - Do the calculations in the vertex shader</h3>
+<p>If possible, do the calculations in the vertex shader and send the result to the fragment shader.</p>
+<h2>Go further</h2>
+<p>Keep an eye on the performances from the start. Test on other devices, use the tools we saw initially and fix any strange behavior before going further.</p>
+<p>Each project will have different constraints, and applying those tips won't always suffice. Try to find solutions. Twist the way you are doing things. Be smart.</p>
+<p>You'll find a better way of doing things throughout your projects, and you'll adapt more quickly. At a point, you'll even know multiple ways of getting the same result, and you'll have the luxury to pick the best one.</p>
+<p>Here is another big list of tips to improve how you use Three.js by <a target="_blank" href="https://twitter.com/lewy_blue">Lewy Blue</a>: <a target="_blank" href="https://discoverthreejs.com/tips-and-tricks/">https://discoverthreejs.com/tips-and-tricks/</a></p>
+</section>
+</body>
+
+</html>

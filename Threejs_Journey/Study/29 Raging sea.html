@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<section class="text js-text">
+    <h2>Introduction</h2>
+<p>Now that we know how to use shaders and draw some patterns let's make fair use of it and create a raging sea.</p>
+<p>We are going to animate the waves and keep control of the parameters with the debug panel.</p>
+<h2>Setup</h2>
+<p>For now, all we have is a rotated plane using <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a>. The geometry has a <code spellcheck="false">128x128</code> subdivision. We are going to animate the vertices to get the waves and we need quite a lot of vertices. <code spellcheck="false">128x128</code> might not be enough, but we will increase the value if required.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/29/step-01.png" src="./assets/lessons/29/step-01.png" width="1792" height="1120" alt="./assets/lessons/29/step-01.png" class="is-loaded"></span></p>
+<h2>Base</h2>
+<p>Let's replace the material by a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> waterMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/29/step-02.png" src="./assets/lessons/29/step-02.png" width="1792" height="1120" alt="./assets/lessons/29/step-02.png" class="is-loaded"></span></p>
+<p>Our Webpack configuration already supports GLSL files, but we need to create these files.</p>
+<p>Create the vertex shader in <code spellcheck="false">/src/shaders/water/vertex.glsl</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">vec4</span> modelPosition <span class="token operator">=</span> modelMatrix <span class="token operator">*</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>position<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> viewPosition <span class="token operator">=</span> viewMatrix <span class="token operator">*</span> modelPosition<span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> projectedPosition <span class="token operator">=</span> projectionMatrix <span class="token operator">*</span> viewPosition<span class="token punctuation">;</span>
+gl_Position <span class="token operator">=</span> projectedPosition<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Now create the fragment shader in <code spellcheck="false">/src/shaders/water/fragment.glsl</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">0.8</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Finally, import those shaders in your script and use them in a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// ...</span>
+
+<span class="token keyword">import</span> waterVertexShader <span class="token keyword">from</span> <span class="token string">'./shaders/water/vertex.glsl'</span>
+<span class="token keyword">import</span> waterFragmentShader <span class="token keyword">from</span> <span class="token string">'./shaders/water/fragment.glsl'</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> waterMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> waterVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> waterFragmentShader
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/29/step-03.png" src="./assets/lessons/29/step-03.png" width="1792" height="1120" alt="./assets/lessons/29/step-03.png" class="is-loaded"></span></p>
+<p>You should get a blue plane. If not, check the logs.</p>
+<p>If you did all of this from memory, congratulation, you are a genius. If not, it's perfectly normal, and you only need time.</p>
+<h2>Big waves</h2>
+<p>We begin with the big waves to get significant results quickly. What's better than a sinus to create waves?</p>
+<p>In the vertex shader, let's move the <code spellcheck="false">y</code> value of the <code spellcheck="false">modelPosition</code> with a <code spellcheck="false">sin(...)</code> based on the <code spellcheck="false">x</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">vec4</span> modelPosition <span class="token operator">=</span> modelMatrix <span class="token operator">*</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>position<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+modelPosition<span class="token punctuation">.</span>y <span class="token operator">+=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/29/step-04.png" src="./assets/lessons/29/step-04.png" width="1792" height="1120" alt="./assets/lessons/29/step-04.png" class="is-loaded"></span></p>
+<p>The displacement and frequency should be way too high. Instead of just multiplying the values numbers coming out from nowhere in the shader, we will use uniforms to have more control over them.</p>
+<p>Let's start with the elevation.</p>
+<h3>Elevation</h3>
+<p>Add a <code spellcheck="false">uBigWavesElevation</code> uniform to the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> waterMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> waterVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> waterFragmentShader<span class="token punctuation">,</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+uBigWavesElevation<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">0.2</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can now retrieve and use the <code spellcheck="false">uBigWavesElevation</code> uniform in the vertex shader:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">uniform</span> <span class="token keyword">float</span> uBigWavesElevation<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+modelPosition<span class="token punctuation">.</span>y <span class="token operator">+=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>x<span class="token punctuation">)</span> <span class="token operator">*</span> uBigWavesElevation<span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/29/step-05.png" src="./assets/lessons/29/step-05.png" width="1792" height="1120" alt="./assets/lessons/29/step-05.png" class="is-loaded"></span></p>
+<p>Instead of updating the <code spellcheck="false">y</code> property directly, we should use a variable named <code spellcheck="false">elevation</code>. This will get handy later when we are going to color those waves:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">uniform</span> <span class="token keyword">float</span> uBigWavesElevation<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">vec4</span> modelPosition <span class="token operator">=</span> modelMatrix <span class="token operator">*</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>position<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Elevation</span>
+<span class="token keyword">float</span> elevation <span class="token operator">=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>x<span class="token punctuation">)</span> <span class="token operator">*</span> uBigWavesElevation<span class="token punctuation">;</span>
+modelPosition<span class="token punctuation">.</span>y <span class="token operator">+=</span> elevation<span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Because the elevation is now handled in the JavaScript, we can add it to our Dat.GUI:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>waterMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uBigWavesElevation<span class="token punctuation">,</span> <span class="token string">'value'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'uBigWavesElevation'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/29/step-06.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<h3>Frequency</h3>
+<p>We can now take care of the frequency. Currently, the waves elevation only changes on the <code spellcheck="false">x</code> axis but it would be even better to control both <code spellcheck="false">x</code> and <code spellcheck="false">z</code> axes.</p>
+<p>Create a <code spellcheck="false">uBigWavesFrequency</code> uniform with a <a target="_blank" href="https://threejs.org/docs/#api/en/math/Vector2">Vector2</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> waterMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> waterVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> waterFragmentShader<span class="token punctuation">,</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+uBigWavesElevation<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">0.2</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+uBigWavesFrequency<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Vector2</span><span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">1.5</span><span class="token punctuation">)</span> <span class="token punctuation">}</span> 
+<span class="token punctuation">}</span> 
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>In the vertex shader, retrieve the uniform —be careful, it's a <code spellcheck="false">vec2</code>— and apply it in the <code spellcheck="false">sin(...)</code> with only the <code spellcheck="false">x</code> property to begin with:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+<span class="token keyword">uniform</span> <span class="token keyword">vec2</span> uBigWavesFrequency<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token keyword">float</span> elevation <span class="token operator">=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>x <span class="token operator">*</span> uBigWavesFrequency<span class="token punctuation">.</span>x<span class="token punctuation">)</span> <span class="token operator">*</span> uBigWavesElevation<span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/29/step-07.png" src="./assets/lessons/29/step-07.png" width="1792" height="1120" alt="./assets/lessons/29/step-07.png" class="is-loaded"></span></p>
+<p>This should result in more waves because the frequency is higher.</p>
+<p>Let's use the second value of the <code spellcheck="false">uBigWavesFrequency</code> (<code spellcheck="false">y</code>) to control the waves on the <code spellcheck="false">z</code> axis. We can do that by multiplying the first <code spellcheck="false">sin(...)</code> by another <code spellcheck="false">sin(...)</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">float</span> elevation <span class="token operator">=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>x <span class="token operator">*</span> uBigWavesFrequency<span class="token punctuation">.</span>x<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>z <span class="token operator">*</span> uBigWavesFrequency<span class="token punctuation">.</span>y<span class="token punctuation">)</span> <span class="token operator">*</span> uBigWavesElevation<span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/29/step-08.png" src="./assets/lessons/29/step-08.png" width="1792" height="1120" alt="./assets/lessons/29/step-08.png" class="is-loaded"></span></p>
+<p>You should get waves on the <code spellcheck="false">z</code> axis too.</p>
+<p>We can now add those  <code spellcheck="false">x</code> and <code spellcheck="false">y</code> properties to our Dat.GUI:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>waterMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uBigWavesFrequency<span class="token punctuation">.</span>value<span class="token punctuation">,</span> <span class="token string">'x'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'uBigWavesFrequencyX'</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>waterMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uBigWavesFrequency<span class="token punctuation">.</span>value<span class="token punctuation">,</span> <span class="token string">'y'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'uBigWavesFrequencyY'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/29/step-09.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<h3>Animate</h3>
+<p>Let's animate these big waves. We are going to use the elapsed time as we did in a previous lesson to offset the value in the <code spellcheck="false">sin(...)</code> and create the animation.</p>
+<p>First, create a <code spellcheck="false">uTime</code> uniform in the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> waterMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+uTime<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span> 
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, update the value in the tick <code spellcheck="false">function</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> clock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Clock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> elapsedTime <span class="token operator">=</span> clock<span class="token punctuation">.</span><span class="token function">getElapsedTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Water</span>
+waterMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uTime<span class="token punctuation">.</span>value <span class="token operator">=</span> elapsedTime
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>In the vertex shader, retrieve and use the <code spellcheck="false">uTime</code> in both <code spellcheck="false">sin(...)</code> functions:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">uniform</span> <span class="token keyword">float</span> uTime<span class="token punctuation">;</span>
+<span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token keyword">float</span> elevation <span class="token operator">=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>x <span class="token operator">*</span> uBigWavesFrequency<span class="token punctuation">.</span>x <span class="token operator">+</span> uTime<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>z <span class="token operator">*</span> uBigWavesFrequency<span class="token punctuation">.</span>y <span class="token operator">+</span> uTime<span class="token punctuation">)</span> <span class="token operator">*</span> uBigWavesElevation<span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/29/step-10.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You now get animated waves. While the speed is ok for a raging sea, it would be great to be able to control it.</p>
+<p>Let's create a <code spellcheck="false">uBigWavesSpeed</code> uniform and multiply our <code spellcheck="false">uTime</code> by it. We will use a <code spellcheck="false">float</code> to make it more simple, but if you want to control both axes speed separately, you can use a <code spellcheck="false">vec2</code>.</p>
+<p>Create the <code spellcheck="false">uBigWavesSpeed</code> uniform in the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a> and add the tweak:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> waterMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+uBigWavesSpeed<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">0.75</span> <span class="token punctuation">}</span> 
+<span class="token punctuation">}</span> 
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>waterMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uBigWavesSpeed<span class="token punctuation">,</span> <span class="token string">'value'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'uBigWavesSpeed'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>In the vertex shader, retrieve the <code spellcheck="false">uBigWavesSpeed</code> uniform and multiply the <code spellcheck="false">uTime</code> by it in both <code spellcheck="false">sin(...)</code> functions:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+<span class="token keyword">uniform</span> <span class="token keyword">float</span> uBigWavesSpeed<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token keyword">float</span> elevation <span class="token operator">=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>x <span class="token operator">*</span> uBigWavesFrequency<span class="token punctuation">.</span>x <span class="token operator">+</span> uTime <span class="token operator">*</span> uBigWavesSpeed<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>z <span class="token operator">*</span> uBigWavesFrequency<span class="token punctuation">.</span>y <span class="token operator">+</span> uTime <span class="token operator">*</span> uBigWavesSpeed<span class="token punctuation">)</span> <span class="token operator">*</span> uBigWavesElevation<span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/29/step-11.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Our <code spellcheck="false">elevation</code> formula is taking way too long. Don't hesitate to refactor a little by using variables or simple line breaks:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">float</span> elevation <span class="token operator">=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>x <span class="token operator">*</span> uBigWavesFrequency<span class="token punctuation">.</span>x <span class="token operator">+</span> uTime <span class="token operator">*</span> uBigWavesSpeed<span class="token punctuation">)</span> <span class="token operator">*</span>
+      <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>z <span class="token operator">*</span> uBigWavesFrequency<span class="token punctuation">.</span>y <span class="token operator">+</span> uTime <span class="token operator">*</span> uBigWavesSpeed<span class="token punctuation">)</span> <span class="token operator">*</span>
+      uBigWavesElevation<span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h2>Colors</h2>
+<p>Our waves are starting to look great, but that uniform blue color doesn't help.</p>
+<p>Let's produce two colors, one for the depth and one for the surface. If you remember, adding Three.js colors to Dat.GUI is a little complicated.</p>
+<p>First, we need to create a <code spellcheck="false">debugObject</code> right after the <code spellcheck="false">gui</code> instantiation:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> gui <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">dat<span class="token punctuation">.</span>GUI</span><span class="token punctuation">(</span><span class="token punctuation">{</span> width<span class="token operator">:</span> <span class="token number">340</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> debugObject <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, right before the <code spellcheck="false">waterMaterial</code> instantiation, we can create these two colors as properties of <code spellcheck="false">debugObject</code>, and use them in two new uniforms that we will call <code spellcheck="false">uDepthColor</code> and <code spellcheck="false">uSurfaceColor</code>. These colors will be using the <a target="_blank" href="https://threejs.org/docs/#api/en/math/Color">Color</a> class:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Colors</span>
+debugObject<span class="token punctuation">.</span>depthColor <span class="token operator">=</span> <span class="token string">'#0000ff'</span>
+debugObject<span class="token punctuation">.</span>surfaceColor <span class="token operator">=</span> <span class="token string">'#8888ff'</span>
+
+<span class="token comment">// Material</span>
+<span class="token keyword">const</span> waterMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> waterVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> waterFragmentShader<span class="token punctuation">,</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+uDepthColor<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">.</span>depthColor<span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+uSurfaceColor<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">.</span>surfaceColor<span class="token punctuation">)</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span> 
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can then add them to our Dat.GUI with the <code spellcheck="false">addColor</code> method. We also need to update the <code spellcheck="false">waterMaterial</code> uniforms when the color changes with <code spellcheck="false">onChange(...)</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">debugObject<span class="token punctuation">.</span>depthColor <span class="token operator">=</span> <span class="token string">'#0000ff'</span>
+debugObject<span class="token punctuation">.</span>surfaceColor <span class="token operator">=</span> <span class="token string">'#8888ff'</span>
+
+gui<span class="token punctuation">.</span><span class="token function">addColor</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">,</span> <span class="token string">'depthColor'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">onChange</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span> waterMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uDepthColor<span class="token punctuation">.</span>value<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">.</span>depthColor<span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">addColor</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">,</span> <span class="token string">'surfaceColor'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">onChange</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span> waterMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uSurfaceColor<span class="token punctuation">.</span>value<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">.</span>surfaceColor<span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/29/step-12.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You should see the color tweaks, but changing them doesn't affect the material. That is because we haven't use the <code spellcheck="false">uDepthColor</code> and <code spellcheck="false">uSurfaceColor</code> uniforms in our shader yet.</p>
+<p>In the fragment shader, start by retrieving these colors:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">uniform</span> <span class="token keyword">vec3</span> uDepthColor<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">vec3</span> uSurfaceColor<span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>And use only one color to verify that everything is working:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>uDepthColor<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/29/step-13.png" src="./assets/lessons/29/step-13.png" width="1792" height="1120" alt="./assets/lessons/29/step-13.png" class="is-loaded"></span></p>
+<p>What we need to do now is use more of the <code spellcheck="false">uDepthColor</code> if the wave is low and more of the <code spellcheck="false">uSurfaceColor</code> if it is high.</p>
+<p>Remember the previous lesson, we are going to use the <code spellcheck="false">mix(...)</code>. This function needs a first input, a second input, and a value that will dictate how to mix these two first inputs.</p>
+<ul>
+<li>If that third value is <code spellcheck="false">0.0</code>, the result will be the first input.</li>
+<li>If that third value is <code spellcheck="false">1.0</code>, the result will be the second input.</li>
+<li>If that third value is <code spellcheck="false">0.5</code>, the result will be a perfect mix of the two inputs.</li>
+<li>If that third value is below <code spellcheck="false">0.0</code> or above <code spellcheck="false">1.0</code> the value will be extrapolated.</li>
+</ul>
+<p>The two first parameters are, as you can imagine, the <code spellcheck="false">uDepthColor</code> and the <code spellcheck="false">uSurfaceColor</code>. But what about the third value that controls the mix?</p>
+<p>We could use the <code spellcheck="false">elevation</code>, unfortunately this variable is in the vertex shader.</p>
+<p>To transmit this variable to the fragment shader —like we did in the previous lessons— we are going to use a <code spellcheck="false">varying</code>. In the vertex shader, create a <code spellcheck="false">vElevation</code> varying and update it in the <code spellcheck="false">main</code> function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+
+<span class="token keyword">varying</span> <span class="token keyword">float</span> vElevation<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Varyings</span>
+vElevation <span class="token operator">=</span> elevation<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>In the fragment shader, retrieve the varying. Then create a <code spellcheck="false">color</code> variable that mixes the <code spellcheck="false">uDepthColor</code> and the <code spellcheck="false">uSurfaceColor</code> according to the <code spellcheck="false">vElevation</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">uniform</span> <span class="token keyword">vec3</span> uDepthColor<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">vec3</span> uSurfaceColor<span class="token punctuation">;</span>
+
+<span class="token keyword">varying</span> <span class="token keyword">float</span> vElevation<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">vec3</span> color <span class="token operator">=</span> <span class="token function">mix</span><span class="token punctuation">(</span>uDepthColor<span class="token punctuation">,</span> uSurfaceColor<span class="token punctuation">,</span> vElevation<span class="token punctuation">)</span><span class="token punctuation">;</span>
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>color<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/29/step-14.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You should see a very slight variation in the color. The problem is that our <code spellcheck="false">vElevation</code> currently only goes from <code spellcheck="false">- 0.2</code> to <code spellcheck="false">+ 0.2</code> according to our code. We need to find a way to control this <code spellcheck="false">vElevation</code>, but only in the fragment shader.</p>
+<p>Let's add some uniforms! We will create a <code spellcheck="false">uColorOffset</code> and <code spellcheck="false">uColorMultiplier</code>, and add both of them to our Dat.GUI:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> waterMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> waterVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> waterFragmentShader<span class="token punctuation">,</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+uColorOffset<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">0.25</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+uColorMultiplier<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">2</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span> 
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>waterMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uColorOffset<span class="token punctuation">,</span> <span class="token string">'value'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'uColorOffset'</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>waterMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uColorMultiplier<span class="token punctuation">,</span> <span class="token string">'value'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'uColorMultiplier'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Now retrieve the <code spellcheck="false">uColorOffset</code> and <code spellcheck="false">uColorMultiplier</code> uniforms in the fragment shader, create a <code spellcheck="false">mixStrength</code> variable —to make it easier to read— based on these two uniforms, and use that variable in the <code spellcheck="false">mix(...)</code> function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">uniform</span> <span class="token keyword">vec3</span> uDepthColor<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">vec3</span> uSurfaceColor<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">float</span> uColorOffset<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">float</span> uColorMultiplier<span class="token punctuation">;</span>
+
+<span class="token keyword">varying</span> <span class="token keyword">float</span> vElevation<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">float</span> mixStrength <span class="token operator">=</span> <span class="token punctuation">(</span>vElevation <span class="token operator">+</span> uColorOffset<span class="token punctuation">)</span> <span class="token operator">*</span> uColorMultiplier<span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> color <span class="token operator">=</span> <span class="token function">mix</span><span class="token punctuation">(</span>uDepthColor<span class="token punctuation">,</span> uSurfaceColor<span class="token punctuation">,</span> mixStrength<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>color<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/29/step-15.png" src="./assets/lessons/29/step-15.png" width="1792" height="1120" alt="./assets/lessons/29/step-15.png" class="is-loaded"></span></p>
+<p>You obtain a much better gradient. Tweak the values to secure colors you like:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl">debugObject<span class="token punctuation">.</span>depthColor <span class="token operator">=</span> <span class="token string">'#186691'</span>
+debugObject<span class="token punctuation">.</span>surfaceColor <span class="token operator">=</span> <span class="token string">'#9bd8ff'</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> waterMaterial <span class="token operator">=</span> new THREE<span class="token punctuation">.</span><span class="token function">ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> waterVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> waterFragmentShader<span class="token punctuation">,</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+uColorOffset<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">0.08</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+uColorMultiplier<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">5</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/29/step-16.png" src="./assets/lessons/29/step-16.png" width="1792" height="1120" alt="./assets/lessons/29/step-16.png" class="is-loaded"></span></p>
+<h2>Small waves</h2>
+<p>For the small waves, we are going to use a perlin noise. We used a 2D perlin noise in the previous lesson, where we sent 2D coordinates and got a float value in return. This time, we are going to use a 3D perlin. That will enable variations of that noise in time for a more realistic result.</p>
+<p>Go to the same gist as during the previous lesson and copy the <strong>Classic Perlin 3D Noise</strong> by <strong>Stefan Gustavson</strong>: <a target="_blank" href="https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83">https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83</a></p>
+<p>Or copy the code below to the vertex shader:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// Classic Perlin 3D Noise </span>
+<span class="token comment">// by Stefan Gustavson</span>
+<span class="token comment">//</span>
+<span class="token keyword">vec4</span> <span class="token function">permute</span><span class="token punctuation">(</span><span class="token keyword">vec4</span> x<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">return</span> <span class="token function">mod</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">(</span>x<span class="token operator">*</span><span class="token number">34.0</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token number">1.0</span><span class="token punctuation">)</span><span class="token operator">*</span>x<span class="token punctuation">,</span> <span class="token number">289.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">vec4</span> <span class="token function">taylorInvSqrt</span><span class="token punctuation">(</span><span class="token keyword">vec4</span> r<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">return</span> <span class="token number">1.79284291400159</span> <span class="token operator">-</span> <span class="token number">0.85373472095314</span> <span class="token operator">*</span> r<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">vec3</span> <span class="token function">fade</span><span class="token punctuation">(</span><span class="token keyword">vec3</span> t<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">return</span> t<span class="token operator">*</span>t<span class="token operator">*</span>t<span class="token operator">*</span><span class="token punctuation">(</span>t<span class="token operator">*</span><span class="token punctuation">(</span>t<span class="token operator">*</span><span class="token number">6.0</span><span class="token operator">-</span><span class="token number">15.0</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token number">10.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">float</span> <span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span> P<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">vec3</span> Pi0 <span class="token operator">=</span> <span class="token function">floor</span><span class="token punctuation">(</span>P<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Integer part for indexing</span>
+<span class="token keyword">vec3</span> Pi1 <span class="token operator">=</span> Pi0 <span class="token operator">+</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Integer part + 1</span>
+Pi0 <span class="token operator">=</span> <span class="token function">mod</span><span class="token punctuation">(</span>Pi0<span class="token punctuation">,</span> <span class="token number">289.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+Pi1 <span class="token operator">=</span> <span class="token function">mod</span><span class="token punctuation">(</span>Pi1<span class="token punctuation">,</span> <span class="token number">289.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> Pf0 <span class="token operator">=</span> <span class="token function">fract</span><span class="token punctuation">(</span>P<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Fractional part for interpolation</span>
+<span class="token keyword">vec3</span> Pf1 <span class="token operator">=</span> Pf0 <span class="token operator">-</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Fractional part - 1.0</span>
+<span class="token keyword">vec4</span> ix <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>Pi0<span class="token punctuation">.</span>x<span class="token punctuation">,</span> Pi1<span class="token punctuation">.</span>x<span class="token punctuation">,</span> Pi0<span class="token punctuation">.</span>x<span class="token punctuation">,</span> Pi1<span class="token punctuation">.</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> iy <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>Pi0<span class="token punctuation">.</span>yy<span class="token punctuation">,</span> Pi1<span class="token punctuation">.</span>yy<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> iz0 <span class="token operator">=</span> Pi0<span class="token punctuation">.</span>zzzz<span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> iz1 <span class="token operator">=</span> Pi1<span class="token punctuation">.</span>zzzz<span class="token punctuation">;</span>
+
+<span class="token keyword">vec4</span> ixy <span class="token operator">=</span> <span class="token function">permute</span><span class="token punctuation">(</span><span class="token function">permute</span><span class="token punctuation">(</span>ix<span class="token punctuation">)</span> <span class="token operator">+</span> iy<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> ixy0 <span class="token operator">=</span> <span class="token function">permute</span><span class="token punctuation">(</span>ixy <span class="token operator">+</span> iz0<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> ixy1 <span class="token operator">=</span> <span class="token function">permute</span><span class="token punctuation">(</span>ixy <span class="token operator">+</span> iz1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">vec4</span> gx0 <span class="token operator">=</span> ixy0 <span class="token operator">/</span> <span class="token number">7.0</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> gy0 <span class="token operator">=</span> <span class="token function">fract</span><span class="token punctuation">(</span><span class="token function">floor</span><span class="token punctuation">(</span>gx0<span class="token punctuation">)</span> <span class="token operator">/</span> <span class="token number">7.0</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">;</span>
+gx0 <span class="token operator">=</span> <span class="token function">fract</span><span class="token punctuation">(</span>gx0<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> gz0 <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token function">abs</span><span class="token punctuation">(</span>gx0<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token function">abs</span><span class="token punctuation">(</span>gy0<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> sz0 <span class="token operator">=</span> <span class="token function">step</span><span class="token punctuation">(</span>gz0<span class="token punctuation">,</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+gx0 <span class="token operator">-=</span> sz0 <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">,</span> gx0<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+gy0 <span class="token operator">-=</span> sz0 <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">,</span> gy0<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">vec4</span> gx1 <span class="token operator">=</span> ixy1 <span class="token operator">/</span> <span class="token number">7.0</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> gy1 <span class="token operator">=</span> <span class="token function">fract</span><span class="token punctuation">(</span><span class="token function">floor</span><span class="token punctuation">(</span>gx1<span class="token punctuation">)</span> <span class="token operator">/</span> <span class="token number">7.0</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">;</span>
+gx1 <span class="token operator">=</span> <span class="token function">fract</span><span class="token punctuation">(</span>gx1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> gz1 <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token function">abs</span><span class="token punctuation">(</span>gx1<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token function">abs</span><span class="token punctuation">(</span>gy1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> sz1 <span class="token operator">=</span> <span class="token function">step</span><span class="token punctuation">(</span>gz1<span class="token punctuation">,</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+gx1 <span class="token operator">-=</span> sz1 <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">,</span> gx1<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+gy1 <span class="token operator">-=</span> sz1 <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">,</span> gy1<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">vec3</span> g000 <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>gx0<span class="token punctuation">.</span>x<span class="token punctuation">,</span>gy0<span class="token punctuation">.</span>x<span class="token punctuation">,</span>gz0<span class="token punctuation">.</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> g100 <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>gx0<span class="token punctuation">.</span>y<span class="token punctuation">,</span>gy0<span class="token punctuation">.</span>y<span class="token punctuation">,</span>gz0<span class="token punctuation">.</span>y<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> g010 <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>gx0<span class="token punctuation">.</span>z<span class="token punctuation">,</span>gy0<span class="token punctuation">.</span>z<span class="token punctuation">,</span>gz0<span class="token punctuation">.</span>z<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> g110 <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>gx0<span class="token punctuation">.</span>w<span class="token punctuation">,</span>gy0<span class="token punctuation">.</span>w<span class="token punctuation">,</span>gz0<span class="token punctuation">.</span>w<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> g001 <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>gx1<span class="token punctuation">.</span>x<span class="token punctuation">,</span>gy1<span class="token punctuation">.</span>x<span class="token punctuation">,</span>gz1<span class="token punctuation">.</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> g101 <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>gx1<span class="token punctuation">.</span>y<span class="token punctuation">,</span>gy1<span class="token punctuation">.</span>y<span class="token punctuation">,</span>gz1<span class="token punctuation">.</span>y<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> g011 <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>gx1<span class="token punctuation">.</span>z<span class="token punctuation">,</span>gy1<span class="token punctuation">.</span>z<span class="token punctuation">,</span>gz1<span class="token punctuation">.</span>z<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> g111 <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>gx1<span class="token punctuation">.</span>w<span class="token punctuation">,</span>gy1<span class="token punctuation">.</span>w<span class="token punctuation">,</span>gz1<span class="token punctuation">.</span>w<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">vec4</span> norm0 <span class="token operator">=</span> <span class="token function">taylorInvSqrt</span><span class="token punctuation">(</span><span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token function">dot</span><span class="token punctuation">(</span>g000<span class="token punctuation">,</span> g000<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">dot</span><span class="token punctuation">(</span>g010<span class="token punctuation">,</span> g010<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">dot</span><span class="token punctuation">(</span>g100<span class="token punctuation">,</span> g100<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">dot</span><span class="token punctuation">(</span>g110<span class="token punctuation">,</span> g110<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+g000 <span class="token operator">*=</span> norm0<span class="token punctuation">.</span>x<span class="token punctuation">;</span>
+g010 <span class="token operator">*=</span> norm0<span class="token punctuation">.</span>y<span class="token punctuation">;</span>
+g100 <span class="token operator">*=</span> norm0<span class="token punctuation">.</span>z<span class="token punctuation">;</span>
+g110 <span class="token operator">*=</span> norm0<span class="token punctuation">.</span>w<span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> norm1 <span class="token operator">=</span> <span class="token function">taylorInvSqrt</span><span class="token punctuation">(</span><span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token function">dot</span><span class="token punctuation">(</span>g001<span class="token punctuation">,</span> g001<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">dot</span><span class="token punctuation">(</span>g011<span class="token punctuation">,</span> g011<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">dot</span><span class="token punctuation">(</span>g101<span class="token punctuation">,</span> g101<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">dot</span><span class="token punctuation">(</span>g111<span class="token punctuation">,</span> g111<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+g001 <span class="token operator">*=</span> norm1<span class="token punctuation">.</span>x<span class="token punctuation">;</span>
+g011 <span class="token operator">*=</span> norm1<span class="token punctuation">.</span>y<span class="token punctuation">;</span>
+g101 <span class="token operator">*=</span> norm1<span class="token punctuation">.</span>z<span class="token punctuation">;</span>
+g111 <span class="token operator">*=</span> norm1<span class="token punctuation">.</span>w<span class="token punctuation">;</span>
+
+<span class="token keyword">float</span> n000 <span class="token operator">=</span> <span class="token function">dot</span><span class="token punctuation">(</span>g000<span class="token punctuation">,</span> Pf0<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> n100 <span class="token operator">=</span> <span class="token function">dot</span><span class="token punctuation">(</span>g100<span class="token punctuation">,</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>Pf1<span class="token punctuation">.</span>x<span class="token punctuation">,</span> Pf0<span class="token punctuation">.</span>yz<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> n010 <span class="token operator">=</span> <span class="token function">dot</span><span class="token punctuation">(</span>g010<span class="token punctuation">,</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>Pf0<span class="token punctuation">.</span>x<span class="token punctuation">,</span> Pf1<span class="token punctuation">.</span>y<span class="token punctuation">,</span> Pf0<span class="token punctuation">.</span>z<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> n110 <span class="token operator">=</span> <span class="token function">dot</span><span class="token punctuation">(</span>g110<span class="token punctuation">,</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>Pf1<span class="token punctuation">.</span>xy<span class="token punctuation">,</span> Pf0<span class="token punctuation">.</span>z<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> n001 <span class="token operator">=</span> <span class="token function">dot</span><span class="token punctuation">(</span>g001<span class="token punctuation">,</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>Pf0<span class="token punctuation">.</span>xy<span class="token punctuation">,</span> Pf1<span class="token punctuation">.</span>z<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> n101 <span class="token operator">=</span> <span class="token function">dot</span><span class="token punctuation">(</span>g101<span class="token punctuation">,</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>Pf1<span class="token punctuation">.</span>x<span class="token punctuation">,</span> Pf0<span class="token punctuation">.</span>y<span class="token punctuation">,</span> Pf1<span class="token punctuation">.</span>z<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> n011 <span class="token operator">=</span> <span class="token function">dot</span><span class="token punctuation">(</span>g011<span class="token punctuation">,</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>Pf0<span class="token punctuation">.</span>x<span class="token punctuation">,</span> Pf1<span class="token punctuation">.</span>yz<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> n111 <span class="token operator">=</span> <span class="token function">dot</span><span class="token punctuation">(</span>g111<span class="token punctuation">,</span> Pf1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">vec3</span> fade_xyz <span class="token operator">=</span> <span class="token function">fade</span><span class="token punctuation">(</span>Pf0<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> n_z <span class="token operator">=</span> <span class="token function">mix</span><span class="token punctuation">(</span><span class="token keyword">vec4</span><span class="token punctuation">(</span>n000<span class="token punctuation">,</span> n100<span class="token punctuation">,</span> n010<span class="token punctuation">,</span> n110<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>n001<span class="token punctuation">,</span> n101<span class="token punctuation">,</span> n011<span class="token punctuation">,</span> n111<span class="token punctuation">)</span><span class="token punctuation">,</span> fade_xyz<span class="token punctuation">.</span>z<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec2</span> n_yz <span class="token operator">=</span> <span class="token function">mix</span><span class="token punctuation">(</span>n_z<span class="token punctuation">.</span>xy<span class="token punctuation">,</span> n_z<span class="token punctuation">.</span>zw<span class="token punctuation">,</span> fade_xyz<span class="token punctuation">.</span>y<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> n_xyz <span class="token operator">=</span> <span class="token function">mix</span><span class="token punctuation">(</span>n_yz<span class="token punctuation">.</span>x<span class="token punctuation">,</span> n_yz<span class="token punctuation">.</span>y<span class="token punctuation">,</span> fade_xyz<span class="token punctuation">.</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+<span class="token keyword">return</span> <span class="token number">2.2</span> <span class="token operator">*</span> n_xyz<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>No fix needed this time.</p>
+<p>We can now use the <code spellcheck="false">cnoise</code> function with a <code spellcheck="false">vec3</code> as parameter.</p>
+<p>Here are the three values of the <code spellcheck="false">vec3</code>:</p>
+<ul>
+<li><code spellcheck="false">x</code> will be the <code spellcheck="false">x</code> of <code spellcheck="false">modelPosition</code></li>
+<li><code spellcheck="false">y</code> will be the <code spellcheck="false">z</code> of <code spellcheck="false">modelPosition</code></li>
+<li><code spellcheck="false">z</code> will be <code spellcheck="false">uTime</code>. That third value will make the noise evolve in a natural and realistic style.</li>
+</ul>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl">elevation <span class="token operator">+=</span> <span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>xz<span class="token punctuation">,</span> uTime<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/29/step-17.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>This is not the expected result. First, the waves speed is too fast. So you must multiply the <code spellcheck="false">uTime</code> by <code spellcheck="false">0.2</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl">elevation <span class="token operator">+=</span> <span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>xz<span class="token punctuation">,</span> uTime <span class="token operator">*</span> <span class="token number">0.2</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/29/step-18.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Secondly, the frequency is too small. That results in waves as large as the big ones we created previously. To increase the frequency, multiply <code spellcheck="false">modelPosition.xz</code> by <code spellcheck="false">3.0</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl">elevation <span class="token operator">+=</span> <span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>xz <span class="token operator">*</span> <span class="token number">3.0</span><span class="token punctuation">,</span> uTime <span class="token operator">*</span> <span class="token number">0.2</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/29/step-19.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Thirdly, the waves are way too high. Let's reduce that by multiplying the noise by <code spellcheck="false">0.15</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl">elevation <span class="token operator">+=</span> <span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>xz <span class="token operator">*</span> <span class="token number">3.0</span><span class="token punctuation">,</span> uTime <span class="token operator">*</span> <span class="token number">0.2</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.15</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/29/step-20.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Finally, real-life waves aren't that smooth. Realistic waves have rounded troughs and high crests. To achieve this result, we can use the <code spellcheck="false">abs(...)</code> function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl">elevation <span class="token operator">+=</span> <span class="token function">abs</span><span class="token punctuation">(</span><span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>xz <span class="token operator">*</span> <span class="token number">3.0</span><span class="token punctuation">,</span> uTime <span class="token operator">*</span> <span class="token number">0.2</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.15</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/29/step-21.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>We got exactly the opposite of what we wanted with rounded crests and high troughs. To invert the waves, replace <code spellcheck="false">+</code> by <code spellcheck="false">-</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl">elevation <span class="token operator">-=</span> <span class="token function">abs</span><span class="token punctuation">(</span><span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>xz <span class="token operator">*</span> <span class="token number">3.0</span><span class="token punctuation">,</span> uTime <span class="token operator">*</span> <span class="token number">0.2</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.15</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/29/step-22.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>That's better, but when you look at waves in a raging sea, they seem more chaotic with different and unpredictable frequencies.</p>
+<p>We need to apply even more noises at higher frequencies. We could repeat the previous line with different values, but it's the perfect occasion to use a <code spellcheck="false">for(...)</code> loop.</p>
+<p><code spellcheck="false">for(...)</code> loops work in GLSL. Just make sure to use a <code spellcheck="false">float</code> type variable. We are going to use 3 iterations starting from <code spellcheck="false">1.0</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">float</span> i <span class="token operator">=</span> <span class="token number">1.0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> <span class="token number">3.0</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then move our previous formula in the loop:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">float</span> i <span class="token operator">=</span> <span class="token number">1.0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> <span class="token number">3.0</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+elevation <span class="token operator">-=</span> <span class="token function">abs</span><span class="token punctuation">(</span><span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>xz <span class="token operator">*</span> <span class="token number">3.0</span><span class="token punctuation">,</span> uTime <span class="token operator">*</span> <span class="token number">0.2</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.15</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/29/step-23.png" src="./assets/lessons/29/step-23.png" width="1792" height="1120" alt="./assets/lessons/29/step-23.png" class="is-loaded"></span></p>
+<p>Right now, we are applying 3 times the same formula, which should result in the same waves, but their amplitude is much more prominent.</p>
+<p>Let's increase the frequency and reduce the amplitude according to the <code spellcheck="false">i</code> variable:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">float</span> i <span class="token operator">=</span> <span class="token number">1.0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> <span class="token number">3.0</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+elevation <span class="token operator">-=</span> <span class="token function">abs</span><span class="token punctuation">(</span><span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>xz <span class="token operator">*</span> <span class="token number">3.0</span> <span class="token operator">*</span> i<span class="token punctuation">,</span> uTime <span class="token operator">*</span> <span class="token number">0.2</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.15</span> <span class="token operator">/</span> i<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/29/step-24.png" src="./assets/lessons/29/step-24.png" width="1792" height="1120" alt="./assets/lessons/29/step-24.png" class="is-loaded"></span></p>
+<p>That's much better. Maybe you haven't noticed it, but we can barely see the smaller waves. That is because our geometry is missing vertices. Increase the subdivisions to <code spellcheck="false">512x512</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">const</span> waterGeometry <span class="token operator">=</span> new THREE<span class="token punctuation">.</span><span class="token function">PlaneGeometry</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">512</span><span class="token punctuation">,</span> <span class="token number">512</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/29/step-25.png" src="./assets/lessons/29/step-25.png" width="1792" height="1120" alt="./assets/lessons/29/step-25.png" class="is-loaded"></span></p>
+<p>That represents a lot of triangles, but the plane is the only geometry we have in the scene, and we are animating almost everything in the shader, meaning that the GPU is doing the heavy lifting.</p>
+<p>Let's add some uniforms and tweaks to control these small waves:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> waterMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> waterVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> waterFragmentShader<span class="token punctuation">,</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+uSmallWavesElevation<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">0.15</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+uSmallWavesFrequency<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">3</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+uSmallWavesSpeed<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">0.2</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+uSmallIterations<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">4</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>waterMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uSmallWavesElevation<span class="token punctuation">,</span> <span class="token string">'value'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'uSmallWavesElevation'</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>waterMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uSmallWavesFrequency<span class="token punctuation">,</span> <span class="token string">'value'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">30</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'uSmallWavesFrequency'</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>waterMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uSmallWavesSpeed<span class="token punctuation">,</span> <span class="token string">'value'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'uSmallWavesSpeed'</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>waterMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uSmallIterations<span class="token punctuation">,</span> <span class="token string">'value'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'uSmallIterations'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>And in the vertex shader:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">uniform</span> <span class="token keyword">float</span> uSmallWavesElevation<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">float</span> uSmallWavesFrequency<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">float</span> uSmallWavesSpeed<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">float</span> uSmallIterations<span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">float</span> i <span class="token operator">=</span> <span class="token number">1.0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> uSmallIterations<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+elevation <span class="token operator">-=</span> <span class="token function">abs</span><span class="token punctuation">(</span><span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>xz <span class="token operator">*</span> uSmallWavesFrequency <span class="token operator">*</span> i<span class="token punctuation">,</span> uTime <span class="token operator">*</span> uSmallWavesSpeed<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">*</span> uSmallWavesElevation <span class="token operator">/</span> i<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/29/step-26.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>And that's it.</p>
+<h2>Go further</h2>
+<p>If you wanted to go further, you could try to add foam.</p>
+<p>You could also attempt to enlarge the plane.</p>
+<p>Adding fog would be a great way to get a more immersive experience that would enhance the feeling of being lost in the sea. Be careful though, adding fog will be more challenging than what we saw because you need to write the code for that fog on your own.</p>
+</section>
+</body>
+
+</html>

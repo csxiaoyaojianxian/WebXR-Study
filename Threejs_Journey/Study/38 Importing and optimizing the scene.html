@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<section class="text js-text">
+    <h2>Introduction</h2>
+<p>In the previous lessons, we created and exported our scene.</p>
+<p>We can now import it into Three.js, but we will also make sure to optimize our model as best as we possibly can.</p>
+<h2>Setup</h2>
+<p>Currently, all we have in our scene is a white cube.</p>
+<p>The loaders have already been added to the code, and Draco is already supported:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Loaders
+*/</span>
+<span class="token comment">// Texture loader</span>
+<span class="token keyword">const</span> textureLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>TextureLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Draco loader</span>
+<span class="token keyword">const</span> dracoLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DRACOLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+dracoLoader<span class="token punctuation">.</span><span class="token function">setDecoderPath</span><span class="token punctuation">(</span><span class="token string">'draco/'</span><span class="token punctuation">)</span>
+
+<span class="token comment">// GLTF loader</span>
+<span class="token keyword">const</span> gltfLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">GLTFLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+gltfLoader<span class="token punctuation">.</span><span class="token function">setDRACOLoader</span><span class="token punctuation">(</span>dracoLoader<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The <code spellcheck="false">portal.glb</code> and <code spellcheck="false">baked.jpg</code> files are located in the <code spellcheck="false">/static/</code> folder but you can replace them with your own files.</p>
+<p>An instance of Dat.GUI is also available, and we are going to add some tweaks to it in the next lesson.</p>
+<p>The antialias is already set on the <code spellcheck="false">WebGLRenderer</code>.</p>
+<h2>Loading the model</h2>
+<p>We can start by loading the model. We are going to keep the cube in the scene to make sure that everything is working. Once we can see our portal scene, we will get rid of the cube.</p>
+<p>Load the model after the loaders part and test the result in the console:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Model
+*/</span>
+gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'portal.glb'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>If you don't get the scene in the console log, check the path and search for errors.</p>
+<p>We will now try to add the model to the scene:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'portal.glb'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-1.png" src="./assets/lessons/38/step-1.png" width="1792" height="1120" alt="./assets/lessons/38/step-1.png" class="is-loaded"></span></p>
+<p>You should see some silhouettes.</p>
+<p>The problem is that, by default, when GLTF exports PBR materials, they get interpreted as <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshStandardMaterial">MeshStandardMaterial</a>. And, this material needs light.</p>
+<p>But we don't want lights because our scene is baked, and all the lighting and shadow information is already contained in the texture:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-2.jpg" src="./assets/lessons/38/step-2.jpg" width="1024" height="1024" alt="./assets/lessons/38/step-2.jpg" class="is-loaded"></span></p>
+<p>So, we are going to create a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a> and apply it to all the elements in the scene.</p>
+<p>Since we are going to create multiple materials, we need to create a section for them in the code before loading the model:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Materials
+*/</span>
+<span class="token comment">// Baked material</span>
+<span class="token keyword">const</span> bakedMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> color<span class="token operator">:</span> <span class="token number">0xff0000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>There are a lot of objects in the scene. Instead of applying the material to each one manually, we can traverse the scene in the load callback:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'portal.glb'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span><span class="token function">traverse</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+child<span class="token punctuation">.</span>material <span class="token operator">=</span> bakedMaterial
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-3.png" src="./assets/lessons/38/step-3.png" width="1792" height="1120" alt="./assets/lessons/38/step-3.png" class="is-loaded"></span></p>
+<p>You should get all the objects visible with a uniform red color.</p>
+<p>Now, remove the code related to the white cube.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-4.png" src="./assets/lessons/38/step-4.png" width="1792" height="1120" alt="./assets/lessons/38/step-4.png" class="is-loaded"></span></p>
+<h2>Loading the texture</h2>
+<p>To load the texture, we can use the <code spellcheck="false">textureLoader</code> already in the code.</p>
+<p>Load it before the materials:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Textures
+*/</span>
+<span class="token keyword">const</span> bakedTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'baked.jpg'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Make sure you don't get any error in the logs.</p>
+<p>To apply this texture to our scene, we can add it to the <code spellcheck="false">bakedMaterial</code> with the <code spellcheck="false">map</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> bakedMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> map<span class="token operator">:</span> bakedTexture <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-5.png" src="./assets/lessons/38/step-5.png" width="1792" height="1120" alt="./assets/lessons/38/step-5.png" class="is-loaded"></span></p>
+<p>While this looks interesting and funny, this is not what we want.</p>
+<p>The problem is that our texture <code spellcheck="false">Y</code> coordinates are inverted. It's as if our texture has been mirrored vertically.</p>
+<p>There is a disagreement between software / library about the direction of the <code spellcheck="false">Y</code> axis in the texture's coordinates. We were unlucky in the illustration above, but all we need to do is flip the texture.</p>
+<p>To do that, set the <code spellcheck="false">flipY</code> property of <code spellcheck="false">bakedTexture</code> to <code spellcheck="false">false</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">bakedTexture<span class="token punctuation">.</span>flipY <span class="token operator">=</span> <span class="token boolean">false</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-6.png" src="./assets/lessons/38/step-6.png" width="1792" height="1120" alt="./assets/lessons/38/step-6.png" class="is-loaded"></span></p>
+<p>The scene looks much better now.</p>
+<p>We still need to take care of the pole lights and the portal. And, we also need to take care of the colors. Maybe you can't really see it, but the colors aren't exactly the same as in the Blender render:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-7.png" src="./assets/lessons/38/step-7.png" width="1920" height="1080" alt="./assets/lessons/38/step-7.png" class="is-loaded"></span></p>
+<h2>Fixing the colors</h2>
+<p>Our baked texture is encoded with <code spellcheck="false">sRGB</code> but Three.js isn't aware of that.</p>
+<p>To set the encoding of the texture, change its <code spellcheck="false">encoding</code> property to <code spellcheck="false">THREE.sRGBEncoding</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">bakedTexture<span class="token punctuation">.</span>encoding <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>sRGBEncoding</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-8.png" src="./assets/lessons/38/step-8.png" width="1792" height="1120" alt="./assets/lessons/38/step-8.png" class="is-loaded"></span></p>
+<p>The colors look worse, but it's because we also need to set the output of our <code spellcheck="false">WebGLRenderer</code> to <code spellcheck="false">sRGB</code>.</p>
+<p>To do that, set the <code spellcheck="false">outputEncoding</code> property of the <code spellcheck="false">renderer</code> to <code spellcheck="false">THREE.sRGBEncoding</code> just like we did with the bakedTexture:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">renderer<span class="token punctuation">.</span>outputEncoding <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>sRGBEncoding</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-9.png" src="./assets/lessons/38/step-9.png" width="1792" height="1120" alt="./assets/lessons/38/step-9.png" class="is-loaded"></span></p>
+<p>The colors are now exactly the same as in the Blender render.</p>
+<p>This might seem like a small detail, but it can make a huge difference between a good result and a great result, especially if you're going for a realistic experience.</p>
+<h2>Fixing the emission objects</h2>
+<p>It's time to fix the pole lights and the portal.</p>
+<p>Because they are emission materials, they should look like uniform bright colors which is why we can use <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a>.</p>
+<p>Create a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a> for the pole light:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Pole light material</span>
+<span class="token keyword">const</span> poleLightMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> color<span class="token operator">:</span> <span class="token number">0xffffe5</span> <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Now the question is, how can we apply that material to the right objects in the scene.</p>
+<p>If you log the <code spellcheck="false">children</code> of the scene in the load callback, you'll see that there are 56 <code spellcheck="false">Meshes</code> in it (this number might vary depending on your model):</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'portal.glb'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>To solve how to apply the right material to the right object, we are going to edit the model and set a specific name for each emission object.</p>
+<p>Open the model in Blender (use your <code spellcheck="false">.blend</code> file or use the file located in the <code spellcheck="false">/resources/</code> folder):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-10.png" src="./assets/lessons/38/step-10.png" width="1792" height="1120" alt="./assets/lessons/38/step-10.png" class="is-loaded"></span></p>
+<p>Enable selection on the <code spellcheck="false">emissions</code> collection (if that's not already the case):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-11.png" src="./assets/lessons/38/step-11.png" width="379" height="110" alt="./assets/lessons/38/step-11.png" class="is-loaded"></span></p>
+<p>Rename each one of the objects accordingly:</p>
+<ul>
+<li><code spellcheck="false">poleLightA</code></li>
+<li><code spellcheck="false">poleLightB</code></li>
+<li>
+<p><code spellcheck="false">portalLight</code></p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-12.png" src="./assets/lessons/38/step-12.png" width="367" height="109" alt="./assets/lessons/38/step-12.png" class="is-loaded"></span></p>
+</li>
+</ul>
+<p>In Blender, you can't use the same name for multiple objects because they each have a unique ID.</p>
+<p>Select everything (except the camera and the light) and export it as <code spellcheck="false">glTF 2.0</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-13.png" src="./assets/lessons/38/step-13.png" width="562" height="544" alt="./assets/lessons/38/step-13.png" class="is-loaded"></span></p>
+<p>Use the same parameters as in the previous lesson and replace the <code spellcheck="false">portal.glb</code> file in the <code spellcheck="false">/static/</code> folder:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-14.png" src="./assets/lessons/38/step-14.png" width="1123" height="858" alt="./assets/lessons/38/step-14.png" class="is-loaded"></span></p>
+<p>Spoiler alert, don't close Blender!</p>
+<p>You can access object names in Three.js with the <code spellcheck="false">name</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'portal.glb'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>name<span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>What we can do now, is search in the <code spellcheck="false">gltf.scene.children</code> array by using the name property.</p>
+<p>In JavaScript, you can "search" in an array with the <code spellcheck="false">find(...)</code> method:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'portal.glb'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span><span class="token function">traverse</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+child<span class="token punctuation">.</span>material <span class="token operator">=</span> bakedMaterial
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">)</span>
+
+<span class="token comment">// Get each object</span>
+<span class="token keyword">const</span> portalLightMesh <span class="token operator">=</span> gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> child<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'portalLight'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> poleLightAMesh <span class="token operator">=</span> gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> child<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'poleLightA'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> poleLightBMesh <span class="token operator">=</span> gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> child<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'poleLightB'</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>portalLightMesh<span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>poleLightAMesh<span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>poleLightBMesh<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You should see each one of the 3 objects in the console.</p>
+<p>If you get an error or <code spellcheck="false">undefined</code>, check the names in your JavaScript as well as in your Blender scene. Also, make sure you exported the model the right way.</p>
+<p>We can now replace the pole lights with the material we created earlier:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'portal.glb'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span><span class="token function">traverse</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+child<span class="token punctuation">.</span>material <span class="token operator">=</span> bakedMaterial
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">)</span>
+
+<span class="token comment">// Get each object</span>
+<span class="token keyword">const</span> portalLightMesh <span class="token operator">=</span> gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> child<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'portalLight'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> poleLightAMesh <span class="token operator">=</span> gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> child<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'poleLightA'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> poleLightBMesh <span class="token operator">=</span> gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> child<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'poleLightB'</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Apply materials</span>
+poleLightAMesh<span class="token punctuation">.</span>material <span class="token operator">=</span> poleLightMaterial
+poleLightBMesh<span class="token punctuation">.</span>material <span class="token operator">=</span> poleLightMaterial
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-15.png" src="./assets/lessons/38/step-15.png" width="1792" height="1120" alt="./assets/lessons/38/step-15.png" class="is-loaded"></span></p>
+<p>You should see your <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a> applied on both lamps.</p>
+<p>Create a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a> for the portal and apply it the same way:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Portal light material</span>
+<span class="token keyword">const</span> portalLightMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> color<span class="token operator">:</span> <span class="token number">0xffffff</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+
+gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'portal.glb'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span><span class="token function">traverse</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+child<span class="token punctuation">.</span>material <span class="token operator">=</span> bakedMaterial
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">)</span>
+
+<span class="token comment">// Get each object</span>
+<span class="token keyword">const</span> portalLightMesh <span class="token operator">=</span> gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> child<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'portalLight'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> poleLightAMesh <span class="token operator">=</span> gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> child<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'poleLightA'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> poleLightBMesh <span class="token operator">=</span> gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> child<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'poleLightB'</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Apply materials</span>
+portalLightMesh<span class="token punctuation">.</span>material <span class="token operator">=</span> portalLightMaterial
+poleLightAMesh<span class="token punctuation">.</span>material <span class="token operator">=</span> poleLightMaterial
+poleLightBMesh<span class="token punctuation">.</span>material <span class="token operator">=</span> poleLightMaterial
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-16.png" src="./assets/lessons/38/step-16.png" width="1792" height="1120" alt="./assets/lessons/38/step-16.png" class="is-loaded"></span></p>
+<p>If you have a portal color different than white, don't spend too much time trying to find the right value because we are going to replace it with a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a> later.</p>
+<h2>Improving performances</h2>
+<p>We could stop here, but we have made some performance mistakes.</p>
+<p>First, we can test the draw calls with Spector.js.</p>
+<h3>Monitoring</h3>
+<p>If you remember from the performance lesson, <a target="_blank" href="https://github.com/BabylonJS/Spector.js/">Spector.js</a> is a Chrome plugin that let us see the different steps the GPU had to go through to create the render.</p>
+<p>While this lesson is being written, the Chrome plugin isn't available anymore.</p>
+<p>You don't need to install the plugin to follow the steps below, but it's always good to keep an eye on how your scene is being rendered in order to optimize it.</p>
+<p>If you installed <a target="_blank" href="https://github.com/BabylonJS/Spector.js/">Spector.js</a> in Chrome, hit the extension icon to activate it and hit it a second time to open the following menu:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-17.png" src="./assets/lessons/38/step-17.png" width="730" height="603" alt="./assets/lessons/38/step-17.png" class="is-loaded"></span></p>
+<p>Click the red circle to start processing the render. This might take few seconds.</p>
+<p>Once processed, a window should open with all the details we need. On the left, you can scroll through the different steps taken to render the scene. The less you have, the better:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-18.png" src="./assets/lessons/38/step-18.png" width="1792" height="1120" alt="./assets/lessons/38/step-18.png" class="is-loaded"></span></p>
+<p>The performance is probably good enough, but if you think about it, we should only have 4 objects:</p>
+<ul>
+<li>The first pole light</li>
+<li>The second pole light</li>
+<li>The portal light</li>
+<li>All the baked objects</li>
+</ul>
+<p>We don't need to separate the baked objects because we are pretty sure we are not going to move them. For example, if we moved the axe, we would still see its shadow on the trunk. If we moved a fence, we would still see its shadow on the floor.</p>
+<p>To improve the performance, we are going to merge these geometries.</p>
+<h3>Merging the baked objects</h3>
+<p>Go back to Blender:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-19.png" src="./assets/lessons/38/step-19.png" width="1792" height="1120" alt="./assets/lessons/38/step-19.png" class="is-loaded"></span></p>
+<p>We don't want to affect the emissions objects. Make sure to set the <code spellcheck="false">emissions</code> collection as un-selectable:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-20.png" src="./assets/lessons/38/step-20.png" width="374" height="65" alt="./assets/lessons/38/step-20.png" class="is-loaded"></span></p>
+<p>Merging all the geometries right now would be a bad idea because we might not be able to modify our scene after that. We are going to duplicate them first and put everything in a different collection before merging.</p>
+<p>Create an empty <code spellcheck="false">merged</code> collection:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-21.png" src="./assets/lessons/38/step-21.png" width="367" height="53" alt="./assets/lessons/38/step-21.png" class="is-loaded"></span></p>
+<p>Select all the objects in the scene (not the camera, the light and the emission objects) and duplicate them with <code spellcheck="false">SHIFT + D</code>. Validate the duplicate by clicking once on the scene (without moving the mouse).</p>
+<p>While those duplicates objects are still selected, move them to the <code spellcheck="false">merged</code> collection by pressing <code spellcheck="false">M</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-22.png" src="./assets/lessons/38/step-22.png" width="659" height="437" alt="./assets/lessons/38/step-22.png" class="is-loaded"></span></p>
+<p>All the objects are now duplicated in the <code spellcheck="false">merged</code> collection. You can merge them by pressing <code spellcheck="false">CTRL + J</code> on Windows or <code spellcheck="false">CMD + J</code> on MacOS.</p>
+<p>Deactivate all the other collections and check that you have only one merged object:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-23.png" src="./assets/lessons/38/step-23.png" width="1145" height="543" alt="./assets/lessons/38/step-23.png" class="is-loaded"></span></p>
+<p>Change the name of this single object to <code spellcheck="false">baked</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-24.png" src="./assets/lessons/38/step-24.png" width="355" height="84" alt="./assets/lessons/38/step-24.png" class="is-loaded"></span></p>
+<p>Reactivate the <code spellcheck="false">emissions</code> collection in order to be able to select the objects inside.</p>
+<p>You should keep the initial collections that you made, even if they are deactivated. They will be there in case we need to make changes or to re-bake the scene:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-25.png" src="./assets/lessons/38/step-25.png" width="331" height="348" alt="./assets/lessons/38/step-25.png" class="is-loaded"></span></p>
+<p>If you switch to <code spellcheck="false">Renderer</code> shading, you'll see that the materials are still working on the merged object.</p>
+<p>This is because Blender can handle multiple materials on one geometry. It's not a problem because, when exporting, we ask Blender not to export the material. But if you are curious to see what your scene looks like without materials, go to the <code spellcheck="false">Materials Properties</code> tab while selecting the <code spellcheck="false">baked</code> object and delete all the materials by clicking on the <code spellcheck="false">-</code> icon:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-26.png" src="./assets/lessons/38/step-26.png" width="151" height="79" alt="./assets/lessons/38/step-26.png" class="is-loaded"></span></p>
+<p>This should result in a nice looking white scene.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-27.png" src="./assets/lessons/38/step-27.png" width="1792" height="1120" alt="./assets/lessons/38/step-27.png" class="is-loaded"></span></p>
+<p>We can now export the merged object and the emissions with the same parameters as before:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-28.png" src="./assets/lessons/38/step-28.png" width="1792" height="1120" alt="./assets/lessons/38/step-28.png" class="is-loaded"></span></p>
+<p>You should get the exact same result in Three.js:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-29.png" src="./assets/lessons/38/step-29.png" width="1792" height="1120" alt="./assets/lessons/38/step-29.png" class="is-loaded"></span></p>
+<p>But let's look at Spector.js:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-30.png" src="./assets/lessons/38/step-30.png" width="1792" height="1120" alt="./assets/lessons/38/step-30.png" class="is-loaded"></span></p>
+<p>As you can see, our scene is being drawn in only 4 steps. One for the baked object and one for each emission light.</p>
+<p>We could have merged the two pole lights, but that's more than enough for now.</p>
+<p>Now that we have only one object on which we want to apply the baked texture, we don't need to traverse all the children of the loaded scene.</p>
+<p>We can search for it using the same method as for the emission objects:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'portal.glb'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">)</span>
+
+<span class="token comment">// Get each object</span>
+<span class="token keyword">const</span> bakedMesh <span class="token operator">=</span> gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> child<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'baked'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> portalLightMesh <span class="token operator">=</span> gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> child<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'portalLight'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> poleLightAMesh <span class="token operator">=</span> gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> child<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'poleLightA'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> poleLightBMesh <span class="token operator">=</span> gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> child<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'poleLightB'</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Apply materials</span>
+bakedMesh<span class="token punctuation">.</span>material <span class="token operator">=</span> bakedMaterial
+portalLightMesh<span class="token punctuation">.</span>material <span class="token operator">=</span> portalLightMaterial
+poleLightAMesh<span class="token punctuation">.</span>material <span class="token operator">=</span> poleLightMaterial
+poleLightBMesh<span class="token punctuation">.</span>material <span class="token operator">=</span> poleLightMaterial
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/38/step-31.png" src="./assets/lessons/38/step-31.png" width="1792" height="1120" alt="./assets/lessons/38/step-31.png" class="is-loaded"></span></p>
+<p>You should get the same result. If not, make sure you changed the name of the merged object to <code spellcheck="false">baked</code> and that you exported it with the 3 emissions objects.</p>
+<p>In the next lesson, we are going to add some details to the scene.</p>
+</section>
+</body>
+
+</html>

@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<section class="text js-text">
+    <h2>Introduction</h2>
+<p>Post-processing is about adding effects on the final image (the render). People mostly use this technique in filmmaking, but we can do it in WebGL too.</p>
+<p>Post-processing can be subtle to improve the image slightly or to create huge effects.</p>
+<p>Here are some examples of what you can use post-processing for:</p>
+<ul>
+<li>Depth of field</li>
+<li>Bloom</li>
+<li>God ray</li>
+<li>Motion blur</li>
+<li>Glitch effect</li>
+<li>Outlines</li>
+<li>Color variations</li>
+<li>Antialiasing</li>
+<li>Reflections and refractions</li>
+<li>Etc.</li>
+</ul>
+<h2>Setup</h2>
+<p>We will use the same setup as the <strong>Realistic Model Render</strong> lesson but with the <strong><a target="_blank" href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/DamagedHelmet">Damaged Helmet</a></strong> model by <a target="_blank" href="http://www.leonardocarrion.com/">Leonardo Carrion</a>. It's a popular model with many details and good textures that should go well with our post-processing.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/32/step-01.png" src="./assets/lessons/32/step-01.png" width="1792" height="1120" alt="./assets/lessons/32/step-01.png" class="is-loaded"></span></p>
+<h2>How it works</h2>
+<p>Most of the time, post-processing works the same way.</p>
+<h3>Render target</h3>
+<p>Instead of rendering in the canvas, we do the render in what we call a render target. That render target will give us a texture very similar to the usual texture. In a simpler way, we render in a texture instead of the canvas on the screen.</p>
+<p>The term "render target" is specific to Three.js. Other contexts mostly use the word "buffer".</p>
+<p>This texture is then applied to a plane facing the camera and covering the whole view. This plane uses a material with a special fragment shader that will do the post-processing effect. If the post-processing effect consists of redden the image, it would merely multiply the red value of the pixel in that fragment shader.</p>
+<p>Most post-process effects are doing more than just tweaking the color values, but you get the idea.</p>
+<p>In Three.js those "effects" are called "passes". We will refer to that term from now on.</p>
+<h3>Ping-pong buffering</h3>
+<p>We can have multiple passes on our post-process: one doing the motion blur, one doing the color changes, one doing the depth of field, etc. Because we can have multiples passes, the post-processing needs two render targets. The reason is that we can't get the texture of a render target while drawing in it at the same time. The idea is to draw in the first render target while taking the texture from the second one. At the next pass, we switch those render targets, take the texture from the second, and draw on the first. And again at the next pass, we switch them, and again, and again. That is what we call <strong>ping pong buffering</strong>.</p>
+<h3>Final pass on the canvas</h3>
+<p>The last pass won't be in a render target because we can put it directly on the canvas so the user can see the final result.</p>
+<h3>In the end</h3>
+<p>All of these can be very complicated for beginners, but, fortunately, we don't have to do it on our own.</p>
+<p>Actually, we could have start without even explaining those render target, textures, ping pong buffering, etc. but it's always good to understand what is really going on behind the scene.</p>
+<p>All we have to do is use the <a target="_blank" href="https://threejs.org/docs/index.html#examples/en/postprocessing/EffectComposer">EffectComposer</a> class that will handle most of the heavy lifting for us.</p>
+<h2>EffectComposer</h2>
+<p>As we said, <a target="_blank" href="https://threejs.org/docs/index.html#examples/en/postprocessing/EffectComposer">EffectComposer</a> will handle all the process of creating the render targets, doing the ping-pong thing, sending the texture of the previous pass to the current pass, drawing the last one on the canvas, etc.</p>
+<p>First, we need to import it because it's not available in the <code spellcheck="false">THREE</code> variable:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token punctuation">{</span> EffectComposer <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'three/examples/jsm/postprocessing/EffectComposer.js'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We will also need a first pass called <code spellcheck="false">RenderPass</code>. This pass is in charge of the first render of our scene, but instead of doing it in the canvas, it will happen in a render target created inside the <a target="_blank" href="https://threejs.org/docs/index.html#examples/en/postprocessing/EffectComposer">EffectComposer</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token punctuation">{</span> RenderPass <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'three/examples/jsm/postprocessing/RenderPass.js'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can now instantiate our <a target="_blank" href="https://threejs.org/docs/index.html#examples/en/postprocessing/EffectComposer">EffectComposer</a> and use our <code spellcheck="false">renderer</code> as parameter. Like the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer">WebGLRenderer</a>, we need to provide a pixel ratio with <code spellcheck="false">setPixelRatio(...)</code> and resize it with <code spellcheck="false">setSize(...)</code>. We will use the same parameters as for the <code spellcheck="false">renderer</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Post processing
+*/</span>
+<span class="token keyword">const</span> effectComposer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">EffectComposer</span><span class="token punctuation">(</span>renderer<span class="token punctuation">)</span>
+effectComposer<span class="token punctuation">.</span><span class="token function">setSize</span><span class="token punctuation">(</span>sizes<span class="token punctuation">.</span>width<span class="token punctuation">,</span> sizes<span class="token punctuation">.</span>height<span class="token punctuation">)</span>
+effectComposer<span class="token punctuation">.</span><span class="token function">setPixelRatio</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span>window<span class="token punctuation">.</span>devicePixelRatio<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then we can instantiate our first pass and add it to our <code spellcheck="false">effectComposer</code> with the <code spellcheck="false">addPass(...)</code> method. The RenderPass needs the <code spellcheck="false">scene</code> and the <code spellcheck="false">camera</code> as parameters:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> renderPass <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RenderPass</span><span class="token punctuation">(</span>scene<span class="token punctuation">,</span> camera<span class="token punctuation">)</span>
+effectComposer<span class="token punctuation">.</span><span class="token function">addPass</span><span class="token punctuation">(</span>renderPass<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>In the <code spellcheck="false">tick</code> function, instead of doing the renders like we used to, we will achieve the renders with <code spellcheck="false">effectComposer</code>. Replace the <code spellcheck="false">renderer.render(...)</code> with the following code:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Render</span>
+<span class="token comment">// renderer.render(scene, camera)</span>
+effectComposer<span class="token punctuation">.</span><span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The <code spellcheck="false">effectComposer</code> will start doing the renders with the ping pong thing and its render targets. But because we only have one pass —the <code spellcheck="false">renderPass</code>— it will render it directly in the canvas like before.</p>
+<p>It's time to add some neat post-process passes.</p>
+<p>You can find a list of available passes in the documentation: <a target="_blank" href="https://threejs.org/docs/index.html#examples/en/postprocessing/EffectComposer">https://threejs.org/docs/index.html#examples/en/postprocessing/EffectComposer</a></p>
+<p>We will use some of them to see how we can set things up, and then we will create our own pass.</p>
+<h2>DotScreenPass</h2>
+<p>The <code spellcheck="false">DotScreenPass</code> will apply some kind of black and white raster effect. We just need to import the <code spellcheck="false">DotScreenPass</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token punctuation">{</span> DotScreenPass <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'three/examples/jsm/postprocessing/DotScreenPass.js'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Instantiate it and add it to the <code spellcheck="false">effectComposer</code>. Make sure to add it after the <code spellcheck="false">renderPass</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> dotScreenPass <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DotScreenPass</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+effectComposer<span class="token punctuation">.</span><span class="token function">addPass</span><span class="token punctuation">(</span>dotScreenPass<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/32/step-02.png" src="./assets/lessons/32/step-02.png" width="1792" height="1120" alt="./assets/lessons/32/step-02.png" class="is-loaded"></span></p>
+<p>To disable a pass, simply comment it or change its <code spellcheck="false">enabled</code> property to <code spellcheck="false">false</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> dotScreenPass <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DotScreenPass</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+dotScreenPass<span class="token punctuation">.</span>enabled <span class="token operator">=</span> <span class="token boolean">false</span>
+effectComposer<span class="token punctuation">.</span><span class="token function">addPass</span><span class="token punctuation">(</span>dotScreenPass<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/32/step-03.png" src="./assets/lessons/32/step-03.png" width="1792" height="1120" alt="./assets/lessons/32/step-03.png" class="is-loaded"></span></p>
+<p>Use this to test the different passes separately.</p>
+<h2>GlitchPass</h2>
+<p>The <code spellcheck="false">GlitchPass</code> will add screen glitches like when the cameras get hacked in the movies.</p>
+<p>Import it and add it just like the <code spellcheck="false">DotScreenPass</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token punctuation">{</span> GlitchPass <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'three/examples/jsm/postprocessing/GlitchPass.js'</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> glitchPass <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">GlitchPass</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+effectComposer<span class="token punctuation">.</span><span class="token function">addPass</span><span class="token punctuation">(</span>glitchPass<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/32/step-04.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Some passes also have editable properties. The <code spellcheck="false">GlitchPass</code> have a <code spellcheck="false">goWild</code> property that, if <code spellcheck="false">true</code>, will result in a non-stop glitch:</p>
+<p><strong>Be careful if you are sensible to flashes or fast movements!</strong></p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">glitchPass<span class="token punctuation">.</span>goWild <span class="token operator">=</span> <span class="token boolean">true</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h2>RGBShiftPass</h2>
+<p>Some passes need extra work like the RGBShift pass.</p>
+<p>The RGBShift isn't available as a pass but as a shader. We need to import this shader and apply it to a <code spellcheck="false">ShaderPass</code> and then add this ShaderPass to the <code spellcheck="false">effectComposer</code>. That is precisely what happens in the <code spellcheck="false">DotScreenPass</code> and the <code spellcheck="false">GlitchPass</code> but we have to do it ourselves this time.</p>
+<p>First, import the <code spellcheck="false">ShaderPass</code> and the <code spellcheck="false">RGBShiftShader</code> located in <code spellcheck="false">three/examples/jsm/shaders/</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token punctuation">{</span> ShaderPass <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'three/examples/jsm/postprocessing/ShaderPass.js'</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> RGBShiftShader <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'three/examples/jsm/shaders/RGBShiftShader.js'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then instantiate the <code spellcheck="false">ShaderPass</code> with the <code spellcheck="false">RGBShiftShader</code> as parameter and add it to the <code spellcheck="false">effectComposer</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> rgbShiftPass <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ShaderPass</span><span class="token punctuation">(</span>RGBShiftShader<span class="token punctuation">)</span>
+effectComposer<span class="token punctuation">.</span><span class="token function">addPass</span><span class="token punctuation">(</span>rgbShiftPass<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/32/step-05.png" src="./assets/lessons/32/step-05.png" width="1792" height="1120" alt="./assets/lessons/32/step-05.png" class="is-loaded"></span></p>
+<p>And that's all.</p>
+<h2>Fixing the color</h2>
+<p>You might have noticed a color change in the render, as if everything became darker, and you are right. Disable the previous shaders <code spellcheck="false">dotScreenPass</code> and the <code spellcheck="false">rgbShiftPass</code> to see it more clearly with the <code spellcheck="false">glitchPass</code> —without the <code spellcheck="false">goWild</code>.</p>
+<p>What's happening here is that the <code spellcheck="false">renderer.outputEncoding = THREE.sRGBEncoding</code> doesn't work anymore. You can comment it, and you'll see no difference. Passes are rendered in render targets, and those doesn't support encoding the same way.</p>
+<p>We need to add one more pass named <code spellcheck="false">GammaCorrectionShader</code> that will converter the linear encoding to a sRGB encoding.</p>
+<p>This pass works exactly like the <code spellcheck="false">RGBShiftShader</code> pass. First, we need to import it:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token punctuation">{</span> GammaCorrectionShader <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'three/examples/jsm/shaders/GammaCorrectionShader.js'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, we can instantiate a <code spellcheck="false">ShaderPass</code> with the <code spellcheck="false">GammaCorrectionShader</code> as a parameter. Make sure to do it as the last pass:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> gammaCorrectionPass <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ShaderPass</span><span class="token punctuation">(</span>GammaCorrectionShader<span class="token punctuation">)</span>
+effectComposer<span class="token punctuation">.</span><span class="token function">addPass</span><span class="token punctuation">(</span>gammaCorrectionPass<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/32/step-06.png" src="./assets/lessons/32/step-06.png" width="1792" height="1120" alt="./assets/lessons/32/step-06.png" class="is-loaded"></span></p>
+<p>The color should be fixed.</p>
+<h2>Resizing</h2>
+<p>Reduce the window to a minimal resolution, refresh and increase the resolution to the maximum size. Everything should look bad, like a small image that we stretched up.</p>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/32/step-07.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>That is because the <a target="_blank" href="https://threejs.org/docs/index.html#examples/en/postprocessing/EffectComposer">EffectComposer</a> and its passes need to be resized.</p>
+<p>In the <code spellcheck="false">window.addEventListener('resize', ...)</code> callback function, call the <code spellcheck="false">setSize(...)</code> method as we did when we instantiated <a target="_blank" href="https://threejs.org/docs/index.html#examples/en/postprocessing/EffectComposer">EffectComposer</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'resize'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Update effect composer</span>
+effectComposer<span class="token punctuation">.</span><span class="token function">setSize</span><span class="token punctuation">(</span>sizes<span class="token punctuation">.</span>width<span class="token punctuation">,</span> sizes<span class="token punctuation">.</span>height<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/32/step-08.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You can resize the window as you want; the resolution should be fine.</p>
+<h2>Fixing the antialias</h2>
+<p>There's another feature that seems to stop working. If you look at edges on the helmet, you'll see that the aliasing is back —if you are using a screen with a pixel ratio above <code spellcheck="false">1</code>, you probably can't see the problem.</p>
+<p>Be careful; if you only have the <code spellcheck="false">renderPass</code> available, you won't see the problem because the render is done in the canvas with antialias support. Enable at least one pass to see the problem.</p>
+<p>That is because the render target used by <a target="_blank" href="https://threejs.org/docs/index.html#examples/en/postprocessing/EffectComposer">EffectComposer</a> does not support the default antialias. We have four available options:</p>
+<ul>
+<li>Say goodbye to the antialias.</li>
+<li>Use a particular type of render target that does manage antialias, but that won't work on all the modern browsers.</li>
+<li>Use a pass to do the antialias but with lesser performances.</li>
+<li>A combination of the two previous options where we test if the browser supports this unique type of render target, and if not, we use an antialias pass.</li>
+</ul>
+<p>Things suddenly got complicated.</p>
+<h3>Using WebGLMultisampleRenderTarget</h3>
+<p>By default <a target="_blank" href="https://threejs.org/docs/index.html#examples/en/postprocessing/EffectComposer">EffectComposer</a> is using the <a target="_blank" href="https://threejs.org/docs/?q=rendertarget#api/en/renderers/WebGLRenderTarget">WebGLRenderTarget</a>.</p>
+<p>Fortunately, we can provide our own render target as the second parameter of <code spellcheck="false">EffectComposer</code>. We are going to provide the same render target to begin with and make sure that everything is working. Then, we are going to provide a render target that supports the antialias.</p>
+<p>If you look at the code of the <a target="_blank" href="https://threejs.org/docs/index.html#examples/en/postprocessing/EffectComposer">EffectComposer</a> located in <code spellcheck="false">/node_modules/three/examples/jsm/postprocessing/EffectComposer.js</code> you'll see the <code spellcheck="false">renderTarget</code> being instantiated with specific parameters.</p>
+<p>The first two parameters are the <code spellcheck="false">width</code> and <code spellcheck="false">height</code>. We can use random values because the render target will be resized when the <code spellcheck="false">setSize(...)</code> function will be called on <code spellcheck="false">effectComposer</code>.</p>
+<p>The third parameter is an object and we can copy the object from the Three.js code.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> renderTarget <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>WebGLRenderTarget</span><span class="token punctuation">(</span>
+<span class="token number">800</span><span class="token punctuation">,</span>
+<span class="token number">600</span><span class="token punctuation">,</span>
+<span class="token punctuation">{</span>
+minFilter<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>LinearFilter<span class="token punctuation">,</span>
+magFilter<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>LinearFilter<span class="token punctuation">,</span>
+format<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>RGBAFormat
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, we can send that <code spellcheck="false">renderTarget</code> to <code spellcheck="false">effectComposer</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> effectComposer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">EffectComposer</span><span class="token punctuation">(</span>renderer<span class="token punctuation">,</span> renderTarget<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We should get the exact same result, but now, we have control over the render target.</p>
+<p>The <a target="_blank" href="https://threejs.org/docs/index.html#api/en/renderers/WebGLMultisampleRenderTarget">WebGLMultisampleRenderTarget</a> is like the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderTarget">WebGLRenderTarget</a> but with support of the Multi Sample Antialias (MSAA).</p>
+<p>We can replace the <code spellcheck="false">WebGLRenderTarget</code> by <code spellcheck="false">WebGLMultisampleRenderTarget</code> and see an immediate result where the aliasing is gone:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> renderTarget <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>WebGLMultisampleRenderTarget</span><span class="token punctuation">(</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Sadly, this won't work for every browsers. That is a matter of WebGL 2 support. People updated WebGL a few years ago, and browsers slowly add support to the different features. You can see how the support is going on here: <a target="_blank" href="https://caniuse.com/#feat=webgl2">https://caniuse.com/#feat=webgl2</a></p>
+<p>At the moment of writing this lesson, major browsers like Safari and iOS Safari only supported it recently.</p>
+<h3>Using an antialias pass</h3>
+<p>Let's get back to the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderTarget">WebGLRenderTarget</a> and try to get the antialias working with a pass:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> renderTarget <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>WebGLRenderTarget</span><span class="token punctuation">(</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We have different choices for the antialias pass:</p>
+<ul>
+<li>FXAA: Performant, but the result is just "ok" and can be blurry</li>
+<li>SMAA: Usually better than FXAA but less performant —not to be confused with MSAA</li>
+<li>SSAA: Best quality but the worst performance</li>
+<li>TAA: Performant but limited result</li>
+<li>And many others.</li>
+</ul>
+<p>Choosing the best antialias pass is a matter of performance and visual expectations. Try them until you're satisfied with what you see at a reasonable frame rate.</p>
+<p>For this lesson, we will go for the SMAA.</p>
+<p>Import the <code spellcheck="false">SMAAPass</code>, instantiate it and add it to <code spellcheck="false">effectComposer</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token punctuation">{</span> SMAAPass <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'three/examples/jsm/postprocessing/SMAAPass.js'</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> smaaPass <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SMAAPass</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+effectComposer<span class="token punctuation">.</span><span class="token function">addPass</span><span class="token punctuation">(</span>smaaPass<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The antialias should be gone.</p>
+<h3>Combining the two solutions</h3>
+<p>Now that we know the two leading solutions, we will mix them depending on different criteria:</p>
+<ul>
+<li>If the pixel ratio is above <code spellcheck="false">1</code>, we use the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderTarget">WebGLRenderTarget</a> and no antialias pass.</li>
+<li>If the pixel ratio is <code spellcheck="false">1</code> and the browser supports WebGL 2, we use a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/renderers/WebGLMultisampleRenderTarget">WebGLMultisampleRenderTarget</a>.</li>
+<li>If the pixel ratio is <code spellcheck="false">1</code> but the browser doesn't support WebGL 2, we use the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderTarget">WebGLRenderTarget</a> and enable the <code spellcheck="false">SMAAPass</code>.</li>
+</ul>
+<p>To get the pixel ratio, we can use the <code spellcheck="false">getPixelRatio()</code> method on the <code spellcheck="false">renderer</code>.</p>
+<p>To know if the browser supports WebGL 2 we can use the <code spellcheck="false">capabilities</code> property on the <code spellcheck="false">renderer</code>. This property contains many details about what is supported. The property we need is <code spellcheck="false">isWebGL2</code>.</p>
+<p>First, let's handle the render target. If the pixel ratio is equal to <code spellcheck="false">1</code> and the browser supports WebGL 2, we use the <code spellcheck="false">WebGLMultisampleRenderTarget</code> otherwise, we use the <code spellcheck="false">WebGLRenderTarget</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">let</span> RenderTargetClass <span class="token operator">=</span> <span class="token keyword">null</span>
+
+<span class="token keyword">if</span><span class="token punctuation">(</span>renderer<span class="token punctuation">.</span><span class="token function">getPixelRatio</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">===</span> <span class="token number">1</span> <span class="token operator">&amp;&amp;</span> renderer<span class="token punctuation">.</span>capabilities<span class="token punctuation">.</span>isWebGL2<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+RenderTargetClass <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>WebGLMultisampleRenderTarget
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Using WebGLMultisampleRenderTarget'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">else</span>
+<span class="token punctuation">{</span>
+RenderTargetClass <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>WebGLRenderTarget
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Using WebGLRenderTarget'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> renderTarget <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RenderTargetClass</span><span class="token punctuation">(</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then we handle the pass. If the pixel ratio is equal to <code spellcheck="false">1</code> and the browser doesn't support WebGL2, we add the <code spellcheck="false">SMAAPass</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">if</span><span class="token punctuation">(</span>renderer<span class="token punctuation">.</span><span class="token function">getPixelRatio</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">===</span> <span class="token number">1</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>renderer<span class="token punctuation">.</span>capabilities<span class="token punctuation">.</span>isWebGL2<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> smaaPass <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SMAAPass</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+effectComposer<span class="token punctuation">.</span><span class="token function">addPass</span><span class="token punctuation">(</span>smaaPass<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Using SMAA'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>And we get a nice picture on every browser with a minimal drawback.</p>
+<h2>UnrealBloomPass</h2>
+<p>Let's get back to our passes with probably the coolest one, the UnrealBloomPass.</p>
+<p>This pass will add bloom on our render that looks amazing. It's useful to recreate things like light glows, fire heat, lasers, lightsabers or radioactive stuff.</p>
+<p>Import the <code spellcheck="false">UnrealBloomPass</code> and add it to the <code spellcheck="false">effectComposer</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token punctuation">{</span> UnrealBloomPass <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'three/examples/jsm/postprocessing/UnrealBloomPass.js'</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> unrealBloomPass <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">UnrealBloomPass</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+effectComposer<span class="token punctuation">.</span><span class="token function">addPass</span><span class="token punctuation">(</span>unrealBloomPass<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/32/step-09.png" src="./assets/lessons/32/step-09.png" width="1792" height="1120" alt="./assets/lessons/32/step-09.png" class="is-loaded"></span></p>
+<p>Everything appears way too bright. We need to tweak some parameters. There are 3 main parameters:</p>
+<ul>
+<li><code spellcheck="false">strength</code>: How strong is the glow.</li>
+<li><code spellcheck="false">radius</code>: How far that brightness can spread.</li>
+<li><code spellcheck="false">threshold</code>: At what luminosity limit things start to glow.</li>
+</ul>
+<p>Use the following parameters and add the tweaks to your Dat.GUI:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">unrealBloomPass<span class="token punctuation">.</span>strength <span class="token operator">=</span> <span class="token number">0.3</span>
+unrealBloomPass<span class="token punctuation">.</span>radius <span class="token operator">=</span> <span class="token number">1</span>
+unrealBloomPass<span class="token punctuation">.</span>threshold <span class="token operator">=</span> <span class="token number">0.6</span>
+
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>unrealBloomPass<span class="token punctuation">,</span> <span class="token string">'enabled'</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>unrealBloomPass<span class="token punctuation">,</span> <span class="token string">'strength'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>unrealBloomPass<span class="token punctuation">,</span> <span class="token string">'radius'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>unrealBloomPass<span class="token punctuation">,</span> <span class="token string">'threshold'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/32/step-10.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>This is probably too much glow but you get the idea.</p>
+<h2>Creating our own pass</h2>
+<p>Creating our own pass is as easy as making a custom shader.</p>
+<h3>Tint pass</h3>
+<p>We are going to start with an effortless pass that lets us control the color tint.</p>
+<p>First, we create a shader. The shader is a simple object with the following properties:</p>
+<ul>
+<li><code spellcheck="false">uniforms</code>: Same format as the uniforms we are used too.</li>
+<li><code spellcheck="false">vertexShader</code>: This one has almost always the same code and will put the plane in front of the view.</li>
+<li><code spellcheck="false">fragmentShader</code>: The fragment shader that will do the post-processing effect.</li>
+</ul>
+<p>Let's create that shader with minimal code:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> TintShader <span class="token operator">=</span> <span class="token punctuation">{</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+vertexShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+void main()
+{
+gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+void main()
+{
+gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+}
+</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then we create the pass with <code spellcheck="false">ShaderPass</code> and add it to our <code spellcheck="false">effectComposer</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> tintPass <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ShaderPass</span><span class="token punctuation">(</span>TintShader<span class="token punctuation">)</span>
+effectComposer<span class="token punctuation">.</span><span class="token function">addPass</span><span class="token punctuation">(</span>tintPass<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/32/step-11.png" src="./assets/lessons/32/step-11.png" width="1792" height="1120" alt="./assets/lessons/32/step-11.png" class="is-loaded"></span></p>
+<p>The screen should become red because our fragment shader sets the <code spellcheck="false">gl_FragColor</code> to a red color.</p>
+<p>We need to get the texture from the previous pass. This texture is automatically stored in the <code spellcheck="false">tDiffuse</code> uniform. We must add the uniform with a <code spellcheck="false">null</code> value —<a target="_blank" href="https://threejs.org/docs/index.html#examples/en/postprocessing/EffectComposer">EffectComposer</a> will update it— and retrieve the value in the <code spellcheck="false">fragmentShader</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> TintShader <span class="token operator">=</span> <span class="token punctuation">{</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+tDiffuse<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">null</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+<span class="token comment">// ...</span>
+
+fragmentShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+uniform sampler2D tDiffuse;
+
+void main()
+{
+gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+}
+</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Now that we have the texture of the previous pass, we need to retrieve the pixels as we've already done in a previous lesson. To get the pixels from a <code spellcheck="false">sampler2D</code> (a texture), we need to use <code spellcheck="false">texture2D(...)</code>. It would require a texture as the first parameter and UV coordinates as the second parameter.</p>
+<p>The problem is that we don't have those UV coordinates right now. We need to do as usual and create a <code spellcheck="false">varying</code> named <code spellcheck="false">vUv</code> containing the <code spellcheck="false">uv</code> from the vertex shader:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> TintShader <span class="token operator">=</span> <span class="token punctuation">{</span>
+
+<span class="token comment">// ...</span>
+
+vertexShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+varying vec2 vUv;
+
+void main()
+{
+gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+
+vUv = uv;
+}
+</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+uniform sampler2D tDiffuse;
+
+varying vec2 vUv;
+
+void main()
+{
+vec4 color = texture2D(tDiffuse, vUv);
+gl_FragColor = color;
+}
+</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/32/step-12.png" src="./assets/lessons/32/step-12.png" width="1792" height="1120" alt="./assets/lessons/32/step-12.png" class="is-loaded"></span></p>
+<p>The render is back. But now, we can play with the texture in the <code spellcheck="false">fragmentShader</code>.</p>
+<p>To change the tint, play with the <code spellcheck="false">r</code>, <code spellcheck="false">g</code>, and <code spellcheck="false">b</code> properties of <code spellcheck="false">color</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> TintShader <span class="token operator">=</span> <span class="token punctuation">{</span>
+
+<span class="token comment">// ...</span>
+
+fragmentShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+uniform sampler2D tDiffuse;
+
+varying vec2 vUv;
+
+void main()
+{
+vec4 color = texture2D(tDiffuse, vUv);
+color.r += 0.1;
+
+gl_FragColor = color;
+}
+</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/32/step-13.png" src="./assets/lessons/32/step-13.png" width="1792" height="1120" alt="./assets/lessons/32/step-13.png" class="is-loaded"></span></p>
+<p>To go further, let's create a uniform to control the tint. First, add the <code spellcheck="false">uTint</code> to the <code spellcheck="false">uniforms</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> TintShader <span class="token operator">=</span> <span class="token punctuation">{</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+tDiffuse<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">null</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+uTint<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">null</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+<span class="token comment">// ...</span>
+
+fragmentShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+uniform sampler2D tDiffuse;
+uniform vec3 uTint;
+
+varying vec2 vUv;
+
+void main()
+{
+vec4 color = texture2D(tDiffuse, vUv);
+color.rgb += uTint;
+
+gl_FragColor = color;
+}
+</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>As you can see, we let the value to <code spellcheck="false">null</code>. Do not set the values directly in the shader object. You must set them on the material once you have created the pass because the shader is intended to be used multiple times —even if you don't. It's like a template for the pass:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> tintPass <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ShaderPass</span><span class="token punctuation">(</span>TintShader<span class="token punctuation">)</span>
+tintPass<span class="token punctuation">.</span>material<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uTint<span class="token punctuation">.</span>value <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Vector3</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then we can add the tweaks to our Dat.GUI:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>tintPass<span class="token punctuation">.</span>material<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uTint<span class="token punctuation">.</span>value<span class="token punctuation">,</span> <span class="token string">'x'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'red'</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>tintPass<span class="token punctuation">.</span>material<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uTint<span class="token punctuation">.</span>value<span class="token punctuation">,</span> <span class="token string">'y'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'green'</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>tintPass<span class="token punctuation">.</span>material<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uTint<span class="token punctuation">.</span>value<span class="token punctuation">,</span> <span class="token string">'z'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'blue'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/32/step-14.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<h3>Displacement pass</h3>
+<p>Let's try another custom pass. This time, we won't fiddle with the color but with the UV to produce what we call a displacement.</p>
+<p>Create a new shader named <code spellcheck="false">DisplacementShader</code>, then a new pass named <code spellcheck="false">displacementPass</code> from the <code spellcheck="false">ShaderPass</code> and add it to <code spellcheck="false">effectComposer</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> DisplacementShader <span class="token operator">=</span> <span class="token punctuation">{</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+tDiffuse<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">null</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+vertexShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+varying vec2 vUv;
+
+void main()
+{
+gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+
+vUv = uv;
+}
+</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+uniform sampler2D tDiffuse;
+
+varying vec2 vUv;
+
+void main()
+{
+vec4 color = texture2D(tDiffuse, vUv);
+
+gl_FragColor = color;
+}
+</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> displacementPass <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ShaderPass</span><span class="token punctuation">(</span>DisplacementShader<span class="token punctuation">)</span>
+effectComposer<span class="token punctuation">.</span><span class="token function">addPass</span><span class="token punctuation">(</span>displacementPass<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Now, let's create a <code spellcheck="false">newUv</code> based on <code spellcheck="false">vUv</code> but with some distortion:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> DisplacementShader <span class="token operator">=</span> <span class="token punctuation">{</span>
+
+<span class="token comment">// ...</span>
+
+fragmentShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+uniform sampler2D tDiffuse;
+
+varying vec2 vUv;
+
+void main()
+{
+vec2 newUv = vec2(
+    vUv.x,
+    vUv.y + sin(vUv.x * 10.0) * 0.1
+);
+vec4 color = texture2D(tDiffuse, newUv);
+
+gl_FragColor = color;
+}
+</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/32/step-15.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Here, we solely applied a <code spellcheck="false">sin(...)</code> on the <code spellcheck="false">y</code> axis based on the <code spellcheck="false">x</code> axis. You should see the render waving.</p>
+<p>Let's animate it. Add a <code spellcheck="false">uTime</code> uniform:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> DisplacementShader <span class="token operator">=</span> <span class="token punctuation">{</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+tDiffuse<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">null</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+uTime<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">null</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+<span class="token comment">// ...</span>
+
+fragmentShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+uniform sampler2D tDiffuse;
+uniform float uTime;
+
+varying vec2 vUv;
+
+void main()
+{
+vec2 newUv = vec2(
+    vUv.x,
+    vUv.y + sin(vUv.x * 10.0 + uTime) * 0.1
+);
+vec4 color = texture2D(tDiffuse, newUv);
+
+gl_FragColor = color;
+}
+</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Set its value to <code spellcheck="false">0</code> after creating the pass:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> displacementPass <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ShaderPass</span><span class="token punctuation">(</span>DisplacementShader<span class="token punctuation">)</span>
+displacementPass<span class="token punctuation">.</span>material<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uTime<span class="token punctuation">.</span>value <span class="token operator">=</span> <span class="token number">0</span>
+effectComposer<span class="token punctuation">.</span><span class="token function">addPass</span><span class="token punctuation">(</span>displacementPass<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>And as always, update it in the <code spellcheck="false">tick</code> function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> clock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Clock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> elapsedTime <span class="token operator">=</span> clock<span class="token punctuation">.</span><span class="token function">getElapsedTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Update passes</span>
+displacementPass<span class="token punctuation">.</span>material<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uTime<span class="token punctuation">.</span>value <span class="token operator">=</span> elapsedTime
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/32/step-16.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The waves are now animated.</p>
+<h3>Futuristic interface displacement</h3>
+<p>Instead of a sinus displacement, we can use a texture. You can find a very plain beehive futuristic interface with normal texture in <code spellcheck="false">/static/textures/interfaceNormalMap.png</code>.</p>
+<p>Add a <code spellcheck="false">uNormalMap</code> uniform:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> DisplacementShader <span class="token operator">=</span> <span class="token punctuation">{</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+uNormalMap<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">null</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Update it while loading the texture —the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/loaders/TextureLoader">TextureLoader</a> is already in the code:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">displacementPass<span class="token punctuation">.</span>material<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uNormalMap<span class="token punctuation">.</span>value <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/interfaceNormalMap.png'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Now update the fragmentShader of the <code spellcheck="false">DisplacementShader</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> DisplacementShader <span class="token operator">=</span> <span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+fragmentShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+uniform sampler2D tDiffuse;
+uniform float uTime;
+uniform sampler2D uNormalMap;
+
+varying vec2 vUv;
+
+void main()
+{
+vec3 normalColor = texture2D(uNormalMap, vUv).xyz * 2.0 - 1.0;
+vec2 newUv = vUv + normalColor.xy * 0.1;
+vec4 color = texture2D(tDiffuse, newUv);
+
+vec3 lightDirection = normalize(vec3(- 1.0, 1.0, 0.0));
+float lightness = clamp(dot(normalColor, lightDirection), 0.0, 1.0);
+color.rgb += lightness * 2.0;
+
+gl_FragColor = color;
+}
+</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/32/step-17.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>We won't disclose what's happening here because it's not the proper way to achieve this effect, but you should see a compelling interface displacement. Regrettably, the texture fits the screen, and if your resolution isn't proportional, it won't look terrific. No worries, it was just for the show anyway.</p>
+<h2>Go further</h2>
+<p>What you can do now is try other passes and possibly add new custom passes if you get some ideas or if there are things you want to try.</p>
+<p>Keep in mind that each pass you add will have to be rendered on each frame. That can have severe performances drawback.</p>
+<p>You could also separate the custom passes into different files and even split the shaders in the <code spellcheck="false">.glsl</code> files. This way, you get a cleaner and reusable code.</p>
+</section>
+</body>
+
+</html>

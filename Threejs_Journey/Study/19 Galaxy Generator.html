@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<section class="text js-text">
+    <h2>Introduction</h2>
+<p>Now that we know how to use particles, we could create something cool like a Galaxy. But instead of producing just one galaxy, let's do a galaxy generator.</p>
+<p>For that, we're going to use <strong>Dat.GUI</strong> to let the user tweak the parameters and generate a new galaxy on each change.</p>
+<h2>Setup</h2>
+<p>The starter is only composed of a cube in the middle of the scene. It ensures that everything is working.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/19/step-01.png" src="./assets/lessons/19/step-01.png" width="1792" height="1120" alt="./assets/lessons/19/step-01.png" class="is-loaded"></span></p>
+<h2>Base particles</h2>
+<p>First, remove the cube and create a <code spellcheck="false">generateGalaxy</code> function. Each time we call that function, we will remove the previous galaxy (if there is one) and create a new one.</p>
+<p>We can call that function immediately:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Galaxy
+*/</span>
+<span class="token keyword">const</span> <span class="token function-variable function">generateGalaxy</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+
+<span class="token punctuation">}</span>
+
+<span class="token function">generateGalaxy</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can create an object that will contain all the parameters of our galaxy. Create this object before the <code spellcheck="false">generateGalaxy</code> function. We will populate it progressively and also add each parameter to <strong>Dat.GUI</strong>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> parameters <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>In our <code spellcheck="false">generateGalaxy</code> function, we're going to create some particles just to make sure that everything is working. We can start with the geometry and add the particles count to the parameters:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> parameters <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+parameters<span class="token punctuation">.</span>count <span class="token operator">=</span> <span class="token number">1000</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">generateGalaxy</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">/**
+* Geometry
+*/</span>
+<span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferGeometry</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> positions <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Float32Array</span><span class="token punctuation">(</span>parameters<span class="token punctuation">.</span>count <span class="token operator">*</span> <span class="token number">3</span><span class="token punctuation">)</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> parameters<span class="token punctuation">.</span>count<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> i3 <span class="token operator">=</span> i <span class="token operator">*</span> <span class="token number">3</span>
+
+positions<span class="token punctuation">[</span>i3    <span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">3</span>
+positions<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">3</span>
+positions<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">3</span>
+<span class="token punctuation">}</span>
+
+geometry<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'position'</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferAttribute</span><span class="token punctuation">(</span>positions<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token function">generateGalaxy</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>That's the same code as before, but we handled the loop a little differently.</p>
+<p>We can now create the material by using the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/PointsMaterial">PointsMaterial</a> class. This time again, we can add tweaks to the <code spellcheck="false">parameters</code> object:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">parameters<span class="token punctuation">.</span>size <span class="token operator">=</span> <span class="token number">0.02</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">generateGalaxy</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">/**
+* Material
+*/</span>
+<span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PointsMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+size<span class="token operator">:</span> parameters<span class="token punctuation">.</span>size<span class="token punctuation">,</span>
+sizeAttenuation<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+depthWrite<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+blending<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>AdditiveBlending
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Finally, we can create the points by using the <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Points">Points</a> class and add it to the scene:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">generateGalaxy</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">/**
+* Points
+*/</span>
+<span class="token keyword">const</span> points <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Points</span><span class="token punctuation">(</span>geometry<span class="token punctuation">,</span> material<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>points<span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/19/step-02.png" src="./assets/lessons/19/step-02.png" width="1792" height="1120" alt="./assets/lessons/19/step-02.png" class="is-loaded"></span></p>
+<p>You should see few points floating around.</p>
+<h2>Tweaks</h2>
+<p>We have already two parameters, <code spellcheck="false">count</code> and <code spellcheck="false">size</code>. Let's add them to the <strong>Dat.GUI</strong> instance that we already created at the start of the code. As you can imagine, we must add those tweaks after creating the parameters:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">parameters<span class="token punctuation">.</span>count <span class="token operator">=</span> <span class="token number">1000</span>
+parameters<span class="token punctuation">.</span>size <span class="token operator">=</span> <span class="token number">0.02</span>
+
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'count'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">1000000</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'size'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">0.1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/19/step-03.png" src="./assets/lessons/19/step-03.png" width="1792" height="1120" alt="./assets/lessons/19/step-03.png" class="is-loaded"></span></p>
+<p>You should have two new ranges in the tweaks but changing them doesn't generate a new galaxy. To generate a new galaxy, you must listen to the change event. More precisely to the <code spellcheck="false">finishChange</code> event to prevent generating galaxies while you are drag and dropping the range value:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'count'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">1000000</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">onFinishChange</span><span class="token punctuation">(</span>generateGalaxy<span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'size'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">0.1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">onFinishChange</span><span class="token punctuation">(</span>generateGalaxy<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>This code won't work because the <code spellcheck="false">generateGalaxy</code> doesn't exist yet. You must move those tweaks after the <code spellcheck="false">generateGalaxy</code> function.</p>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/19/step-04.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Be careful, we still have a problem, and if you play too much with the tweaks, your computer will start to heat. It's because we didn't destroy the previously created galaxy. We are creating galaxies one above the other.</p>
+<p>To make things right, we must first move the <code spellcheck="false">geometry</code>, <code spellcheck="false">material</code> and <code spellcheck="false">points</code> variables outside the <code spellcheck="false">generateGalaxy</code>.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">let</span> geometry <span class="token operator">=</span> <span class="token keyword">null</span>
+<span class="token keyword">let</span> material <span class="token operator">=</span> <span class="token keyword">null</span>
+<span class="token keyword">let</span> points <span class="token operator">=</span> <span class="token keyword">null</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">generateGalaxy</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferGeometry</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+
+material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PointsMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+size<span class="token operator">:</span> parameters<span class="token punctuation">.</span>size<span class="token punctuation">,</span>
+sizeAttenuation<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+depthWrite<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+blending<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>AdditiveBlending
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+
+points <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Points</span><span class="token punctuation">(</span>geometry<span class="token punctuation">,</span> material<span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, before assigning those variables, we can test if they already exist. If so, we can call the <code spellcheck="false">dispose()</code> method on the geometry and the material. Then remove the points from the scene with the <code spellcheck="false">remove()</code> method:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">generateGalaxy</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// Destroy old galaxy</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>points <span class="token operator">!==</span> <span class="token keyword">null</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+geometry<span class="token punctuation">.</span><span class="token function">dispose</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+material<span class="token punctuation">.</span><span class="token function">dispose</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>points<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/19/step-05.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Instead of using a texture that can create depth and alpha issues as we saw in the previous lesson, we will just let the default square shape. Don't worry; there will be so many small particles that we won't notice that they are squares.</p>
+<p>Now that we can estimate how much particles we can have and their size, let's update the parameters:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">parameters<span class="token punctuation">.</span>count <span class="token operator">=</span> <span class="token number">100000</span>
+parameters<span class="token punctuation">.</span>size <span class="token operator">=</span> <span class="token number">0.01</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/19/step-06.png" src="./assets/lessons/19/step-06.png" width="1792" height="1120" alt="./assets/lessons/19/step-06.png" class="is-loaded"></span></p>
+<h2>Shape</h2>
+<p>Galaxies can have several different shapes. We will focus on the spirals one. There are many ways to position the particles to create a galaxy. Feel free to try your way before testing the lesson way.</p>
+<h3>Radius</h3>
+<p>First, let's create a <code spellcheck="false">radius</code> parameter:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">parameters<span class="token punctuation">.</span>radius <span class="token operator">=</span> <span class="token number">5</span>
+
+<span class="token comment">// ...</span>
+
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'radius'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0.01</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">20</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.01</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">onFinishChange</span><span class="token punctuation">(</span>generateGalaxy<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Each star will be positioned accordingly to that radius. If the radius is <code spellcheck="false">5</code>, the stars will be positioned at a distance from <code spellcheck="false">0</code> to <code spellcheck="false">5</code>. For now, let's position all the particles on a straight line:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> parameters<span class="token punctuation">.</span>count<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> i3 <span class="token operator">=</span> i <span class="token operator">*</span> <span class="token number">3</span>
+
+<span class="token keyword">const</span> radius <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> parameters<span class="token punctuation">.</span>radius
+
+positions<span class="token punctuation">[</span>i3    <span class="token punctuation">]</span> <span class="token operator">=</span> radius
+positions<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span>
+positions<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/19/step-07.png" src="./assets/lessons/19/step-07.png" width="1792" height="1120" alt="./assets/lessons/19/step-07.png" class="is-loaded"></span></p>
+<h3>Branches</h3>
+<p>Spin galaxies always seem to have at least two branches, but it can have much more.</p>
+<p>Create a <code spellcheck="false">branches</code> parameter:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">parameters<span class="token punctuation">.</span>branches <span class="token operator">=</span> <span class="token number">3</span>
+
+<span class="token comment">// ...</span>
+
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'branches'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">20</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">onFinishChange</span><span class="token punctuation">(</span>generateGalaxy<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can use <code spellcheck="false">Math.cos(...)</code> and <code spellcheck="false">Math.sin(...)</code> to position the particles on those branches. We first calculate an angle with the modulo (<code spellcheck="false">%</code>), divide the result by the branches count parameter to get an angle between <code spellcheck="false">0</code> and <code spellcheck="false">1</code>, and multiply this value by <code spellcheck="false">Math.PI * 2</code> to get an angle between <code spellcheck="false">0</code> and a full circle. We then use that angle with <code spellcheck="false">Math.cos(...)</code> and <code spellcheck="false">Math.sin(...)</code> for the <code spellcheck="false">x</code> and the <code spellcheck="false">z</code> axis and we finally multiply by the radius:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> parameters<span class="token punctuation">.</span>count<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> i3 <span class="token operator">=</span> i <span class="token operator">*</span> <span class="token number">3</span>
+
+<span class="token keyword">const</span> radius <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> parameters<span class="token punctuation">.</span>radius
+<span class="token keyword">const</span> branchAngle <span class="token operator">=</span> <span class="token punctuation">(</span>i <span class="token operator">%</span> parameters<span class="token punctuation">.</span>branches<span class="token punctuation">)</span> <span class="token operator">/</span> parameters<span class="token punctuation">.</span>branches <span class="token operator">*</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">2</span>
+
+positions<span class="token punctuation">[</span>i3    <span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">cos</span><span class="token punctuation">(</span>branchAngle<span class="token punctuation">)</span> <span class="token operator">*</span> radius
+positions<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span>
+positions<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">sin</span><span class="token punctuation">(</span>branchAngle<span class="token punctuation">)</span> <span class="token operator">*</span> radius
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/19/step-08.png" src="./assets/lessons/19/step-08.png" width="1792" height="1120" alt="./assets/lessons/19/step-08.png" class="is-loaded"></span></p>
+<h3>Spin</h3>
+<p>Let's add the spin effect.</p>
+<p>Create a <code spellcheck="false">spin</code> parameter:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">parameters<span class="token punctuation">.</span>spin <span class="token operator">=</span> <span class="token number">1</span>
+
+<span class="token comment">// ...</span>
+
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'spin'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">onFinishChange</span><span class="token punctuation">(</span>generateGalaxy<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then we can multiply the <code spellcheck="false">spinAngle</code> by that <code spellcheck="false">spin</code> parameter. To put it differently, the further the particle is from the center, the more spin it'll endure:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> parameters<span class="token punctuation">.</span>count<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> i3 <span class="token operator">=</span> i <span class="token operator">*</span> <span class="token number">3</span>
+
+<span class="token keyword">const</span> radius <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> parameters<span class="token punctuation">.</span>radius
+<span class="token keyword">const</span> spinAngle <span class="token operator">=</span> radius <span class="token operator">*</span> parameters<span class="token punctuation">.</span>spin
+<span class="token keyword">const</span> branchAngle <span class="token operator">=</span> <span class="token punctuation">(</span>i <span class="token operator">%</span> parameters<span class="token punctuation">.</span>branches<span class="token punctuation">)</span> <span class="token operator">/</span> parameters<span class="token punctuation">.</span>branches <span class="token operator">*</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">2</span>
+
+positions<span class="token punctuation">[</span>i3    <span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">cos</span><span class="token punctuation">(</span>branchAngle <span class="token operator">+</span> spinAngle<span class="token punctuation">)</span> <span class="token operator">*</span> radius
+positions<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span>
+positions<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">sin</span><span class="token punctuation">(</span>branchAngle <span class="token operator">+</span> spinAngle<span class="token punctuation">)</span> <span class="token operator">*</span> radius
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/19/step-09.png" src="./assets/lessons/19/step-09.png" width="1792" height="1120" alt="./assets/lessons/19/step-09.png" class="is-loaded"></span></p>
+<h2>Randomness</h2>
+<p>Those particles are perfectly aligned. We need randomness. But what we truly need is spread stars on the outside and more condensed star on the inside.</p>
+<p>Create a <code spellcheck="false">randomness</code> parameter:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">parameters<span class="token punctuation">.</span>randomness <span class="token operator">=</span> <span class="token number">0.2</span>
+
+<span class="token comment">// ...</span>
+
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'randomness'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">onFinishChange</span><span class="token punctuation">(</span>generateGalaxy<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Now create a random value for each axis with <code spellcheck="false">Math.random()</code>, multiply it by the <code spellcheck="false">radius</code> and then add those values to the <code spellcheck="false">postions</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> parameters<span class="token punctuation">.</span>count<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> i3 <span class="token operator">=</span> i <span class="token operator">*</span> <span class="token number">3</span>
+
+<span class="token keyword">const</span> radius <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> parameters<span class="token punctuation">.</span>radius
+
+<span class="token keyword">const</span> spinAngle <span class="token operator">=</span> radius <span class="token operator">*</span> parameters<span class="token punctuation">.</span>spin
+<span class="token keyword">const</span> branchAngle <span class="token operator">=</span> <span class="token punctuation">(</span>i <span class="token operator">%</span> parameters<span class="token punctuation">.</span>branches<span class="token punctuation">)</span> <span class="token operator">/</span> parameters<span class="token punctuation">.</span>branches <span class="token operator">*</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">2</span>
+
+<span class="token keyword">const</span> randomX <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> parameters<span class="token punctuation">.</span>randomness <span class="token operator">*</span> radius
+<span class="token keyword">const</span> randomY <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> parameters<span class="token punctuation">.</span>randomness <span class="token operator">*</span> radius
+<span class="token keyword">const</span> randomZ <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> parameters<span class="token punctuation">.</span>randomness <span class="token operator">*</span> radius
+
+positions<span class="token punctuation">[</span>i3    <span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">cos</span><span class="token punctuation">(</span>branchAngle <span class="token operator">+</span> spinAngle<span class="token punctuation">)</span> <span class="token operator">*</span> radius <span class="token operator">+</span> randomX
+positions<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> randomY
+positions<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">sin</span><span class="token punctuation">(</span>branchAngle <span class="token operator">+</span> spinAngle<span class="token punctuation">)</span> <span class="token operator">*</span> radius <span class="token operator">+</span> randomZ
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/19/step-10.png" src="./assets/lessons/19/step-10.png" width="1792" height="1120" alt="./assets/lessons/19/step-10.png" class="is-loaded"></span></p>
+<p>It's working but it's not very convincing, right? And we can still see the pattern. To fix that, we can use <code spellcheck="false">Math.pow()</code> to crush the value. The more power you apply, the closest to <code spellcheck="false">0</code> it will get. The problem is that you can't use a negative value with <code spellcheck="false">Math.pow()</code>. What we will do is calculate the power then multiply it by <code spellcheck="false">-1</code> randomly.</p>
+<p>First create the power parameter:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">parameters<span class="token punctuation">.</span>randomnessPower <span class="token operator">=</span> <span class="token number">3</span>
+
+<span class="token comment">// ...</span>
+
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'randomnessPower'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">onFinishChange</span><span class="token punctuation">(</span>generateGalaxy<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then apply the power with <code spellcheck="false">Math.pow()</code> and multiply it by <code spellcheck="false">-1</code> randomly:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">        <span class="token keyword">const</span> randomX <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">pow</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> parameters<span class="token punctuation">.</span>randomnessPower<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0.5</span> <span class="token operator">?</span> <span class="token number">1</span> <span class="token operator">:</span> <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">*</span> parameters<span class="token punctuation">.</span>randomness <span class="token operator">*</span> radius
+<span class="token keyword">const</span> randomY <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">pow</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> parameters<span class="token punctuation">.</span>randomnessPower<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0.5</span> <span class="token operator">?</span> <span class="token number">1</span> <span class="token operator">:</span> <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">*</span> parameters<span class="token punctuation">.</span>randomness <span class="token operator">*</span> radius
+<span class="token keyword">const</span> randomZ <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">pow</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> parameters<span class="token punctuation">.</span>randomnessPower<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0.5</span> <span class="token operator">?</span> <span class="token number">1</span> <span class="token operator">:</span> <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">*</span> parameters<span class="token punctuation">.</span>randomness <span class="token operator">*</span> radius</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/19/step-11.png" src="./assets/lessons/19/step-11.png" width="1792" height="1120" alt="./assets/lessons/19/step-11.png" class="is-loaded"></span></p>
+<h2>Colors</h2>
+<p>For a better effect, we need to add some colors to our creation. A cool thing would be to have different colors inside the galaxy and on its edges.</p>
+<p>First, add the colors parameters:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">parameters<span class="token punctuation">.</span>insideColor <span class="token operator">=</span> <span class="token string">'#ff6030'</span>
+parameters<span class="token punctuation">.</span>outsideColor <span class="token operator">=</span> <span class="token string">'#1b3984'</span>
+
+<span class="token comment">// ...</span>
+
+gui<span class="token punctuation">.</span><span class="token function">addColor</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'insideColor'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">onFinishChange</span><span class="token punctuation">(</span>generateGalaxy<span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">addColor</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'outsideColor'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">onFinishChange</span><span class="token punctuation">(</span>generateGalaxy<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We're going to provide a color for each vertex. We must active the <code spellcheck="false">vertexColors</code> on the material:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PointsMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+size<span class="token operator">:</span> parameters<span class="token punctuation">.</span>size<span class="token punctuation">,</span>
+sizeAttenuation<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+depthWrite<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+blending<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>AdditiveBlending<span class="token punctuation">,</span>
+vertexColors<span class="token operator">:</span> <span class="token boolean">true</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then add a <code spellcheck="false">color</code> attribute on our geometry just like we added the <code spellcheck="false">position</code> attribute. For now, we're not using the <code spellcheck="false">insideColor</code> and <code spellcheck="false">outsideColor</code> parameters:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferGeometry</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> positions <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Float32Array</span><span class="token punctuation">(</span>parameters<span class="token punctuation">.</span>count <span class="token operator">*</span> <span class="token number">3</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> colors <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Float32Array</span><span class="token punctuation">(</span>parameters<span class="token punctuation">.</span>count <span class="token operator">*</span> <span class="token number">3</span><span class="token punctuation">)</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> parameters<span class="token punctuation">.</span>count<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+colors<span class="token punctuation">[</span>i3    <span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">1</span>
+colors<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span>
+colors<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span>
+<span class="token punctuation">}</span>
+
+geometry<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'position'</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferAttribute</span><span class="token punctuation">(</span>positions<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+geometry<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'color'</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferAttribute</span><span class="token punctuation">(</span>colors<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/19/step-12.png" src="./assets/lessons/19/step-12.png" width="1792" height="1120" alt="./assets/lessons/19/step-12.png" class="is-loaded"></span></p>
+<p>You should get a red galaxy.</p>
+<p>To use the colors from the parameters, we first need to create a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/math/Color">Color</a> instance for each one. We have to do it inside the <code spellcheck="false">generateGalaxy</code> function for reasons you'll understand in a bit:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">generateGalaxy</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> colorInside <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span>parameters<span class="token punctuation">.</span>insideColor<span class="token punctuation">)</span>
+<span class="token keyword">const</span> colorOutside <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span>parameters<span class="token punctuation">.</span>outsideColor<span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Inside the loop function, we want to mix these colors into a third color. That mix depends on the distance from the center of the galaxy. If the particle is at the center of the galaxy, it'll have the <code spellcheck="false">insideColor</code> and the further it gets from the center, the more it will get mixed with the <code spellcheck="false">outsideColor</code>.</p>
+<p>Instead of creating a third <a target="_blank" href="https://threejs.org/docs/index.html#api/en/math/Color">Color</a>, we are going to clone the <code spellcheck="false">colorInside</code> and then use the <code spellcheck="false">lerp(...)</code> method to interpolate the color from that base color to another one. The first parameter of <code spellcheck="false">lerp(...)</code> is the other color, and the second parameter is a value between <code spellcheck="false">0</code> and <code spellcheck="false">1</code>. If it's <code spellcheck="false">0</code>, the color will keep its base value, and if it's <code spellcheck="false">1</code> the result color will be the one provided. We can use the <code spellcheck="false">radius</code> divided by the radius parameter:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">        <span class="token keyword">const</span> mixedColor <span class="token operator">=</span> colorInside<span class="token punctuation">.</span><span class="token function">clone</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+mixedColor<span class="token punctuation">.</span><span class="token function">lerp</span><span class="token punctuation">(</span>colorOutside<span class="token punctuation">,</span> radius <span class="token operator">/</span> parameters<span class="token punctuation">.</span>radius<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can then use the <code spellcheck="false">r</code>, <code spellcheck="false">g</code> and <code spellcheck="false">b</code> properties in our <code spellcheck="false">colors</code> array:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">        colors<span class="token punctuation">[</span>i3    <span class="token punctuation">]</span> <span class="token operator">=</span> mixedColor<span class="token punctuation">.</span>r
+colors<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> mixedColor<span class="token punctuation">.</span>g
+colors<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> mixedColor<span class="token punctuation">.</span>b</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/19/step-13.png" src="./assets/lessons/19/step-13.png" width="1792" height="1120" alt="./assets/lessons/19/step-13.png" class="is-loaded"></span></p>
+<p>And here you have a beautiful galaxy generator. You can play with the tweaks and continue to add parameters and improve the style of your galaxies.</p>
+<p>Try not to burn your computer.</p>
+<h2>Go further</h2>
+<p>To go further, you can try to add more tweaks or test other galaxy shapes. We will learn how to animate all the particles in a cool spin animation in a future lesson.</p>
+</section>
+</body>
+
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<body>
+
+    <section class="text js-text">
+        <h2>Introduction</h2>
+<p>Now that we have lights, we want shadows. The back of the objects are indeed in the dark, and this is called the <strong>core shadow</strong>. What we are missing is the <strong>drop shadow</strong>, where objects create shadows on the other objects.</p>
+<p>Shadows have always been a challenge for real-time 3D rendering, and developers must find tricks to display realistic shadows at a reasonable frame rate.</p>
+<p>There are many ways of implementing them, and Three.js has a built-in solution. Be aware, this solution is convenient, but it's far from perfect.</p>
+<h2>How it works</h2>
+<p>We won't detail how shadows are working internally, but we will try to understand the basics.</p>
+<p>When you do one render, Three.js will first do a render for each light supposed to cast shadows. Those renders will simulate what the light sees as if it was a camera. During these lights renders, <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshDepthMaterial">MeshDepthMaterial</a> replaces all meshes materials.</p>
+<p>The results are stored as textures and named shadow maps.</p>
+<p>You won't see those shadow maps directly, but they are used on every material supposed to receive shadows and projected on the geometry.</p>
+<p>Here's an excellent example of what the directional light and the spotlight see: <a target="_blank" href="https://threejs.org/examples/webgl_shadowmap_viewer.html">https://threejs.org/examples/webgl_shadowmap_viewer.html</a></p>
+<h2>Setup</h2>
+<p>Our starter is composed of one simple sphere on a plane with one directional light and one ambient light.</p>
+<p>You can control these lights and the material metalness and roughness in Dat.GUI.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-01.png" src="./assets/lessons/16/step-01.png" width="1792" height="1120" alt="./assets/lessons/16/step-01.png" class="is-loaded"></span></p>
+<h2>How to activate shadows</h2>
+<p>First, we need to activate the shadow maps on the <code spellcheck="false">renderer</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">renderer<span class="token punctuation">.</span>shadowMap<span class="token punctuation">.</span>enabled <span class="token operator">=</span> <span class="token boolean">true</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, we need to go through each object of the scene and decide if the object can cast a shadow with the <code spellcheck="false">castShadow</code> property, and if the object can receive shadow with the <code spellcheck="false">receiveShadow</code> property.</p>
+<p>Try to activate these on as few objects as possible:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">sphere<span class="token punctuation">.</span>castShadow <span class="token operator">=</span> <span class="token boolean">true</span>
+
+<span class="token comment">// ...</span>
+plane<span class="token punctuation">.</span>receiveShadow <span class="token operator">=</span> <span class="token boolean">true</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Finally, activate the shadows on the light with the <code spellcheck="false">castShadow</code> property.</p>
+<p>Only the following types of lights support shadows:</p>
+<ul>
+<li><a target="_blank" href="https://threejs.org/docs/index.html#api/en/lights/PointLight">PointLight</a></li>
+<li><a target="_blank" href="https://threejs.org/docs/index.html#api/en/lights/DirectionalLight">DirectionalLight</a></li>
+<li><a target="_blank" href="https://threejs.org/docs/index.html#api/en/lights/SpotLight">SpotLight</a></li>
+</ul>
+<p>And again, try to activate shadows on as few lights as possible:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">directionalLight<span class="token punctuation">.</span>castShadow <span class="token operator">=</span> <span class="token boolean">true</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-02.png" src="./assets/lessons/16/step-02.png" width="1792" height="1120" alt="./assets/lessons/16/step-02.png" class="is-loaded"></span></p>
+<p>You should get a shadow of the sphere on the plane.</p>
+<p>Sadly, that shadow looks terrible. Let's try to improve it.</p>
+<h2>Shadow map optimizations</h2>
+<h3>Render size</h3>
+<p>As we said at the start of the lesson, Three.js is doing renders called shadow maps for each light. You can access this shadow map (and many other things) using the <code spellcheck="false">shadow</code> property on the light:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>As for our render, we need to specify a size. By default, the shadow map size is only <code spellcheck="false">512x512</code> for performance reasons. We can improve it but keep in mind that you need a power of 2 value for the mipmapping:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>mapSize<span class="token punctuation">.</span>width <span class="token operator">=</span> <span class="token number">1024</span>
+directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>mapSize<span class="token punctuation">.</span>height <span class="token operator">=</span> <span class="token number">1024</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-03.png" src="./assets/lessons/16/step-03.png" width="1792" height="1120" alt="./assets/lessons/16/step-03.png" class="is-loaded"></span></p>
+<p>The shadow should already look better.</p>
+<h3>Near and far</h3>
+<p>Three.js is using cameras to do the shadow maps renders. Those cameras have the same properties as the cameras we already used. This means that we must define a <code spellcheck="false">near</code> and a <code spellcheck="false">far</code>. It won't really improve the shadow's quality, but it might fix bugs where you can't see the shadow or where the shadow appears suddenly cropped.</p>
+<p>To help us debug the camera and preview the <code spellcheck="false">near</code> and <code spellcheck="false">far</code>, we can use a <a target="_blank" href="https://threejs.org/docs/#api/en/helpers/CameraHelper">CameraHelper</a> with the camera used for the shadow map located in the <code spellcheck="false">directionalLight.shadow.camera</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> directionalLightCameraHelper <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>CameraHelper</span><span class="token punctuation">(</span>directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>directionalLightCameraHelper<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-04.png" src="./assets/lessons/16/step-04.png" width="1792" height="1120" alt="./assets/lessons/16/step-04.png" class="is-loaded"></span></p>
+<p>Now you can visually see the <code spellcheck="false">near</code> and <code spellcheck="false">far</code> of the camera. Try to find a value that fits the scene:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>near <span class="token operator">=</span> <span class="token number">1</span>
+directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>far <span class="token operator">=</span> <span class="token number">6</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-05.png" src="./assets/lessons/16/step-05.png" width="1792" height="1120" alt="./assets/lessons/16/step-05.png" class="is-loaded"></span></p>
+<h3>Amplitude</h3>
+<p>With the camera helper we just added, we can see that the camera's amplitude is too large.</p>
+<p>Because we are using a <a target="_blank" href="https://threejs.org/docs/#api/en/lights/DirectionalLight">DirectionalLight</a>, Three.js is using an <a target="_blank" href="https://threejs.org/docs/#api/en/cameras/OrthographicCamera">OrthographicCamera</a>. If you remember from the Cameras lesson, we can control how far on each side the camera can see with the <code spellcheck="false">top</code>, <code spellcheck="false">right</code>, <code spellcheck="false">bottom</code>, and <code spellcheck="false">left</code> properties. Let's reduce those properties:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>top <span class="token operator">=</span> <span class="token number">2</span>
+directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>right <span class="token operator">=</span> <span class="token number">2</span>
+directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>bottom <span class="token operator">=</span> <span class="token operator">-</span> <span class="token number">2</span>
+directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>left <span class="token operator">=</span> <span class="token operator">-</span> <span class="token number">2</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-06.png" src="./assets/lessons/16/step-06.png" width="1792" height="1120" alt="./assets/lessons/16/step-06.png" class="is-loaded"></span></p>
+<p>The smaller the values, the more precise the shadow will be. But if it's too small, the shadows will just be cropped.</p>
+<p>You can hide the camera helper once you're done:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">directionalLightCameraHelper<span class="token punctuation">.</span>visible <span class="token operator">=</span> <span class="token boolean">false</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-07.png" src="./assets/lessons/16/step-07.png" width="1792" height="1120" alt="./assets/lessons/16/step-07.png" class="is-loaded"></span></p>
+<h3>Blur</h3>
+<p>You can control the shadow blur with the <code spellcheck="false">radius</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>radius <span class="token operator">=</span> <span class="token number">10</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-08.png" src="./assets/lessons/16/step-08.png" width="1792" height="1120" alt="./assets/lessons/16/step-08.png" class="is-loaded"></span></p>
+<p>This technique doesn't use the proximity of the camera with the object. It's just a general and cheap blur.</p>
+<h3>Shadow map algorithm</h3>
+<p>Different types of algorithms can be applied to shadow maps:</p>
+<ul>
+<li><strong>THREE.BasicShadowMap</strong>
+Very performant but lousy quality</li>
+<li><strong>THREE.PCFShadowMap</strong>
+Less performant but smoother edges</li>
+<li><strong>THREE.PCFSoftShadowMap</strong>
+Less performant but even softer edges</li>
+<li><strong>THREE.VSMShadowMap</strong>
+Less performant, more constraints, can have unexpected results</li>
+</ul>
+<p>To change it, update the <code spellcheck="false">renderer.shadowMap.type</code> property. The default is <code spellcheck="false">THREE.PCFShadowMap</code> but you can use <code spellcheck="false">THREE.PCFSoftShadowMap</code> for better quality.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">renderer<span class="token punctuation">.</span>shadowMap<span class="token punctuation">.</span>type <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>PCFSoftShadowMap</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-09.png" src="./assets/lessons/16/step-09.png" width="1792" height="1120" alt="./assets/lessons/16/step-09.png" class="is-loaded"></span></p>
+<p>Be aware that the radius property doesn't work with <code spellcheck="false">THREE.PCFSoftShadowMap</code>. You'll have to choose.</p>
+<h2>SpotLight</h2>
+<p>Let's try to add a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/lights/SpotLight">SpotLight</a> like we did in the <strong>Lights</strong> lesson and add the <code spellcheck="false">castShadow</code> property to <code spellcheck="false">true</code>. Don't forget to add the <code spellcheck="false">target</code> property to the <code spellcheck="false">scene</code>.</p>
+<p>We will also add a camera helper:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Spot light</span>
+<span class="token keyword">const</span> spotLight <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>SpotLight</span><span class="token punctuation">(</span><span class="token number">0xffffff</span><span class="token punctuation">,</span> <span class="token number">0.4</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">,</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">0.3</span><span class="token punctuation">)</span>
+
+spotLight<span class="token punctuation">.</span>castShadow <span class="token operator">=</span> <span class="token boolean">true</span>
+
+spotLight<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>spotLight<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>spotLight<span class="token punctuation">.</span>target<span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> spotLightCameraHelper <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>CameraHelper</span><span class="token punctuation">(</span>spotLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>spotLightCameraHelper<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You can reduce the other lights intensity if the scene is too bright:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> ambientLight <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>AmbientLight</span><span class="token punctuation">(</span><span class="token number">0xffffff</span><span class="token punctuation">,</span> <span class="token number">0.4</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> directionalLight <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>DirectionalLight</span><span class="token punctuation">(</span><span class="token number">0xffffff</span><span class="token punctuation">,</span> <span class="token number">0.4</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-10.png" src="./assets/lessons/16/step-10.png" width="1792" height="1120" alt="./assets/lessons/16/step-10.png" class="is-loaded"></span></p>
+<p>As you can see, shadows don't merge nicely. They are handled independently, and, unfortunately, there is not much to do about it.</p>
+<p>But we can improve the shadow quality using the same techniques that we used for the directional light.</p>
+<p>Change the <code spellcheck="false">shadow.mapSize</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">spotLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>mapSize<span class="token punctuation">.</span>width <span class="token operator">=</span> <span class="token number">1024</span>
+spotLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>mapSize<span class="token punctuation">.</span>height <span class="token operator">=</span> <span class="token number">1024</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-11.png" src="./assets/lessons/16/step-11.png" width="1792" height="1120" alt="./assets/lessons/16/step-11.png" class="is-loaded"></span></p>
+<p>Because we are now using a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/lights/SpotLight">SpotLight</a>, internally, Three.js is using a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/cameras/PerspectiveCamera">PerspectiveCamera</a>. That means that instead of the <code spellcheck="false">top</code>, <code spellcheck="false">right</code>, <code spellcheck="false">bottom</code>, and <code spellcheck="false">left</code> properties, we must change the <code spellcheck="false">fov</code> property. Try to find an angle as small as possible without having the shadows cropped:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">spotLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>fov <span class="token operator">=</span> <span class="token number">30</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-12.png" src="./assets/lessons/16/step-12.png" width="1792" height="1120" alt="./assets/lessons/16/step-12.png" class="is-loaded"></span></p>
+<p>Change the <code spellcheck="false">near</code> and <code spellcheck="false">far</code> values:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">spotLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>near <span class="token operator">=</span> <span class="token number">1</span>
+spotLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>far <span class="token operator">=</span> <span class="token number">6</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-13.png" src="./assets/lessons/16/step-13.png" width="1792" height="1120" alt="./assets/lessons/16/step-13.png" class="is-loaded"></span></p>
+<p>You can hide the camera helper once you're done:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">spotLightCameraHelper<span class="token punctuation">.</span>visible <span class="token operator">=</span> <span class="token boolean">false</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-14.png" src="./assets/lessons/16/step-14.png" width="1792" height="1120" alt="./assets/lessons/16/step-14.png" class="is-loaded"></span></p>
+<h2>PointLight</h2>
+<p>Let's try the last light supporting shadows, the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/lights/PointLight">PointLight</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Point light</span>
+<span class="token keyword">const</span> pointLight <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PointLight</span><span class="token punctuation">(</span><span class="token number">0xffffff</span><span class="token punctuation">,</span> <span class="token number">0.3</span><span class="token punctuation">)</span>
+
+pointLight<span class="token punctuation">.</span>castShadow <span class="token operator">=</span> <span class="token boolean">true</span>
+
+pointLight<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>pointLight<span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> pointLightCameraHelper <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>CameraHelper</span><span class="token punctuation">(</span>pointLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>pointLightCameraHelper<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You can reduce the other lights intensity if the scene is too bright:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> ambientLight <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>AmbientLight</span><span class="token punctuation">(</span><span class="token number">0xffffff</span><span class="token punctuation">,</span> <span class="token number">0.3</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> directionalLight <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>DirectionalLight</span><span class="token punctuation">(</span><span class="token number">0xffffff</span><span class="token punctuation">,</span> <span class="token number">0.3</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> spotLight <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>SpotLight</span><span class="token punctuation">(</span><span class="token number">0xffffff</span><span class="token punctuation">,</span> <span class="token number">0.3</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">,</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">0.3</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-15.png" src="./assets/lessons/16/step-15.png" width="1792" height="1120" alt="./assets/lessons/16/step-15.png" class="is-loaded"></span></p>
+<p>As you can see, the camera helper is a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/cameras/PerspectiveCamera">PerspectiveCamera</a> (like for the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/lights/SpotLight">SpotLight</a>) but facing downward. That is due to how Three.js handles shadow maps for the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/lights/PointLight">PointLight</a>.</p>
+<p>Because the point light illuminates in every direction, Three.js will have to render each of the 6 directions to create a cube shadow map. The camera helper you see is the camera's position in the last of those 6 renders (which is downward).</p>
+<p>Doing all those renders can generate performance issues. Try to avoid having too much <a target="_blank" href="https://threejs.org/docs/index.html#api/en/lights/PointLight">PointLight</a> with shadows enabled.</p>
+<p>The only properties you can tweak here are the <code spellcheck="false">mapSize</code>, <code spellcheck="false">near</code> and <code spellcheck="false">far</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">pointLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>mapSize<span class="token punctuation">.</span>width <span class="token operator">=</span> <span class="token number">1024</span>
+pointLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>mapSize<span class="token punctuation">.</span>height <span class="token operator">=</span> <span class="token number">1024</span>
+
+pointLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>near <span class="token operator">=</span> <span class="token number">0.1</span>
+pointLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>far <span class="token operator">=</span> <span class="token number">5</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-16.png" src="./assets/lessons/16/step-16.png" width="1792" height="1120" alt="./assets/lessons/16/step-16.png" class="is-loaded"></span></p>
+<p>You can hide the camera helper once you're done:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">pointLightCameraHelper<span class="token punctuation">.</span>visible <span class="token operator">=</span> <span class="token boolean">false</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-17.png" src="./assets/lessons/16/step-17.png" width="1792" height="1120" alt="./assets/lessons/16/step-17.png" class="is-loaded"></span></p>
+<h2>Baking shadows</h2>
+<p>Three.js shadows can be very useful if the scene is simple, but it might otherwise become messy.</p>
+<p>A good alternative is baked shadows. We talk about baked lights in the previous lesson and it is exactly the same thing. Shadows are integrated into textures that we apply on materials.</p>
+<p>Instead of commenting all the shadows related lines of code, we can simply deactivate them in the renderer:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">renderer<span class="token punctuation">.</span>shadowMap<span class="token punctuation">.</span>enabled <span class="token operator">=</span> <span class="token boolean">false</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-18.png" src="./assets/lessons/16/step-18.png" width="1792" height="1120" alt="./assets/lessons/16/step-18.png" class="is-loaded"></span></p>
+<p>Now we can load a shadow texture located in <code spellcheck="false">/static/textures/bakedShadow.jpg</code> using the classic <a target="_blank" href="https://threejs.org/docs/index.html#api/en/loaders/TextureLoader">TextureLoader</a>.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/bakedShadow.jpg" src="./assets/lessons/16/bakedShadow.jpg" width="512" height="512" alt="./assets/lessons/16/bakedShadow.jpg" class="is-loaded"></span></p>
+<p>Add the following code before creating the objects and lights:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Textures
+*/</span>
+<span class="token keyword">const</span> textureLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>TextureLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> bakedShadow <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/bakedShadow.jpg'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>And finally, instead of using a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshStandardMaterial">MeshStandardMaterial</a> on the plane, we'll use a simple <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a> with the <code spellcheck="false">bakedShadow</code> as <code spellcheck="false">map</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> plane <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PlaneGeometry</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+map<span class="token operator">:</span> bakedShadow
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-19.png" src="./assets/lessons/16/step-19.png" width="1792" height="1120" alt="./assets/lessons/16/step-19.png" class="is-loaded"></span></p>
+<p>You should see a nice blurred, and realistic fake shadow. The main problem is that it's not dynamic, and if the sphere or the lights moves, the shadows won't.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-20.png" src="./assets/lessons/16/step-20.png" width="1792" height="1120" alt="./assets/lessons/16/step-20.png" class="is-loaded"></span></p>
+<h2>Baking shadows alternative</h2>
+<p>A less realistic but more dynamic solution would be to use a more simple shadow under the sphere and slightly above the plane.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/simpleShadow.jpg" src="./assets/lessons/16/simpleShadow.jpg" width="256" height="256" alt="./assets/lessons/16/simpleShadow.jpg" class="is-loaded"></span></p>
+<p>The texture is a simple halo. The white part will be visible and the black part will be invisible.</p>
+<p>Then, we move that shadow with the sphere.</p>
+<p>First, let's remove the previous baked shadow by putting back the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshStandardMaterial">MeshStandardMaterial</a> on the plane:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> plane <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PlaneGeometry</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+material
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, we can load a basic shadow texture located in <code spellcheck="false">/static/textures/bakedShadow.jpg</code>.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> simpleShadow <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/simpleShadow.jpg'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can create the shadow by using a simple plane that we rotate and place slightly above the floor. The material must be black but with the shadow texture as the <code spellcheck="false">alphaMap</code>. Don't forget to change <code spellcheck="false">transparent</code> to <code spellcheck="false">true</code>, and to add the mesh to the <code spellcheck="false">scene</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> sphereShadow <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PlaneGeometry</span><span class="token punctuation">(</span><span class="token number">1.5</span><span class="token punctuation">,</span> <span class="token number">1.5</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+color<span class="token operator">:</span> <span class="token number">0x000000</span><span class="token punctuation">,</span>
+transparent<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+alphaMap<span class="token operator">:</span> simpleShadow
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span>
+sphereShadow<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token operator">-</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">0.5</span>
+sphereShadow<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> plane<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">+</span> <span class="token number">0.01</span>
+
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>sphere<span class="token punctuation">,</span> sphereShadow<span class="token punctuation">,</span> plane<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/16/step-21.png" src="./assets/lessons/16/step-21.png" width="1792" height="1120" alt="./assets/lessons/16/step-21.png" class="is-loaded"></span></p>
+<p>There you go, a not so realistic but very performant shadow.</p>
+<p>If you're going to animate the sphere, you can simply animate the shadow accordingly and change its opacity depending on the elevation of the sphere:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> clock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Clock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> elapsedTime <span class="token operator">=</span> clock<span class="token punctuation">.</span><span class="token function">getElapsedTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Update the sphere</span>
+sphere<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">cos</span><span class="token punctuation">(</span>elapsedTime<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">1.5</span>
+sphere<span class="token punctuation">.</span>position<span class="token punctuation">.</span>z <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">sin</span><span class="token punctuation">(</span>elapsedTime<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">1.5</span>
+sphere<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">abs</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">sin</span><span class="token punctuation">(</span>elapsedTime <span class="token operator">*</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Update the shadow</span>
+sphereShadow<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> sphere<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x
+sphereShadow<span class="token punctuation">.</span>position<span class="token punctuation">.</span>z <span class="token operator">=</span> sphere<span class="token punctuation">.</span>position<span class="token punctuation">.</span>z
+sphereShadow<span class="token punctuation">.</span>material<span class="token punctuation">.</span>opacity <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token number">1</span> <span class="token operator">-</span> sphere<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.3</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">tick</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/16/step-22.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<h2>Which technique to use</h2>
+<p>Finding the right solution to handle shadows is up to you. It depends on the project, the performances and the techniques you know. You can also combine them.</p>
+    </section>
+</body>
+
+</html>

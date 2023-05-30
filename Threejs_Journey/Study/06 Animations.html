@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<body>
+
+    <section class="text js-text">
+        <h2>Introduction</h2>
+<p>We created a scene that we rendered once at the end of our code. That is already good progress, but most of the time, you'll want to animate your creations.</p>
+<p>Animations, when using Three.js, work like stop motion. You move the objects, and you do a render. Then you move the objects a little more, and you do another render. Etc. The more you move the objects between renders, the faster they'll appear to move.</p>
+<p>The screen you are looking at runs at a specific frequency. We call that a frame rate. The frame rate mostly depends on the screen, but the computer itself has limitations. Most screens run at 60 frames per second. If you do the maths, that means about a frame every 16ms. But some screens can run much faster, and when the computer has difficulties processing things, it'll run more slowly.</p>
+<p>We want to execute a function that will move objects and do the render on each frame regardless of the frame rate.</p>
+<p>The native JavaScript way of doing so is by using the <code spellcheck="false">window.requestAnimationFrame(...)</code> method.</p>
+<h2>Setup</h2>
+<p>As we had before, all we have in the starter is our cube in the scene's center.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/06/step-01.png" src="./assets/lessons/06/step-01.png" width="1792" height="1120" alt="./assets/lessons/06/step-01.png" class="is-loaded"></span></p>
+<h2>Using requestAnimationFrame</h2>
+<p>The primary purpose of <a target="_blank" href="https://developer.mozilla.org/docs/Web/API/window/requestAnimationFrame">requestAnimationFrame</a> is not to run code on each frame.</p>
+<p><code spellcheck="false">requestAnimationFrame</code> will execute the function you provide <strong>on the next frame</strong>. But then, if this function also uses <code spellcheck="false">requestAnimationFrame</code> to execute that same function on the next frame, you'll end up with your function being executed on each frame forever which is exactly what we want.</p>
+<p>Create a function named <code spellcheck="false">tick</code> and call this function once. In this function, use <code spellcheck="false">window.requestAnimationFrame(...)</code> to call this same function on the next frame:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Animate
+*/</span>
+<span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'tick'</span><span class="token punctuation">)</span>
+
+window<span class="token punctuation">.</span><span class="token function">requestAnimationFrame</span><span class="token punctuation">(</span>tick<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">tick</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>That's it. You have your infinite loop.</p>
+<p>As you can see on the console, the <code spellcheck="false">'tick'</code> is being called on each frame. If you test this code on a computer with a high frame rate, the <code spellcheck="false">'tick'</code> will appears at a higher frequency.</p>
+<p>You can now move the <code spellcheck="false">renderer.render(...)</code> call inside that function and increase the cube <code spellcheck="false">rotation</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Animate
+*/</span>
+<span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// Update objects</span>
+mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>y <span class="token operator">+=</span> <span class="token number">0.01</span>
+
+<span class="token comment">// Render</span>
+renderer<span class="token punctuation">.</span><span class="token function">render</span><span class="token punctuation">(</span>scene<span class="token punctuation">,</span> camera<span class="token punctuation">)</span>
+
+<span class="token comment">// Call tick again on the next frame</span>
+window<span class="token punctuation">.</span><span class="token function">requestAnimationFrame</span><span class="token punctuation">(</span>tick<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">tick</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/06/step-02.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>Congratulations, you now have a Three.js animation.</p>
+<p>The problem is, if you test this code on a computer with high frame rate, the cube will rotate faster, and if you test on a lower frame rate, the cube will rotate slower.</p>
+<h4>Adaptation to the framerate</h4>
+<p>To adapt the animation to the framerate, we need to know how much time it's been since the last tick.</p>
+<p>First, we need a way to measure time. In native JavaScript, you can use <code spellcheck="false">Date.now()</code> to get the current timestamp:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> time <span class="token operator">=</span> Date<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The timestamp corresponds to how much time has passed since the 1st of January 1970 (the beginning of time for Unix). In JavaScript, its unit is in milliseconds.</p>
+<p>What you need now is to subtract the current timestamp to that of the previous frame to get what we can call the <code spellcheck="false">deltaTime</code> and use this value when animating objects:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Animate
+*/</span>
+<span class="token keyword">let</span> time <span class="token operator">=</span> Date<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// Time</span>
+<span class="token keyword">const</span> currentTime <span class="token operator">=</span> Date<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> deltaTime <span class="token operator">=</span> currentTime <span class="token operator">-</span> time
+time <span class="token operator">=</span> currentTime
+
+<span class="token comment">// Update objects</span>
+mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>y <span class="token operator">+=</span> <span class="token number">0.01</span> <span class="token operator">*</span> deltaTime
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">tick</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/06/step-03.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>The cube should rotate faster because the deltaTime should be around <code spellcheck="false">16</code> if your screen is running at <code spellcheck="false">60fps</code>, so feel free to reduce it by multiplying the value.</p>
+<p>Now that we base our rotation on how much time was spent since the last frame, this rotation speed will be the same on every screen and every computers regardless of the frame rate.</p>
+<h2>Using Clock</h2>
+<p>While this code isn't that complicated, there is a built-in solution in Three.js named <a target="_blank" href="https://threejs.org/docs/#api/en/core/Clock">Clock</a> that will handle the time calculations.</p>
+<p>You simply have to instantiate a <a target="_blank" href="https://threejs.org/docs/#api/en/core/Clock">Clock</a> variable and use the built-in methods like <code spellcheck="false">getElapsedTime()</code>. This method will return how many seconds have passed since the <a target="_blank" href="https://threejs.org/docs/#api/en/core/Clock">Clock</a> was created.</p>
+<p>You can use this value to rotate the object:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Animate
+*/</span>
+<span class="token keyword">const</span> clock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Clock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> elapsedTime <span class="token operator">=</span> clock<span class="token punctuation">.</span><span class="token function">getElapsedTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Update objects</span>
+mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>y <span class="token operator">=</span> elapsedTime
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">tick</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/06/step-04.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>You can also use it to move things with the <code spellcheck="false">position</code> property. If you combine it with <code spellcheck="false">Math.sin(...)</code> you can get a pretty good result:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Animate
+*/</span>
+<span class="token keyword">const</span> clock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Clock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> elapsedTime <span class="token operator">=</span> clock<span class="token punctuation">.</span><span class="token function">getElapsedTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Update objects</span>
+mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">cos</span><span class="token punctuation">(</span>elapsedTime<span class="token punctuation">)</span>
+mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">sin</span><span class="token punctuation">(</span>elapsedTime<span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">tick</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/06/step-05.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>And obviously, you can use those techniques to animate any <a target="_blank" href="https://threejs.org/docs/#api/en/core/Object3D">Object3D</a> like the camera:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Animate
+*/</span>
+<span class="token keyword">const</span> clock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Clock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> elapsedTime <span class="token operator">=</span> clock<span class="token punctuation">.</span><span class="token function">getElapsedTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Update objects</span>
+camera<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">cos</span><span class="token punctuation">(</span>elapsedTime<span class="token punctuation">)</span>
+camera<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">sin</span><span class="token punctuation">(</span>elapsedTime<span class="token punctuation">)</span>
+camera<span class="token punctuation">.</span><span class="token function">lookAt</span><span class="token punctuation">(</span>mesh<span class="token punctuation">.</span>position<span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">tick</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/06/step-06.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>Another available method is <code spellcheck="false">getDelta(...)</code>, but you should not use it unless you know exactly what's going on in the <a target="_blank" href="https://threejs.org/docs/#api/en/core/Clock">Clock</a> class code. Using it might mess with your animation, and you'll get unwanted results.</p>
+<h2>Using a library</h2>
+<p>Sometimes you'll want to animate your scene in a very specific way that will require using another library. There are tons of animation libraries, but a very famous one is <a target="_blank" href="https://greensock.com/gsap/">GSAP</a>.</p>
+<p>To add GSAP to our Webpack project, we can use the dependency manager provided with Node.js called <code spellcheck="false">npm</code>.</p>
+<p>In your terminal (while the server is not running or by using another terminal window on the same folder), run <code spellcheck="false">npm install --save gsap@3.5.1</code></p>
+<p>The <code spellcheck="false">--save</code> argument saves the dependency in the <code spellcheck="false">package.json</code> so the module can be fetched if we do an <code spellcheck="false">npm install</code>.</p>
+<p>The <code spellcheck="false">@3.5.1</code> forces the version. We use this version because it was the one used when writing the lesson, but you can try the latest version if you want by removing <code spellcheck="false">@3.5.1</code>.</p>
+<p>GSAP is now available in the <code spellcheck="false">node_modules/</code> folder, and we can import it in our <code spellcheck="false">script.js</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token string">'./style.css'</span>
+<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> <span class="token constant">THREE</span> <span class="token keyword">from</span> <span class="token string">'three'</span>
+<span class="token keyword">import</span> gsap <span class="token keyword">from</span> <span class="token string">'gsap'</span>
+
+<span class="token comment">// ...</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>There are many ways of using GSAP, and we could dedicate an entire course to it, but it is not the goal of this course. We will simply create a tween to test things out. If you already know how to use GSAP, it works the same with Three.js.</p>
+<p>Comment the code related to the previous animations but keep the <code spellcheck="false">tick</code> function with the render. Then you can create what we call a tween (an animation from A to B) using <code spellcheck="false">gsap.to(...)</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Animate
+*/</span>
+gsap<span class="token punctuation">.</span><span class="token function">to</span><span class="token punctuation">(</span>mesh<span class="token punctuation">.</span>position<span class="token punctuation">,</span> <span class="token punctuation">{</span> duration<span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> delay<span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> x<span class="token operator">:</span> <span class="token number">2</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// Render</span>
+renderer<span class="token punctuation">.</span><span class="token function">render</span><span class="token punctuation">(</span>scene<span class="token punctuation">,</span> camera<span class="token punctuation">)</span>
+
+<span class="token comment">// Call tick again on the next frame</span>
+window<span class="token punctuation">.</span><span class="token function">requestAnimationFrame</span><span class="token punctuation">(</span>tick<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">tick</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/06/step-07.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>GSAP has a built-in <code spellcheck="false">requestAnimationFrame</code>, so you don't need to update the animation by yourself, but still, if you want to see the cube moving, you need to keep doing the renders of your scene on each frame.</p>
+<h2>Choosing the right solution</h2>
+<p>As for choosing between native JS and an animation library, it's a matter of what you want to achieve. If you're going to create a carousel that spins forever, you don't need any library for that. But if you want to animate, for instance, the swing of a sword, you might prefer to use a library.</p>
+    </section>
+</body>
+
+</html>

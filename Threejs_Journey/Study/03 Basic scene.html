@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<body>
+    <section class="text js-text">
+        <h2>Introduction</h2>
+        <p>For our first lesson, we will make Three.js works the most straightforward way: no bundler, no dependency, no
+            modules, just an HTML file, and some JavaScript.</p>
+        <h2>Base files</h2>
+        <p>To begin, create a plain <code spellcheck="false">index.html</code> file:</p>
+        <div class="code-toolbar">
+            <pre contenteditable=""
+                class=" language-html"><code spellcheck="false" class=" language-html"><span class="token doctype"><span class="token punctuation">&lt;!</span><span class="token doctype-tag">DOCTYPE</span> <span class="token name">html</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>html</span> <span class="token attr-name">lang</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>en<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>head</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">charset</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>UTF-8<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>viewport<span class="token punctuation">"</span></span> <span class="token attr-name">content</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>width=device-width, initial-scale=1.0<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>title</span><span class="token punctuation">&gt;</span></span>03 - Basic Scene<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>title</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>head</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>./script.js<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span><span class="token script"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>html</span><span class="token punctuation">&gt;</span></span></code></pre>
+        </div>
+        <p>And a simple <code spellcheck="false">script.js</code> file:</p>
+        <div class="code-toolbar">
+            <pre contenteditable=""
+                class=" language-javascript"><code spellcheck="false" class=" language-javascript">console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Hello Three.js'</span><span class="token punctuation">)</span></code></pre>
+        </div>
+        <p>Open the <code spellcheck="false">index.html</code> in your browser. To do that, you can try to double click
+            on the file. If it doesn't work or it opens with the wrong browser, you can drag and drop the file onto the
+            right browser. Even if Three.js will work on most browsers, I recommend using a developer-friendly browser
+            like <strong>Chrome</strong> or <strong>Firefox</strong>.</p>
+        <p>Now open the <strong>Developer Tools</strong>.</p>
+        <p>To do that, you can right click anywhere on the page and choose <code spellcheck="false">Inspect</code> or
+            you can press <code spellcheck="false">F12</code> on Windows and <code
+                spellcheck="false">CMD + OPTION + I</code> on MacOS.</p>
+        <p>Then navigate to the <strong>Console</strong> tab on top of the <strong>Developer Tools</strong>.</p>
+        <p>You should keep the <strong>Console</strong> open at all time to see potential errors and warnings.</p>
+        <h2>How to load Three.js</h2>
+        <p>Now we need to load the Three.js library.
+            There are many ways of doing it. For now, we will simply download the library and load it using <code
+                spellcheck="false">&lt;script&gt;</code>.</p>
+        <p>Go to <a target="_blank" href="https://threejs.org/">https://threejs.org/</a> and click on the
+            <strong>download</strong> button to download a zip file and unzip it. The file is quite heavy, but don't
+            worry, we only need one file from it.</p>
+        <p>You should get a folder that looks like this:</p>
+        <p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/03/image-1.png"
+                    src="./assets/lessons/03/image-1.png" width="408" height="266" alt="./assets/lessons/03/image-1.png"
+                    class="is-loaded"></span></p>
+        <p>Go to the <code spellcheck="false">build/</code> folder and copy the <code
+                spellcheck="false">three.min.js</code> file to your project.</p>
+        <p>You should get something like this:</p>
+        <p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/03/image-2.png"
+                    src="./assets/lessons/03/image-2.png" width="114" height="67" alt="./assets/lessons/03/image-2.png"
+                    class="is-loaded"></span></p>
+        <p>We can now load the Three.js library at the end of the <code spellcheck="false">&lt;body&gt;</code>, right
+            before closing it:</p>
+        <div class="code-toolbar">
+            <pre contenteditable=""
+                class=" language-html"><code spellcheck="false" class=" language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>./three.min.js<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span><span class="token script"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>./script.js<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span><span class="token script"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span></code></pre>
+            <div class="toolbar">
+                <div class="toolbar-item"><span>HTML</span></div>
+                <div class="toolbar-item"><button>Copy</button></div>
+            </div>
+        </div>
+        <p>Make sure to load <code spellcheck="false">three.min.js</code> before your <code
+                spellcheck="false">script.js</code>; otherwise, your script will not be aware of what's inside the <code
+                spellcheck="false">three.min.js</code> file.</p>
+        <h2>How to use Three.js</h2>
+        <p>Inside of our <code spellcheck="false">script.js</code> file, we now have access to a variable named <code
+                spellcheck="false">THREE</code>. Be careful and always write it using uppercase.</p>
+        <p>If you <code spellcheck="false">console.log()</code> this variable, you'll see that there is a lot going on
+            inside:</p>
+        <div class="code-toolbar">
+            <pre contenteditable=""
+                class=" language-javascript"><code spellcheck="false" class=" language-javascript">console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">THREE</span><span class="token punctuation">)</span></code></pre>
+        </div>
+        <p>The <code spellcheck="false">THREE</code> variable contains most of the classes and properties you might need
+            on a classic Three.js project. Unfortunately, not all classes are inside this variable, but we will see
+            later how to access them.</p>
+        <p>To use one of those classes, you need to instantiate it. For example, if you want to create a scene, you'll
+            write <code spellcheck="false">const scene = new THREE.Scene()</code>. If you want to create a sphere
+            geometry, you need to write <code
+                spellcheck="false">const sphereGeometry = new THREE.SphereGeometry(1.5, 32, 32)</code> —We'll dig deeper
+            into these later.</p>
+        <h2>First scene</h2>
+        <p>It's time to create our scene and produce something on the screen.</p>
+        <p>We need 4 elements to get started:</p>
+        <ol>
+            <li>A scene that will contain objects</li>
+            <li>Some objects</li>
+            <li>A camera</li>
+            <li>A renderer</li>
+        </ol>
+        <h4>Scene</h4>
+        <p>The scene is like a container. You place your objects, models, particles, lights, etc. in it, and at some
+            point, you ask Three.js to render that scene.</p>
+        <p>To create a scene, use the <a target="_blank"
+                href="https://threejs.org/docs/index.html#api/en/scenes/Scene">Scene</a> class:</p>
+        <div class="code-toolbar">
+            <pre contenteditable=""
+                class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Scene</span>
+<span class="token keyword">const</span> scene <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Scene</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre>
+        </div>
+        <h4>Objects</h4>
+        <p>Objects can be many things. You can have primitive geometries, imported models, particles, lights, and so on.
+        </p>
+        <p>We will start with a simple red cube. </p>
+        <p>To create that red cube, we need to create a type of object named <a target="_blank"
+                href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a>. A <a target="_blank"
+                href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a> is the combination of a geometry (the
+            shape) and a material (how it looks).</p>
+        <p>There are many geometries and many materials, but we will keep things simple for now and create a <a
+                target="_blank" href="https://threejs.org/docs/index.html#api/en/geometries/BoxGeometry">BoxGeometry</a>
+            and a <a target="_blank"
+                href="https://threejs.org/docs/#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a>.</p>
+        <p>To create the geometry, we use the <a target="_blank"
+                href="https://threejs.org/docs/index.html#api/en/geometries/BoxGeometry">BoxGeometry</a> class with the
+            first 3 parameters that correspond to the box's size.</p>
+        <div class="code-toolbar">
+            <pre contenteditable=""
+                class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Object</span>
+<span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BoxGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span></code></pre>
+
+        </div>
+        <p>To create the material, we use the <a target="_blank"
+                href="https://threejs.org/docs/index.html#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a>
+            class with one parameter: an object <code spellcheck="false">{}</code> containing all the options. All we
+            need is to specify its <code spellcheck="false">color</code> property.</p>
+        <p>There are many ways to specify a color in Three.js. You can send it as a JS hexadecimal <code
+                spellcheck="false">0xff0000</code>, you can send it as a string hexadecimal <code
+                spellcheck="false">'#ff0000'</code>, you can use color names like <code spellcheck="false">'red'</code>,
+            or you can send an instance of the <a target="_blank"
+                href="https://threejs.org/docs/index.html#api/en/math/Color">Color</a> class —we'll cover more about it
+            later.</p>
+        <div class="code-toolbar">
+            <pre contenteditable=""
+                class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Object</span>
+<span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BoxGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> color<span class="token operator">:</span> <span class="token number">0xff0000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre>
+
+        </div>
+        <p>To create the final mesh, we use the <a target="_blank"
+                href="https://threejs.org/docs/index.html#api/en/objects/Mesh">Mesh</a> class and send the <code
+                spellcheck="false">geometry</code> and the <code spellcheck="false">material</code> as parameters.</p>
+        <div class="code-toolbar">
+            <pre contenteditable=""
+                class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Object</span>
+<span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BoxGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> color<span class="token operator">:</span> <span class="token number">0xff0000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> mesh <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>geometry<span class="token punctuation">,</span> material<span class="token punctuation">)</span></code></pre>
+
+        </div>
+        <p>You can now add your mesh to the scene by using the <code spellcheck="false">add(...)</code> method:</p>
+        <div class="code-toolbar">
+            <pre contenteditable=""
+                class=" language-javascript"><code spellcheck="false" class=" language-javascript">scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh<span class="token punctuation">)</span></code></pre>
+
+        </div>
+        <p>If you don't add an object to the scene, you won't be able to see it.</p>
+        <h4>Camera</h4>
+        <p>The camera is not visible. It's more like a theoretical point of view. When we will do a render of your
+            scene, it will be from that camera's point of view.</p>
+        <p>You can have multiple cameras just like on a movie set, and you can switch between those cameras as you
+            please. Usually, we only use one camera.</p>
+        <p>There are different types of cameras, and we will talk about these in a future lesson. For now, we simply
+            need a camera that handles perspective (making close objects look more prominent than far objects).</p>
+        <p>To create the camera, we use the <a target="_blank"
+                href="https://threejs.org/docs/index.html#api/en/cameras/PerspectiveCamera">PerspectiveCamera</a> class.
+        </p>
+        <p>There are two essential parameters we need to provide.</p>
+        <p><strong>The field of view</strong></p>
+        <p>The field of view is how large your vision angle is. If you use a very large angle, you'll be able to see in
+            every direction at once but with much distortion, because the result will be drawn on a small rectangle. If
+            you use a small angle, things will look zoomed in.
+            The field of view (or <code spellcheck="false">fov</code>) is expressed in degrees and corresponds to the
+            vertical vision angle. For this exercise we will use a <code spellcheck="false">75</code> degrees angle.</p>
+        <p>Here's a video to explain what the field of view variation looks like:</p>
+        <p>
+        </p>
+        <div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls=""
+                src="./assets/lessons/03/video-1.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6"
+                    style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1"
+                        d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2"
+                        d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z">
+                    </path>
+                    <path class="face-3"
+                        d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z">
+                    </path>
+                    <path class="triangle-1"
+                        d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z">
+                    </path>
+                    <path class="triangle-2"
+                        d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z">
+                    </path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z">
+                    </path>
+                </svg>
+            </div>
+        </div>
+        <p></p>
+        <p><strong>The aspect ratio</strong></p>
+        <p>In most cases, the aspect ratio is the width of the canvas divided by its height.
+            We haven't specified any width or height for now, but we will need to later. In the meantime, we will create
+            an object with temporary values that we can re-use.</p>
+        <p>Don't forget to add your camera to the scene. Everything should work without adding the camera to the scene,
+            but it might result in bugs later:</p>
+        <div class="code-toolbar">
+            <pre contenteditable=""
+                class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Sizes</span>
+<span class="token keyword">const</span> sizes <span class="token operator">=</span> <span class="token punctuation">{</span>
+width<span class="token operator">:</span> <span class="token number">800</span><span class="token punctuation">,</span>
+height<span class="token operator">:</span> <span class="token number">600</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Camera</span>
+<span class="token keyword">const</span> camera <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PerspectiveCamera</span><span class="token punctuation">(</span><span class="token number">75</span><span class="token punctuation">,</span> sizes<span class="token punctuation">.</span>width <span class="token operator">/</span> sizes<span class="token punctuation">.</span>height<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>camera<span class="token punctuation">)</span></code></pre>
+
+        </div>
+        <h4>Renderer</h4>
+        <p>The renderer's job is to do the render. Bet you didn't see that coming?</p>
+        <p>We will simply ask the renderer to render our scene from the camera point of view, and the result will be
+            drawn into a canvas. You can create the canvas by yourself, or let the renderer generate it and then add it
+            to your page. For this exercise, we will add the canvas to the html and send it to the renderer.</p>
+        <p>Create the <code spellcheck="false">&lt;canvas&gt;</code> element <strong>before</strong> you load the
+            scripts and give it a class:</p>
+        <div class="code-toolbar">
+            <pre contenteditable=""
+                class=" language-html"><code spellcheck="false" class=" language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canvas</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>webgl<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canvas</span><span class="token punctuation">&gt;</span></span></code></pre>
+        </div>
+        <p>To create the renderer, we use the <a target="_blank"
+                href="https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer">WebGLRenderer</a> class with
+            one parameter: an object <code spellcheck="false">{}</code> containing all the options. We need to specify
+            the <code spellcheck="false">canvas</code> property corresponding to the <code
+                spellcheck="false">&lt;canvas&gt;</code> we added to the page.</p>
+        <p>Create a <code spellcheck="false">canvas</code> variable at the start of the code, then fetch and store in it
+            the element we created in the HTML using <code spellcheck="false">document.querySelector(...)</code>.</p>
+        <p>It's better to assign the canvas to a variable because we'll use it for other purposes in the next lessons.
+        </p>
+        <p>We also need to update the size of your renderer with the <code spellcheck="false">setSize(...)</code> method
+            using the <code spellcheck="false">sizes</code> object we created earlier.
+            The <code spellcheck="false">setSize(...)</code> method will automatically resize our <code
+                spellcheck="false">&lt;canvas&gt;</code> accordingly:</p>
+        <div class="code-toolbar">
+            <pre contenteditable=""
+                class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Canvas</span>
+<span class="token keyword">const</span> canvas <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">querySelector</span><span class="token punctuation">(</span><span class="token string">'canvas.webgl'</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Renderer</span>
+<span class="token keyword">const</span> renderer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>WebGLRenderer</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+canvas<span class="token operator">:</span> canvas
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+renderer<span class="token punctuation">.</span><span class="token function">setSize</span><span class="token punctuation">(</span>sizes<span class="token punctuation">.</span>width<span class="token punctuation">,</span> sizes<span class="token punctuation">.</span>height<span class="token punctuation">)</span></code></pre>
+        </div>
+        <p>If you refresh the page, you should see a black canvas of 800px width and 600px large.</p>
+        <p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/03/step-01.png"
+                    src="./assets/lessons/03/step-01.png"
+                    width="1792" height="1120" alt="./assets/lessons/03/step-01.png"></span></p>
+        <h2>First render</h2>
+        <p>It's time to work on our first render. Call the <code spellcheck="false">render(...)</code> method on the
+            renderer and send it the <code spellcheck="false">scene</code> and the <code
+                spellcheck="false">camera</code> as parameters:</p>
+        <div class="code-toolbar">
+            <pre contenteditable=""
+                class=" language-javascript"><code spellcheck="false" class=" language-javascript">renderer<span class="token punctuation">.</span><span class="token function">render</span><span class="token punctuation">(</span>scene<span class="token punctuation">,</span> camera<span class="token punctuation">)</span></code></pre>
+        </div>
+        <p>Still nothing? Here's the issue: we haven't specified our object's position, nor our camera's. Both are in
+            the default position, which is the center of the scene and we can't see an object from its inside (by
+            default).</p>
+        <p>We need to move things.</p>
+        <p>To do that, we have access to multiple properties on each object, such as <code
+                spellcheck="false">position</code>, <code spellcheck="false">rotation</code>, and <code
+                spellcheck="false">scale</code>. For now, use the <code spellcheck="false">position</code> property to
+            move the camera backward.</p>
+        <p>The <code spellcheck="false">position</code> property is an object with three relevant properties: <code
+                spellcheck="false">x</code>, <code spellcheck="false">y</code> and <code spellcheck="false">z</code>. By
+            default, Three.js considers the forward/backward axis to be <code spellcheck="false">z</code>.</p>
+        <p>To move the camera backward, we need to provide a positive value to that property. You can do that anywhere
+            once you've created the <code spellcheck="false">camera</code> variable, yet it has to happen before you do
+            the render:</p>
+        <div class="code-toolbar">
+            <pre contenteditable=""
+                class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> camera <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PerspectiveCamera</span><span class="token punctuation">(</span><span class="token number">75</span><span class="token punctuation">,</span> sizes<span class="token punctuation">.</span>width <span class="token operator">/</span> sizes<span class="token punctuation">.</span>height<span class="token punctuation">)</span>
+camera<span class="token punctuation">.</span>position<span class="token punctuation">.</span>z <span class="token operator">=</span> <span class="token number">3</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>camera<span class="token punctuation">)</span></code></pre>
+        </div>
+        <p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/03/step-02.png"
+                    src="./assets/lessons/03/step-02.png"
+                    width="1792" height="1120" alt="./assets/lessons/03/step-02.png"></span></p>
+        <p>Congratulations, you should see your first render. It looks like a square, and that's because the camera
+            aligns perfectly with the cube, and you can see only one side of it.</p>
+        <p>Don't worry about the render's size; we'll learn how to make the canvas fit the viewport later.</p>
+        <p>In the next lessons, you will learn more about the <code spellcheck="false">position</code>, <code
+                spellcheck="false">rotation</code> and <code spellcheck="false">scale</code> properties, how to change
+            them, and animate the scene.</p>
+    </section>
+
+</body>
+
+</html>

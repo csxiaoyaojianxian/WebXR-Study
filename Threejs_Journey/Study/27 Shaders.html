@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<section class="text js-text">
+    <h2>Introduction</h2>
+<p>This lesson is probably the most anticipated one. We already talked about shaders, and that is the most demanding topic.</p>
+<p>The funny thing is that we have been using them since the beginning. When we are creating Three.js built-in materials, those materials are composed of shaders. Everything showing up on the WebGL render is made possible because of shaders, but it's time to create them on our own.</p>
+<p>We will start by explaining what shaders are and when to use them. Then we will create our own very simple shaders. We will, of course, cover the syntax of the shader language. And finally, we will do some exercises to practice classic situations.</p>
+<h2>What is a shader</h2>
+<p>A shader is, in fact, one of the main components of WebGL. If we had started WebGL without Three.js, it would have been one of the first things we would have to learn, and this is why native WebGL is so hard.</p>
+<p>A shader is a program written in GLSL that is sent to the GPU. They are used to <strong>position each vertex of a geometry</strong> and to <strong>colorize each visible pixel of that geometry</strong>. The term "pixel" isn't accurate because each point in the render doesn't necessarily match each pixel of the screen and this is why we prefer to use the term "fragment" so don't be surprised if you see both terms.</p>
+<p>Then we send a lot of data to the shader such as the vertices coordinates, the mesh transformation, information about the camera and its field of view, parameters like the color, the textures, the lights, the fog, etc. The GPU then processes all of this data following the shader instructions, and our geometry appears in the render.</p>
+<p>There are two types of shaders, and we need both of them.</p>
+<h3>Vertex shader</h3>
+<p>The vertex shader's purpose is to position the vertices of the geometry. The idea is to send the vertices positions, the mesh transformations (like its position, rotation, and scale), the camera information (like its position, rotation, and field of view). Then, the GPU will follow the instructions in the vertex shader to process all of this information in order to project the vertices on a 2D space that will become our render —in other words, our canvas.</p>
+<p>When using a vertex shader, its code will be applied on every vertex of the geometry. But some data like the vertex position will change between each vertex. This type of data —the one that changes between vertices— is called an <strong>attribute</strong>. But some data doesn't need to switch between each vertex like the position of the mesh. Yes, the location of the mesh will impact all the vertices, but in the same way. This type of data —the one that doesn't change between vertices— is called a <strong>uniform</strong>. We will get back to <strong>attributes</strong> and <strong>uniforms</strong> later.</p>
+<p>The vertex shader happens first. Once the vertices are placed, the GPU knows what pixels of the geometry are visible and can proceed to the fragment shader.</p>
+<h3>Fragment shader</h3>
+<p>The fragment shader purpose is to color each visible fragment of the geometry.</p>
+<p>The same fragment shader will be used for every visible fragment of the geometry. We can send data to it like a color by using <strong>uniforms</strong> —just like the vertex shader, or we can send data from the vertex shader to the fragment shader. We call this type of data —the one that comes from the vertex shader to the fragment shader— <strong>varying</strong>. We will get back to this later.</p>
+<p>The most straightforward instruction in a fragment shader can be to color all the fragments with the same color. We get the equivalent of the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a> —if we had set only the <code spellcheck="false">color</code> property. </p>
+<p>Or we can send more data to the shader, for instance, a light position. We can then color the fragments according to how much the face is in front of the light source. We would get the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshPhongMaterial">MeshPhongMaterial</a> equivalent—if we had one light in the scene.</p>
+<h3>Summary</h3>
+<p>The <strong>vertex shader</strong> position the vertices on the render.</p>
+<p>The <strong>fragment shader</strong> color each visible fragment (or pixel) of that geometry.</p>
+<p>The <strong>fragment shader</strong> is executed after the <strong>vertex shader</strong>.</p>
+<p>Data that changes between each vertices (like their position) is called <strong>attribute</strong> and can only be used in the <strong>vertex shader</strong>.</p>
+<p>Data that doesn't change between vertices (like the mesh position or a color) is called <strong>uniform</strong> and can be use in both the <strong>vertex shader</strong> and the <strong>fragment shader</strong>.</p>
+<p>We can send data from the <strong>vertex shader</strong> to the <strong>fragment shader</strong> using <strong>varying</strong>.</p>
+<h2>Why writing our own shaders</h2>
+<p>Three.js materials try to cover as many situations as possible, but they have limitations. If we want to break those limits, we have to write our own shaders.</p>
+<p>It can also be for performance reasons. Materials like <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshStandardMaterial">MeshStandardMaterial</a> are very elaborate and involve a lot of code and calculations. If we write our own shader, we can keep the features and calculations to the minimum. We have more control over the performance.</p>
+<p>Writing our own shader is also an excellent way to add post-process to our render, but we will see this in a dedicated lesson.</p>
+<p>Once you master the shaders, they'll become a must in all your projects.</p>
+<h2>Create our first shaders with RawShaderMaterial</h2>
+<p>To create our first shader, we need to create a particular material. This material can be a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial">ShaderMaterial</a> or a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/RawShaderMaterial">RawShaderMaterial</a>. The difference between these two is that the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial">ShaderMaterial</a> will have some code automatically added to the shader codes while the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/RawShaderMaterial">RawShaderMaterial</a>, as its name suggests, will have nothing.</p>
+<p>We will start with the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/RawShaderMaterial">RawShaderMaterial</a> to better understand what's happening.</p>
+<p>The starter contains a simple plane with a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a> on it.</p>
+<p>Replace that <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a> with a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/RawShaderMaterial">RawShaderMaterial</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>RawShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You should get an error.</p>
+<p>As we said earlier, we need to provide both the vertex and the fragment shader. You can do this with the <code spellcheck="false">vertexShader</code> and <code spellcheck="false">fragmentShader</code> properties:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>RawShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> <span class="token string">''</span><span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> <span class="token string">''</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The problem with that technique is that simple quotes can contain only one line inside —double-quotes too. Our shaders —as simple as they are at the start, will be too long to be written on one line.</p>
+<p>A reliable solution is to use back quotes —also called backtick, acute or left quote. Most modern browsers support them. This technique is called <a target="_blank" href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Template_literals">template literals</a>, and we can use line breaks in it.</p>
+<p>The key or shortcut to write this character depends on your keyboard. Here's a thread on the subject to help you: <a target="_blank" href="https://superuser.com/questions/254076/how-do-i-type-the-tick-and-backtick-characters-on-windows/879277">https://superuser.com/questions/254076/how-do-i-type-the-tick-and-backtick-characters-on-windows/879277</a></p>
+<p>Once you've found the key, change your simple quotes with back quotes:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>RawShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can finally write our shaders. Just copy the code, we will explain everything later:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>RawShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 modelMatrix;
+
+attribute vec3 position;
+
+void main()
+{
+gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+}
+</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+precision mediump float;
+
+void main()
+{
+gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+}
+</span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/27/step-01.png" src="./assets/lessons/27/step-01.png" width="1792" height="1120" alt="./assets/lessons/27/step-01.png" class="is-loaded"></span></p>
+<p>You should get a red plane. Congratulations, you might not yet understand what's written here, but it's your first shader and a good start for an incredible journey.</p>
+<h2>Separate the shaders in different files</h2>
+<p>Before we get into the code itself, let's try to improve the way we work. The back quotes are an excellent solution for small code, and we will use it in future lessons with shaders, but we are missing syntax coloration. Once we have multiple shaders with a lot of code in it, our script will become unbearable. Having a good and comfortable setup is essential.</p>
+<h3>Shader files</h3>
+<p>We are going to move the code into separate files. First, move the vertex shader code and the fragment shader codes respectively in <code spellcheck="false">/src/shaders/test/vertex.glsl</code> and <code spellcheck="false">/src/shaders/test/fragment.glsl</code>.</p>
+<p>Even if we will have only one shader in our project, it's a healthy habit to separate and organize our code as best as possible. Consequential projects can have dozens of custom shaders.</p>
+<p>Unless your code editor already supports glsl, the syntax coloration probably doesn't work for those two new files. To add the syntax coloration, if you are using VSCode, go to your plugins, search for <code spellcheck="false">shader</code>, and install the <code spellcheck="false">Shader languages support for VS Code</code> plugin. If you are using another code editor, look for compatible plugins and keep an eye on the popularity and the reviews.</p>
+<p>Once installed, you should have a nice syntax coloration on the <code spellcheck="false">.glsl</code> files. If not, try to restart your code editor.</p>
+<p>Syntax coloration is cool, but having a linter is even better. A linter will validate your code and find potential errors while you are writing it. It can be really useful to avoid basic mistakes without having to test the result on the browser.</p>
+<p>We won't use one in the following lessons because installing it can be hard but if you want to give it a try, I recommend you watching this video in the <a target="_blank" href="https://www.youtube.com/channel/UC8Wzk_R1GoPkPqLo-obU_kQ">Lewis Lepton Youtube Channel</a>: <a target="_blank" href="https://www.youtube.com/watch?v=NQ-g6v7GtoI">https://www.youtube.com/watch?v=NQ-g6v7GtoI</a></p>
+<p>The linter will also produce errors on incomplete shaders which is a problem because we are going to write partial shaders a little later in the lesson. It's up to you, but you can give it a try.</p>
+<h3>Import</h3>
+<p>Let's try to import the files into our script:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> testVertexShader <span class="token keyword">from</span> <span class="token string">'./shaders/test/vertex.glsl'</span>
+<span class="token keyword">import</span> testFragmentShader <span class="token keyword">from</span> <span class="token string">'./shaders/test/fragment.glsl'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Unfortunately, we get a Webpack error. We need to tell Webpack how to handle <code spellcheck="false">.glsl</code> files.</p>
+<p>To do this, go to the <code spellcheck="false">/bundler/webpack.common.js</code> where loaders are set in the <code spellcheck="false">rules</code> array property.</p>
+<p>Add the following rule at the <code spellcheck="false">rules</code> —or anywhere, as long as it's in the array —and don't forget the comma between those <code spellcheck="false">rules</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+module<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+rules<span class="token operator">:</span>
+<span class="token punctuation">[</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Shaders</span>
+<span class="token punctuation">{</span>
+    test<span class="token operator">:</span> <span class="token regex">/\.(glsl|vs|fs|vert|frag)$/</span><span class="token punctuation">,</span>
+    type<span class="token operator">:</span> <span class="token string">'asset/source'</span><span class="token punctuation">,</span>
+    generator<span class="token operator">:</span>
+    <span class="token punctuation">{</span>
+        filename<span class="token operator">:</span> <span class="token string">'assets/images/[hash][ext]'</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>This rule solely tells Webpack to provide the raw content of the files having <code spellcheck="false">.glsl</code>, <code spellcheck="false">.vs</code>, <code spellcheck="false">.fs</code>, <code spellcheck="false">.vert</code> or <code spellcheck="false">.frag</code> as extension. We might as well have used <code spellcheck="false">.glsl</code>, but some people feel more comfortable using other file extensions.</p>
+<p>Re-launch the server with <code spellcheck="false">npm run dev</code> and the Webpack error will disappear.</p>
+<p>If you log <code spellcheck="false">testVertexShader</code> and <code spellcheck="false">testFragmentShader</code>, you'll get the shader code as a plain string. We can use these two variables in our <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/RawShaderMaterial">RawShaderMaterial</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>RawShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> testVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> testFragmentShader
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/27/step-02.png" src="./assets/lessons/27/step-02.png" width="1792" height="1120" alt="./assets/lessons/27/step-02.png" class="is-loaded"></span></p>
+<h3>Properties</h3>
+<p>Most of the common properties we've covered with other materials such as <code spellcheck="false">wireframe</code>, <code spellcheck="false">side</code>, <code spellcheck="false">transparent</code> or <code spellcheck="false">flatShading</code> are still available for the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/RawShaderMaterial">RawShaderMaterial</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>RawShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> testVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> testFragmentShader<span class="token punctuation">,</span>
+wireframe<span class="token operator">:</span> <span class="token boolean">true</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/27/step-03.png" src="./assets/lessons/27/step-03.png" width="1792" height="1120" alt="./assets/lessons/27/step-03.png" class="is-loaded"></span></p>
+<p>But properties like <code spellcheck="false">map</code>, <code spellcheck="false">alphaMap</code>, <code spellcheck="false">opacity</code>, <code spellcheck="false">color</code>, etc. won't work anymore because we need to write these features in the shaders ourselves.</p>
+<p>Comment or delete the wireframe line.</p>
+<h2>GLSL</h2>
+<p>The language used to code the shaders is called GLSL and stands for OpenGL Shading Language. It's close to C language. Let's learn the basics of its syntax.</p>
+<h3>Logging</h3>
+<p>There is no console and, thus, no way to log values. That is due to the code being executed for every vertex and every fragment. It would make no sense to log one value.</p>
+<h3>Indentation</h3>
+<p>The indentation is not essential. You can indent as you like.</p>
+<h3>Semicolon</h3>
+<p>The semicolon is required to end any instruction. Forgetting even one semicolon will probably result in a compilation error, and the whole material won't work.</p>
+<h3>Variables</h3>
+<p>It's a typed language, meaning that we must specify a variable's type, and we cannot assign any other type to that variable.</p>
+<p>To declare a variable, we must start by the type, followed by the name (usually in camelCase), then the <code spellcheck="false">=</code> sign, then the value, and end with a <code spellcheck="false">;</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">float</span> fooBar <span class="token operator">=</span> <span class="token number">0.123</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>There are multiple different types.</p>
+<h4>Float</h4>
+<p>Floats are decimals. They can be negative or positive. We must always provide the <code spellcheck="false">.</code> of the decimals even if the value is rounded:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">float</span> foo <span class="token operator">=</span> <span class="token operator">-</span> <span class="token number">0.123</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> bar <span class="token operator">=</span> <span class="token number">1.0</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can do mathematic operations like <code spellcheck="false">+</code>, <code spellcheck="false">-</code>, <code spellcheck="false">*</code> and <code spellcheck="false">/</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">float</span> a <span class="token operator">=</span> <span class="token number">1.0</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> b <span class="token operator">=</span> <span class="token number">2.0</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> c <span class="token operator">=</span> a <span class="token operator">/</span> b<span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h4>Integer</h4>
+<p>Integers work just like the floats, but without the decimals' <code spellcheck="false">.</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">int</span> foo <span class="token operator">=</span> <span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> bar <span class="token operator">=</span> <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can also do mathematic operations:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">int</span> a <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> b <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> c <span class="token operator">=</span> a <span class="token operator">*</span> b<span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>But we can't mix <code spellcheck="false">float</code> and <code spellcheck="false">int</code> in these operations:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">float</span> a <span class="token operator">=</span> <span class="token number">1.0</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> b <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> c <span class="token operator">=</span> a <span class="token operator">*</span> b<span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>But we can convert types on the fly:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">float</span> a <span class="token operator">=</span> <span class="token number">1.0</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> b <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> c <span class="token operator">=</span> a <span class="token operator">*</span> <span class="token keyword">float</span><span class="token punctuation">(</span>b<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h4>Boolean</h4>
+<p>Booleans are just booleans:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">bool</span> foo <span class="token operator">=</span> <span class="token keyword">true</span><span class="token punctuation">;</span>
+<span class="token keyword">bool</span> bar <span class="token operator">=</span> <span class="token keyword">false</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h4>Vector 2</h4>
+<p>This is where things get interesting. If we want to store values like 2 coordinates with <code spellcheck="false">x</code> and <code spellcheck="false">y</code> properties, we can use a <code spellcheck="false">vec2</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">vec2</span> foo <span class="token operator">=</span> <span class="token keyword">vec2</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">2.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>An empty <code spellcheck="false">vec2</code> will result in an error:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">vec2</span> foo <span class="token operator">=</span> <span class="token keyword">vec2</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can change these properties after creating the <code spellcheck="false">vec2</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">vec2</span> foo <span class="token operator">=</span> <span class="token keyword">vec2</span><span class="token punctuation">(</span><span class="token number">0.0</span>  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+foo<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">1.0</span><span class="token punctuation">;</span>
+foo<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token number">2.0</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Doing operations like multiplying a <code spellcheck="false">vec2</code> with a <code spellcheck="false">float</code> will operate both the <code spellcheck="false">x</code> and the <code spellcheck="false">y</code> properties:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">vec2</span> foo <span class="token operator">=</span> <span class="token keyword">vec2</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">2.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+foo <span class="token operator">*=</span> <span class="token number">2.0</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h4>Vector 3</h4>
+<p><code spellcheck="false">vec3</code> is just like <code spellcheck="false">vec2</code>, but with a third property named <code spellcheck="false">z</code>. It's very convenient when one needs 3D coordinates:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">vec3</span> foo <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> bar <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">2.0</span><span class="token punctuation">,</span> <span class="token number">3.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+bar<span class="token punctuation">.</span>z <span class="token operator">=</span> <span class="token number">4.0</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>While we can use <code spellcheck="false">x</code>, <code spellcheck="false">y</code>, and <code spellcheck="false">z</code>, we can also work with <code spellcheck="false">r</code>, <code spellcheck="false">g</code>, and <code spellcheck="false">b</code>. This is just syntax sugar and the result is exactly the same. It's very effective when we use a <code spellcheck="false">vec3</code> to store colors:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">vec3</span> purpleColor <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+purpleColor<span class="token punctuation">.</span>r <span class="token operator">=</span> <span class="token number">0.5</span><span class="token punctuation">;</span>
+purpleColor<span class="token punctuation">.</span>b <span class="token operator">=</span> <span class="token number">1.0</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>A <code spellcheck="false">vec3</code> can also be partially created from a <code spellcheck="false">vec2</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">vec2</span> foo <span class="token operator">=</span> <span class="token keyword">vec2</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">2.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> bar <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>foo<span class="token punctuation">,</span> <span class="token number">3.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can also take a part of the <code spellcheck="false">vec3</code> to generate a <code spellcheck="false">vec2</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">vec3</span> foo <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">2.0</span><span class="token punctuation">,</span> <span class="token number">3.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec2</span> bar <span class="token operator">=</span> foo<span class="token punctuation">.</span>xy<span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Here, the <code spellcheck="false">bar</code> will be a <code spellcheck="false">vec2</code> with <code spellcheck="false">1.0</code>, and <code spellcheck="false">2.0</code> as values.</p>
+<p>This is called a <strong>swizzle</strong> and we can also use the properties in a different order:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">vec3</span> foo <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">2.0</span><span class="token punctuation">,</span> <span class="token number">3.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec2</span> bar <span class="token operator">=</span> foo<span class="token punctuation">.</span>yx<span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h4>Vector 4</h4>
+<p>Finally, the <code spellcheck="false">vec4</code> works like it's two predecessors but with a fourth value named <code spellcheck="false">w</code> or <code spellcheck="false">a</code> —<code spellcheck="false">w</code> because there is no letter after <code spellcheck="false">z</code>  in the alphabet and <code spellcheck="false">a</code> for "alpha":</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">vec4</span> foo <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">2.0</span><span class="token punctuation">,</span> <span class="token number">3.0</span><span class="token punctuation">,</span> <span class="token number">4.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> bar <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>foo<span class="token punctuation">.</span>zw<span class="token punctuation">,</span> <span class="token keyword">vec2</span><span class="token punctuation">(</span><span class="token number">5.0</span><span class="token punctuation">,</span> <span class="token number">6.0</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>There are other types of variables such as <code spellcheck="false">mat2</code>, <code spellcheck="false">mat3</code>, <code spellcheck="false">mat4</code>, or <code spellcheck="false">sampler2D</code>, but we will see those later.</p>
+<h3>Functions</h3>
+<p>Just like in most programming languages, we can create and use functions.</p>
+<p>A function must start with the type of the value that will be returned:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">float</span> <span class="token function">loremIpsum</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">float</span> a <span class="token operator">=</span> <span class="token number">1.0</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> b <span class="token operator">=</span> <span class="token number">2.0</span><span class="token punctuation">;</span>
+
+<span class="token keyword">return</span> a <span class="token operator">+</span> b<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>If the function isn't supposed to return anything, we set the type to <code spellcheck="false">void</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">justDoingStuff</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">float</span> a <span class="token operator">=</span> <span class="token number">1.0</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> b <span class="token operator">=</span> <span class="token number">2.0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can specify parameters, but we also have to provide their type:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">float</span> <span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">float</span> a<span class="token punctuation">,</span> <span class="token keyword">float</span> b<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">return</span> a <span class="token operator">+</span> b<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>This function is, as you can imagine, worthless.</p>
+<h3>Native function</h3>
+<p>GLSL has many built-in classic functions such as <code spellcheck="false">sin</code>, <code spellcheck="false">cos</code>, <code spellcheck="false">max</code>, <code spellcheck="false">min</code>, <code spellcheck="false">pow</code>, <code spellcheck="false">exp</code>, <code spellcheck="false">mod</code>, <code spellcheck="false">clamp</code>, but also very practical functions like <code spellcheck="false">cross</code>, <code spellcheck="false">dot</code>, <code spellcheck="false">mix</code>, <code spellcheck="false">step</code>, <code spellcheck="false">smoothstep</code>, <code spellcheck="false">length</code>, <code spellcheck="false">distance</code>, <code spellcheck="false">reflect</code>, <code spellcheck="false">refract</code>, <code spellcheck="false">normalize</code>.</p>
+<p>Unluckily, there is no beginner-friendly documentation and, most of the time, we do naive searches on the web and usually end up on these three websites:</p>
+<h4><strong>Shaderific documentation</strong></h4>
+<p><a target="_blank" href="https://www.shaderific.com/glsl-functions">https://www.shaderific.com/glsl-functions</a></p>
+<p>Shaderific is an iOS application that lets you play with GLSL. The application is not something to care about, but the documentation isn't too bad.</p>
+<h4>Kronos Group OpenGL reference pages</h4>
+<p><a target="_blank" href="https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/indexflat.php">https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/indexflat.php</a></p>
+<p>This documentation deals with OpenGL, but most of the standard functions you'll see will be compatible with WebGL. Let's not forget that WebGL is just a JavaScript API to access OpenGL.</p>
+<h4>Book of shaders documentation</h4>
+<p><a target="_blank" href="https://thebookofshaders.com/">https://thebookofshaders.com/</a></p>
+<p>The book of shaders mainly focus on fragment shaders and has nothing to do with Three.js but it is a great resource to learn and it has its own <a target="_blank" href="https://thebookofshaders.com/glossary/">glossary</a>.</p>
+<h2>Understanding the vertex shader</h2>
+<p>Now that we know the GLSL syntax, let's try to understand what's in our shaders.</p>
+<p>Keep in mind that the vertex shader purpose is to position each vertex of the geometry on the render 2D space. In other words, the vertex shader will convert the 3D vertices coordinates to our 2D canvas coordinates.</p>
+<h3>Main function</h3>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>This <code spellcheck="false">main</code> function will be called automatically. As you can see, it doesn't return anything (<code spellcheck="false">void</code>). </p>
+<h3>gl_Position</h3>
+<p>The <code spellcheck="false">gl_Position</code> variable already exists. We need to assign it. This variable will contain the position of the vertex on the screen. The goal of the instructions in the <code spellcheck="false">main</code> function is to set this variable properly.</p>
+<p>At the end of this instruction, we get a <code spellcheck="false">vec4</code>. This means that we can play with its <code spellcheck="false">x</code>, <code spellcheck="false">y</code>, <code spellcheck="false">z</code>, and <code spellcheck="false">w</code> properties directly on the <code spellcheck="false">gl_Position</code> variable:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+gl_Position <span class="token operator">=</span> projectionMatrix <span class="token operator">*</span> viewMatrix <span class="token operator">*</span> modelMatrix <span class="token operator">*</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>position<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+gl_Position<span class="token punctuation">.</span>x <span class="token operator">+=</span> <span class="token number">0.5</span><span class="token punctuation">;</span>
+gl_Position<span class="token punctuation">.</span>y <span class="token operator">+=</span> <span class="token number">0.5</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The plane should move on the top right corner. But be careful; we didn't truly move the plane in a 3D space as if we were playing with the <code spellcheck="false">position</code> in Three.js. We did move the projected plane on a 2D space.</p>
+<p>Think of it like a drawing you did on a paper. In this drawing, you have respected the perspective with vanishing points. Then, you move the whole picture to the top right corner of your desk. The perspective didn't change inside the drawing.</p>
+<p>You're probably wondering why we need 4 values for the <code spellcheck="false">gl_Position</code> if its final goal is to position vertices on a 2D space. It's actually because of the coordinates or not precisely in 2D space; they are in what we call <strong>clip space</strong> which needs 4 dimensions.</p>
+<p>A clip space is a space that goes in all 3 directions (<code spellcheck="false">x</code>, <code spellcheck="false">y</code> , and <code spellcheck="false">z</code>) in a range from <code spellcheck="false">-1</code> to <code spellcheck="false">+1</code>. It's like positioning everything in a 3D box. Anything out of this range will be "clipped" and disappear. The fourth value (<code spellcheck="false">w</code>) is responsible for the perspective.</p>
+<p>Fortunately, all of this is automatic, and, as a beginner, we don't need to master everything. It's just for the sake of knowing.</p>
+<p>But what are we exactly sending to this <code spellcheck="false">gl_Position</code>?</p>
+<h3>Position attributes</h3>
+<p>First, we retrieve the vertex <code spellcheck="false">position</code> with:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">attribute</span> <span class="token keyword">vec3</span> position<span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Remember that the same code applies to every vertices of the geometry. <strong>Attributes</strong> are the only variable that will change between the vertices. The same vertex shader will be applied for each vertex and the <code spellcheck="false">position</code> attribute will contain the <code spellcheck="false">x</code>, <code spellcheck="false">y</code>, and <code spellcheck="false">z</code> coordinates of that specific vertex.</p>
+<p>Then, we convert this <code spellcheck="false">vec3</code> to a <code spellcheck="false">vec4</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl">gl_Position <span class="token operator">=</span> <span class="token comment">/* ... */</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>position<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>This is because the following matrices and the <code spellcheck="false">gl_Position</code> need to use <code spellcheck="false">vec4</code> as we saw earlier.</p>
+<h3>Matrices uniforms</h3>
+<p>Each matrix will transform the <code spellcheck="false">position</code> until we get the final clip space coordinates.</p>
+<p>There are 3 matrices in our code, and because their values are the same for all the vertices of the geometry, we retrieve them by using <strong>uniforms</strong>.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">uniform</span> <span class="token keyword">mat4</span> projectionMatrix<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">mat4</span> viewMatrix<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">mat4</span> modelMatrix<span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Each matrix will do a part of the transformation:</p>
+<ul>
+<li>The <code spellcheck="false">modelMatrix</code> will apply all transformations relative to the <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a>. If we scale, rotate or move the <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a>, these transformations will be contained in the <code spellcheck="false">modelMatrix</code> and applied to the <code spellcheck="false">position</code>.</li>
+<li>The <code spellcheck="false">viewMatrix</code> will apply transformations relative to the camera. If we rotate the camera to the left, the vertices should be on the right. If we move the camera in direction of the <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a>, the vertices should get bigger, etc.</li>
+<li>The <code spellcheck="false">projectionMatrix</code> will finally transform our coordinates into the final clip space coordinates.</li>
+</ul>
+<p>If you want to find out more about those matrices and coordinates, here's a good article: <a target="_blank" href="https://learnopengl.com/Getting-started/Coordinate-Systems">https://learnopengl.com/Getting-started/Coordinate-Systems</a>.</p>
+<p>To apply a matrix, we multiply it. If want to apply a <code spellcheck="false">mat4</code> to a variable, this variable has to be a <code spellcheck="false">vec4</code>. We can also multiply matrices with other matrices:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl">gl_Position <span class="token operator">=</span> projectionMatrix <span class="token operator">*</span> viewMatrix <span class="token operator">*</span> modelMatrix <span class="token operator">*</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>position<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>There is actually a shorter version where the <code spellcheck="false">viewMatrix</code> and the <code spellcheck="false">modelMatrix</code> are combined into a <code spellcheck="false">modelViewMatrix</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">uniform</span> <span class="token keyword">mat4</span> projectionMatrix<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">mat4</span> modelViewMatrix<span class="token punctuation">;</span>
+
+<span class="token keyword">attribute</span> <span class="token keyword">vec3</span> position<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+gl_Position <span class="token operator">=</span> projectionMatrix <span class="token operator">*</span> modelViewMatrix <span class="token operator">*</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>position<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>This is shorter, but we have less control over each step.</p>
+<p>We will actually make our code even longer to have a better understanding and more control on the position:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">uniform</span> <span class="token keyword">mat4</span> projectionMatrix<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">mat4</span> viewMatrix<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">mat4</span> modelMatrix<span class="token punctuation">;</span>
+
+<span class="token keyword">attribute</span> <span class="token keyword">vec3</span> position<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">vec4</span> modelPosition <span class="token operator">=</span> modelMatrix <span class="token operator">*</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>position<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> viewPosition <span class="token operator">=</span> viewMatrix <span class="token operator">*</span> modelPosition<span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> projectedPosition <span class="token operator">=</span> projectionMatrix <span class="token operator">*</span> viewPosition<span class="token punctuation">;</span>
+
+gl_Position <span class="token operator">=</span> projectedPosition<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Those changes have the exact same result but we can now move the whole model just by tweaking the values of the <code spellcheck="false">modelPosition</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">vec4</span> modelPosition <span class="token operator">=</span> modelMatrix <span class="token operator">*</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>position<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+modelPosition<span class="token punctuation">.</span>y <span class="token operator">+=</span> <span class="token number">1.0</span><span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/27/step-04.png" src="./assets/lessons/27/step-04.png" width="1792" height="1120" alt="./assets/lessons/27/step-04.png" class="is-loaded"></span></p>
+<p>The whole plane should appear higher.</p>
+<p>Or we can do cooler things such as transforming our plane wave:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">vec4</span> modelPosition <span class="token operator">=</span> modelMatrix <span class="token operator">*</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>position<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+modelPosition<span class="token punctuation">.</span>z <span class="token operator">+=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>x <span class="token operator">*</span> <span class="token number">10.0</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.1</span><span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/27/step-05.png" src="./assets/lessons/27/step-05.png" width="1792" height="1120" alt="./assets/lessons/27/step-05.png" class="is-loaded"></span></p>
+<p>We changed the <code spellcheck="false">z</code> by using the <code spellcheck="false">x</code> coordinate through a <code spellcheck="false">sin(...)</code> function. Good luck getting this result with Three.js built-in materials.</p>
+<h2>Understanding the fragment shader</h2>
+<p>The fragment shader code will be applied to every visible fragment of the geometry. That is why the fragment shader comes after the vertex shader.</p>
+<p>The code is more manageable than the vertex shader.</p>
+<h3>Main function</h3>
+<p>Again, we face the <code spellcheck="false">main</code> function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h3>Precision</h3>
+<p>We also have an instruction at the top of the code:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">precision</span> <span class="token keyword">mediump</span> <span class="token keyword">float</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>This instruction lets us decide how precise can a <code spellcheck="false">float</code> be. There are different possible values:</p>
+<ul>
+<li><code spellcheck="false">highp</code></li>
+<li><code spellcheck="false">mediump</code></li>
+<li><code spellcheck="false">lowp</code></li>
+</ul>
+<p><code spellcheck="false">highp</code> can have performance hit and might not even work on some devices. <code spellcheck="false">lowp</code> can create bugs by the lack of precision. We ordinarily use <code spellcheck="false">mediump</code>. We also could have set the precision for the vertex shader but it's not required.</p>
+<p>This part is automatically handled when we are using <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial">ShaderMaterial</a> instead of <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/RawShaderMaterial">RawShaderMaterial</a>.</p>
+<h3>gl_FragColor</h3>
+<p>The <code spellcheck="false">gl_FragColor</code> is like the <code spellcheck="false">gl_Position</code> but for the color. It's already declared, and we need to assign it in the <code spellcheck="false">main</code> function.</p>
+<p>It's a <code spellcheck="false">vec4</code> with the first three values being the red, green, and blue channels (<code spellcheck="false">r</code>, <code spellcheck="false">g</code>, <code spellcheck="false">b</code>) and the fourth value being the alpha (<code spellcheck="false">a</code>):</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl">gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">0.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/27/step-06.png" src="./assets/lessons/27/step-06.png" width="1792" height="1120" alt="./assets/lessons/27/step-06.png" class="is-loaded"></span></p>
+<p>This code will result on a purple color for the whole geometry.</p>
+<p>Each property of <code spellcheck="false">gl_FragColor</code> goes from <code spellcheck="false">0.0</code> to <code spellcheck="false">1.0</code>. We can go beyond those values with no error, but it won't help us.</p>
+<p>If we want to set an alpha below <code spellcheck="false">1.0</code>, we also need to set the <code spellcheck="false">transparent</code> property to <code spellcheck="false">true</code> in the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/RawShaderMaterial">RawShaderMaterial</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>RawShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> testVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> testFragmentShader<span class="token punctuation">,</span>
+transparent<span class="token operator">:</span> <span class="token boolean">true</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h2>Attributes</h2>
+<p>Attributes are values that change between each vertex. We already have one attribute named <code spellcheck="false">position</code> that contains a <code spellcheck="false">vec3</code> of the coordinates of each vertex.</p>
+<p>We can add our own attributes directly to the <a target="_blank" href="https://threejs.org/docs/#api/en/core/BufferGeometry">BufferGeometry</a> as we did during the Geometries lesson.</p>
+<p>We will add a random value for each vertex and move that vertex on the <code spellcheck="false">z</code> axis according to that value for this lesson.</p>
+<p>Let's get back to the JavaScript and create a <a target="_blank" href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Float32Array">Float32Array</a> of the right size right after creating the <code spellcheck="false">geometry</code>. To know how much vertices we have in the geometry, we can use the already existing <code spellcheck="false">position</code> attribute:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> count <span class="token operator">=</span> geometry<span class="token punctuation">.</span>attributes<span class="token punctuation">.</span>position<span class="token punctuation">.</span>count
+<span class="token keyword">const</span> randoms <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Float32Array</span><span class="token punctuation">(</span>count<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then we fill this array with random values:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> count<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+randoms<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Finally, we use that array in a <a target="_blank" href="https://threejs.org/docs/#api/en/core/BufferAttribute">BufferAttribute</a> and add it to our geometry attributes:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">geometry<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'aRandom'</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferAttribute</span><span class="token punctuation">(</span>randoms<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The first parameter of <code spellcheck="false">setAttribute(...)</code> is the name of the attribute. That is the name we will use in the shader. We can choose any name but it's good practice to prefix with <code spellcheck="false">a</code> for "attribute".</p>
+<p>The first parameter of <code spellcheck="false">BufferAttribute</code> is the data array and the second parameter is how many values compose one attribute. If we were to send a position, we would use <code spellcheck="false">3</code> because positions are composed of 3 values (<code spellcheck="false">x</code>, <code spellcheck="false">y</code> and <code spellcheck="false">z</code>). But here, it's just 1 random value per vertex so we use <code spellcheck="false">1</code>.</p>
+<p>We can now retrieve this attribute in the vertex shader and use it to move the vertices:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+<span class="token keyword">attribute</span> <span class="token keyword">float</span> aRandom<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+modelPosition<span class="token punctuation">.</span>z <span class="token operator">+=</span> aRandom <span class="token operator">*</span> <span class="token number">0.1</span><span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/27/step-07.png" src="./assets/lessons/27/step-07.png" width="1792" height="1120" alt="./assets/lessons/27/step-07.png" class="is-loaded"></span></p>
+<p>Now you get a plane composed of random spikes.</p>
+<h2>Varyings</h2>
+<p>We now want to color the fragments also with the <code spellcheck="false">aRandom</code> attribute.</p>
+<p>Unfortunately, we cannot use attributes directly in the fragment shader.</p>
+<p>Fortunately, there is a way of sending data from the vertex shader to the fragment shader called <code spellcheck="false">varyings</code>.</p>
+<p>We have to do it on both the vertex and the fragment shader.</p>
+<p>In the vertex shader, we need to create the varying before the <code spellcheck="false">main</code> function. We will call our varying <code spellcheck="false">vRandom</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+
+<span class="token keyword">varying</span> <span class="token keyword">float</span> vRandom<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You can call your varying as you want but I recommend prefixing with a <code spellcheck="false">v</code> to distinguish them easily.</p>
+<p>Then, we update the varying value in the <code spellcheck="false">main</code> function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">varying</span> <span class="token keyword">float</span> vRandom<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+vRandom <span class="token operator">=</span> aRandom<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Finally, we get the varying value in the fragment shader with the same declaration, and we use it as we want in the <code spellcheck="false">main</code> function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">precision</span> <span class="token keyword">mediump</span> <span class="token keyword">float</span><span class="token punctuation">;</span>
+
+<span class="token keyword">varying</span> <span class="token keyword">float</span> vRandom<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">,</span> vRandom<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/27/step-08.png" src="./assets/lessons/27/step-08.png" width="1792" height="1120" alt="./assets/lessons/27/step-08.png" class="is-loaded"></span></p>
+<p>You now obtain a striking looking shape with colored spikes on it.</p>
+<p>One interesting thing with varyings is that the values between the vertices are <strong>interpolated</strong>. If the GPU is drawing a fragment right between two vertices —one having a varying of <code spellcheck="false">1.0</code> and the other having a varying of <code spellcheck="false">0.0</code>—the fragment value will be <code spellcheck="false">0.5</code>.</p>
+<p>Let's remove or comment the elevation part and the varying, so we get back to our purple plane.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/27/step-09.png" src="./assets/lessons/27/step-09.png" width="1792" height="1120" alt="./assets/lessons/27/step-09.png" class="is-loaded"></span></p>
+<p>We will use attributes later on.</p>
+<h2>Uniforms</h2>
+<p>Uniforms are a way to send data from the JavaScript to the shader.</p>
+<p>That can be valuable if we want to use the same shader but with different parameters, and it's also the occasion to have parameters that can change during the experience.</p>
+<p>We can use uniforms with both vertex and fragment shaders, and the data will be the same for every vertex and every fragment. We already have uniforms in our code with <code spellcheck="false">projectionMatrix</code>, <code spellcheck="false">viewMatrix</code>, and <code spellcheck="false">modelMatrix</code> but we didn't create these. Three.js did.</p>
+<p>Let's create our own uniforms.</p>
+<p>To add uniforms to our <code spellcheck="false">material</code>, use the <code spellcheck="false">uniforms</code> property. We are going to make our plane wave and we want to control the waves frequency:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>RawShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> testVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> testFragmentShader<span class="token punctuation">,</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+frequency<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">10</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Here, the name of the uniform we chose is <code spellcheck="false">frequency</code>. While it's not mandatory, it's considered a good practice to prefix with the letter <code spellcheck="false">u</code> to distinguish "uniforms" from other data.</p>
+<p>Change the name of the uniform to <code spellcheck="false">uFrequency</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>RawShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> testVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> testFragmentShader<span class="token punctuation">,</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+uFrequency<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">10</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>If you're looking at other tutorials or examples, you might see uniforms being declared like this <code spellcheck="false">uFrequency: { value: 10, type: 'float' }</code>. There was a time when we had to specify the type but it's deprecated now.</p>
+<p>We can now retrieve the value in our shader code and use it in our <code spellcheck="false">main</code> function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">uniform</span> <span class="token keyword">mat4</span> projectionMatrix<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">mat4</span> viewMatrix<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">mat4</span> modelMatrix<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">float</span> uFrequency<span class="token punctuation">;</span>
+
+<span class="token keyword">attribute</span> <span class="token keyword">vec3</span> position<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+modelPosition<span class="token punctuation">.</span>z <span class="token operator">+=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>x <span class="token operator">*</span> uFrequency<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.1</span><span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/27/step-10.png" src="./assets/lessons/27/step-10.png" width="1792" height="1120" alt="./assets/lessons/27/step-10.png" class="is-loaded"></span></p>
+<p>The result is the same, but we can now control the frequency from the JavaScript.</p>
+<p>Let's change our frequency to a <code spellcheck="false">vec2</code> to control waves horizontally and vertically. We simply use a Three.js <a target="_blank" href="https://threejs.org/docs/#api/en/math/Vector2">Vector2</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>RawShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> testVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> testFragmentShader<span class="token punctuation">,</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+uFrequency<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Vector2</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>In our shader, we change the <code spellcheck="false">float</code> to <code spellcheck="false">vec2</code>, and we apply the displacement on the <code spellcheck="false">z</code> axis by using the <code spellcheck="false">y</code> axis too:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+<span class="token keyword">uniform</span> <span class="token keyword">vec2</span> uFrequency<span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+modelPosition<span class="token punctuation">.</span>z <span class="token operator">+=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>x <span class="token operator">*</span> uFrequency<span class="token punctuation">.</span>x<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.1</span><span class="token punctuation">;</span>
+modelPosition<span class="token punctuation">.</span>z <span class="token operator">+=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>y <span class="token operator">*</span> uFrequency<span class="token punctuation">.</span>y<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.1</span><span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/27/step-11.png" src="./assets/lessons/27/step-11.png" width="1792" height="1120" alt="./assets/lessons/27/step-11.png" class="is-loaded"></span></p>
+<p>Take your time on this one. It's easy to make mistakes.</p>
+<p>Because those values are now controlled in the JavaScript, we can add them to our Dat.GUI:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>material<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uFrequency<span class="token punctuation">.</span>value<span class="token punctuation">,</span> <span class="token string">'x'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">20</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.01</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'frequencyX'</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>material<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uFrequency<span class="token punctuation">.</span>value<span class="token punctuation">,</span> <span class="token string">'y'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">20</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.01</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'frequencyY'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/27/step-12.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Let's add a new uniform to animate our plane like a flag in the wind. We send a time value to the shader by using a <strong>uniform</strong> and we use this value inside the <code spellcheck="false">sin(...)</code> function. First, update the material to add the <code spellcheck="false">uTime</code> uniform:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>RawShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> testVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> testFragmentShader<span class="token punctuation">,</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+uFrequency<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Vector2</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+uTime<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">0</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, update this <code spellcheck="false">uTime</code> uniform in the <code spellcheck="false">tick</code> function. To do so, use the <code spellcheck="false">getElapsedTime</code> function from the <a target="_blank" href="https://threejs.org/docs/#api/en/core/Clock">Clock</a> to know how much time passed:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> elapsedTime <span class="token operator">=</span> clock<span class="token punctuation">.</span><span class="token function">getElapsedTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Update material</span>
+material<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uTime<span class="token punctuation">.</span>value <span class="token operator">=</span> elapsedTime
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Finally, we get the uniform value in our vertex shader, and we use it in the two <code spellcheck="false">sin(...)</code> functions:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+<span class="token keyword">uniform</span> <span class="token keyword">float</span> uTime<span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+modelPosition<span class="token punctuation">.</span>z <span class="token operator">+=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>x <span class="token operator">*</span> uFrequency<span class="token punctuation">.</span>x <span class="token operator">+</span> uTime<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.1</span><span class="token punctuation">;</span>
+modelPosition<span class="token punctuation">.</span>z <span class="token operator">+=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>y <span class="token operator">*</span> uFrequency<span class="token punctuation">.</span>y <span class="token operator">+</span> uTime<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.1</span><span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/27/step-13.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You should see the flag wave as if it was flying the wind.</p>
+<p>Let's invert the direction by using a <code spellcheck="false">-</code> before the <code spellcheck="false">uTime</code> instead of a <code spellcheck="false">+</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl">    modelPosition<span class="token punctuation">.</span>z <span class="token operator">+=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>x <span class="token operator">*</span> uFrequency<span class="token punctuation">.</span>x <span class="token operator">-</span> uTime<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.1</span><span class="token punctuation">;</span>
+modelPosition<span class="token punctuation">.</span>z <span class="token operator">+=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>y <span class="token operator">*</span> uFrequency<span class="token punctuation">.</span>y <span class="token operator">-</span> uTime<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.1</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/27/step-14.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Be careful with <code spellcheck="false">uTime</code>: if we were to use native JavaScript solution like <code spellcheck="false">Date.now()</code>, it wouldn't work. That is due to <code spellcheck="false">Date.now()</code> returning the number of milliseconds spent since January 1st, 1970 and this value is too big for a shader. To put it in a shell, remember that we cannot send uniform values too big or too small.</p>
+<p>Don't forget that this is still a plane and we can transform the <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a> as we used to. Let's give our plane a flag shape.</p>
+<p>We could do it in the shader by multiplying the <code spellcheck="false">modelPosition.y</code> value but don't forget that you can still change the <code spellcheck="false">position</code>, <code spellcheck="false">scale</code> and <code spellcheck="false">rotation</code> directly on the <code spellcheck="false">mesh</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> mesh <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>geometry<span class="token punctuation">,</span> material<span class="token punctuation">)</span>
+mesh<span class="token punctuation">.</span>scale<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token number">2</span> <span class="token operator">/</span> <span class="token number">3</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/27/step-15.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Uniforms are also available in the fragment shader. Let's add a new uniform to control the color. For a color value, we can use a Three.js a <a target="_blank" href="https://threejs.org/docs/#api/en/math/Color">Color</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>RawShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> testVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> testFragmentShader<span class="token punctuation">,</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+uFrequency<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Vector2</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+uTime<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+uColor<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span><span class="token string">'orange'</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, in our fragment shader, we retrieve the value, and we use it inside our <code spellcheck="false">gl_FragColor</code> <code spellcheck="false">vec4</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">precision</span> <span class="token keyword">mediump</span> <span class="token keyword">float</span><span class="token punctuation">;</span>
+
+<span class="token keyword">uniform</span> <span class="token keyword">vec3</span> uColor<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>uColor<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/27/step-16.png" src="./assets/lessons/27/step-16.png" width="1792" height="1120" alt="./assets/lessons/27/step-16.png" class="is-loaded"></span></p>
+<p>The flag should now be orange.</p>
+<h2>Textures</h2>
+<p>Textures are a little harder, but we almost have everything we need.</p>
+<p>First, we have to load a texture as we did in previous lessons. We already have a flag texture in the <code spellcheck="false">/static/textures/</code> folder and we can use the <code spellcheck="false">textureLoader</code> already available in the JavaScript starter: </p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> flagTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/flag-french.jpg'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then we can send the texture as a uniform. We can call it <code spellcheck="false">uTexture</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>RawShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+uTexture<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> flagTexture <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>While it's tempting to send it to the fragment shader immediately, we have a problem. To take fragment colors from a texture and apply them in the fragment shader, we must use the <code spellcheck="false">texture2D(...)</code> function. The first parameter of <code spellcheck="false">texture2D(...)</code> is the texture (easy, it's our <code spellcheck="false">uTexture</code>), but the second parameter consists of the coordinates of where to pick the color on that texture, and we don't have these coordinates yet.</p>
+<p>That information should sound familiar. We are looking for coordinates that should help us project a texture on a geometry. We are talking about UV coordinates.</p>
+<p>The <a target="_blank" href="https://threejs.org/docs/index.html#api/en/geometries/PlaneGeometry">PlaneGeometry</a> automatically generates these coordinates, and we can see that if we log <code spellcheck="false">geometry.attributes.uv</code>.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>geometry<span class="token punctuation">.</span>attributes<span class="token punctuation">.</span>uv<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Because it's an attribute, we can retrieve it in the vertex shader:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">attribute</span> <span class="token keyword">vec2</span> uv<span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Still, we need those coordinates in the fragment shader. To send data from the vertex shader to the fragment shader, we need to create a <code spellcheck="false">varying</code>. We are going to call that varying <code spellcheck="false">vUv</code> and update its value in the <code spellcheck="false">main</code> function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+<span class="token keyword">attribute</span> <span class="token keyword">vec2</span> uv<span class="token punctuation">;</span>
+
+<span class="token keyword">varying</span> <span class="token keyword">vec2</span> vUv<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+vUv <span class="token operator">=</span> uv<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can now retrieve the varying <code spellcheck="false">vUv</code> in the fragment shader, retrieve the uniform <code spellcheck="false">uTexture</code> and eventually get the fragment color with <code spellcheck="false">texture2D(...)</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">precision</span> <span class="token keyword">mediump</span> <span class="token keyword">float</span><span class="token punctuation">;</span>
+
+<span class="token keyword">uniform</span> <span class="token keyword">vec3</span> uColor<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">sampler2D</span> uTexture<span class="token punctuation">;</span>
+
+<span class="token keyword">varying</span> <span class="token keyword">vec2</span> vUv<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">vec4</span> textureColor <span class="token operator">=</span> <span class="token function">texture2D</span><span class="token punctuation">(</span>uTexture<span class="token punctuation">,</span> vUv<span class="token punctuation">)</span><span class="token punctuation">;</span>
+gl_FragColor <span class="token operator">=</span> textureColor<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/27/step-17.png" src="./assets/lessons/27/step-17.png" width="1792" height="1120" alt="./assets/lessons/27/step-17.png" class="is-loaded"></span></p>
+<p>The output of <code spellcheck="false">texture2D(...)</code> is a <code spellcheck="false">vec4</code> because it contains <code spellcheck="false">r</code>, <code spellcheck="false">g</code>, <code spellcheck="false">b</code>,and <code spellcheck="false">a</code> —even if our texture has no alpha variation.</p>
+<p>You should get a nice looking flag.</p>
+<p>Again, take your time. Doing mistakes here is easy.</p>
+<h2>Color variations</h2>
+<p>Our flag color doesn't vary much. It would be great to have a brightness variation as if there are shadows.</p>
+<p>The technique we are going to use isn't physically accurate, but it should do the trick.</p>
+<p>First, in the vertex shader, we are going to store the wind elevation in a variable:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token keyword">float</span> elevation <span class="token operator">=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>x <span class="token operator">*</span> uFrequency<span class="token punctuation">.</span>x <span class="token operator">-</span> uTime<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.1</span><span class="token punctuation">;</span>
+elevation <span class="token operator">+=</span> <span class="token function">sin</span><span class="token punctuation">(</span>modelPosition<span class="token punctuation">.</span>y <span class="token operator">*</span> uFrequency<span class="token punctuation">.</span>y <span class="token operator">-</span> uTime<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.1</span><span class="token punctuation">;</span>
+
+modelPosition<span class="token punctuation">.</span>z <span class="token operator">+=</span> elevation<span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, we send the elevation to the fragment by using a varying:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+<span class="token keyword">varying</span> <span class="token keyword">float</span> vElevation<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+vElevation <span class="token operator">=</span> elevation<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Finally, we retrieve the <code spellcheck="false">vElevation</code> varying in our fragment shader, and use it to change the <code spellcheck="false">r</code>, <code spellcheck="false">g</code>, and <code spellcheck="false">b</code> properties of our <code spellcheck="false">textureColor</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+<span class="token keyword">varying</span> <span class="token keyword">float</span> vElevation<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">vec4</span> textureColor <span class="token operator">=</span> <span class="token function">texture2D</span><span class="token punctuation">(</span>uTexture<span class="token punctuation">,</span> vUv<span class="token punctuation">)</span><span class="token punctuation">;</span>
+textureColor<span class="token punctuation">.</span>rgb <span class="token operator">*=</span> vElevation <span class="token operator">*</span> <span class="token number">2.0</span> <span class="token operator">+</span> <span class="token number">0.5</span><span class="token punctuation">;</span>
+gl_FragColor <span class="token operator">=</span> textureColor<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/27/step-18.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You should see brightness variations on the flag as if we had light and shadows. It's a cheap technique, but it works.</p>
+<h2>ShaderMaterial</h2>
+<p>Until now, we have used <a target="_blank" href="https://threejs.org/docs/#api/en/materials/RawShaderMaterial">RawShaderMaterial</a>. The <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a> works just the same, but with pre-built uniforms and attributes prepended in the shader codes. The precision will also be automatically set.</p>
+<p>To use it, simply replace your <a target="_blank" href="https://threejs.org/docs/#api/en/materials/RawShaderMaterial">RawShaderMaterial</a> by <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+<span class="token comment">// ...</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then remove the following <code spellcheck="false">uniform</code> and <code spellcheck="false">attribute</code> and <code spellcheck="false">precision</code> in both shaders:</p>
+<ul>
+<li><code spellcheck="false">uniform mat4 projectionMatrix;</code></li>
+<li><code spellcheck="false">uniform mat4 viewMatrix;</code></li>
+<li><code spellcheck="false">uniform mat4 modelMatrix;</code></li>
+<li><code spellcheck="false">attribute vec3 position;</code></li>
+<li><code spellcheck="false">attribute vec2 uv;</code></li>
+<li><code spellcheck="false">precision mediump float;</code></li>
+</ul>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">uniform vec2 uFrequency<span class="token punctuation">;</span>
+uniform float uTime<span class="token punctuation">;</span>
+
+attribute float aRandom<span class="token punctuation">;</span>
+
+varying float vElevation<span class="token punctuation">;</span>
+varying vec2 vUv<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The shader should work just like before because the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a> will add these automatically.</p>
+<h2>Debugging</h2>
+<p>Debugging a shader is hard. We cannot log data as in JavaScript because it's the GPU that execute the shader code and it does it for every vertices and every fragment.</p>
+<p>Favorably for us, Three.js is doing a great job passing on the errors at compilation.</p>
+<h3>Finding the error</h3>
+<p>If we forget a semicolon, Three.js will log the full shader and tell us the line where the error occurred with a short description like <code spellcheck="false">ERROR: 0:71: 'vec4' : syntax error</code>.</p>
+<p>This message means that the error occurred at line <code spellcheck="false">71</code>, but the problem might come from the line right before. Take your time, read the error, and you'll find what is wrong.</p>
+<h3>Read the shader</h3>
+<p>Having the whole shader code logged is also an excellent way to see what Three.js prepends to our shaders when using a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a>.</p>
+<h3>Test values</h3>
+<p>Another solution to debug values is to use them in the <code spellcheck="false">gl_FragColor</code>. That isn't precise because all we can see are color variations, but sometimes it's enough.</p>
+<p>If the values are in the vertex shader, we can use a varying to pass it on to the fragment shader.</p>
+<p>Let's say we want to see what the <code spellcheck="false">uv</code> looks like. We can send it to the fragment with a varying —already done with <code spellcheck="false">vUv</code>— and use it in the <code spellcheck="false">gl_FragColor</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl">gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>vUv<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/27/step-19.png" src="./assets/lessons/27/step-19.png" width="1792" height="1120" alt="./assets/lessons/27/step-19.png" class="is-loaded"></span></p>
+<h2>Go further</h2>
+<p>Once we understand the basics of the shaders, it's all about practice. Your first shaders will take countless hours, but you'll learn techniques that you'll frequently use.</p>
+<p>In the next lessons, we will practice those techniques and even learn how to draw shapes in shaders, but if you want to go further, here are some links:</p>
+<ul>
+<li>The Book of Shaders: <a target="_blank" href="https://thebookofshaders.com/">https://thebookofshaders.com/</a></li>
+<li>ShaderToy: <a target="_blank" href="https://www.shadertoy.com/">https://www.shadertoy.com/</a></li>
+<li>The Art of Code Youtube Channel: <a target="_blank" href="https://www.youtube.com/channel/UCcAlTqd9zID6aNX3TzwxJXg">https://www.youtube.com/channel/UCcAlTqd9zID6aNX3TzwxJXg</a></li>
+<li>Lewis Lepton Youtube Channel: <a target="_blank" href="https://www.youtube.com/channel/UC8Wzk_R1GoPkPqLo-obU_kQ">https://www.youtube.com/channel/UC8Wzk_R1GoPkPqLo-obU_kQ</a></li>
+</ul>
+<h2>Glslify</h2>
+<p>GLSLify is a node module that improves what we can do with our glsl files. With glslify, we can import and export glsl codes like modules. That is good to separate our code into multiple smaller and reusable parts.</p>
+<p>We won't be using it in this course, but if your glsl code is getting too big, or let's say you need the same code in multiple files, you should try adding it to your project.</p>
+<p>You can use the <a target="_blank" href="https://www.npmjs.com/package/glslify-loader">glslify-loader</a> and add it to the rules of your webpack configuration.</p>
+</section>
+</body>
+
+</html>

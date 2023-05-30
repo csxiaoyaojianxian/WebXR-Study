@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<body>
+    <section class="text js-text">
+        <h2>Introduction</h2>
+<p>Until now, we only used the <a target="_blank" href="https://threejs.org/docs/#api/en/geometries/BoxGeometry">BoxGeometry</a> class to create our cube. In this lesson, we will discover various other geometries, but first, we need to understand what a geometry really is.</p>
+<h2>What is a geometry?</h2>
+<p>In Three.js, geometries are composed of vertices (point coordinates in 3D spaces) and faces (triangles that join those vertices to create a surface).</p>
+<p>We use geometries to create meshes, but you can also use geometries to form particles. Each vertex (singular of vertices) will correspond to a particle, but this is for a future lesson.</p>
+<p>We can store more data than the position in the vertices. A good example would be to talk about the UV coordinates or the normals. As you'll see, we will learn more about those later.</p>
+<h2>The different built-in geometries</h2>
+<p>Three.js has many built-in geometries. While you don't need to know precisely how to instantiate each one, it is good to know that they exist.</p>
+<p>All the built-in geometries we are going to see inherit from the <a target="_blank" href="https://threejs.org/docs/#api/en/core/BufferGeometry">BufferGeometry</a> class. This class has many built in methods like <code spellcheck="false">translate(...)</code>, <code spellcheck="false">rotateX(...)</code>, <code spellcheck="false">normalize()</code>, etc. but we are not going to use them in this lesson.</p>
+<p>Most of the geometries documentation pages have examples.</p>
+<ul>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/BoxGeometry">BoxGeometry</a>
+To create a box.</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/PlaneGeometry">PlaneGeometry</a>
+To create a rectangle plane.</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/CircleGeometry">CircleGeometry</a>
+To create a disc or a portion of a disc (like a pie chart).</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/ConeGeometry">ConeGeometry</a>
+To create a cone or a portion of a cone. You can open or close the base of the cone.</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/CylinderGeometry">CylinderGeometry</a>
+To create a cylinder. You can open or close the ends of the cylinder and you can change the radius of each end.</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/RingGeometry">RingGeometry</a>
+To create a flat ring or portion of a flat circle.</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/TorusGeometry">TorusGeometry</a>
+To create a ring that has a thickness (like a donut) or portion of a ring.</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/TorusKnotGeometry">TorusKnotGeometry</a>
+To create some sort of knot geometry.</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/DodecahedronGeometry">DodecahedronGeometry</a>
+To create a 12 faces sphere. You can add details for a rounder sphere.</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/OctahedronGeometry">OctahedronGeometry</a>
+To create a 8 faces sphere. You can add details for a rounder sphere.</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/TetrahedronGeometry">TetrahedronGeometry</a>
+To create a 4 faces sphere (it won't be much of a sphere if you don't increase details). You can add details for a rounder sphere.</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/IcosahedronGeometry">IcosahedronGeometry</a>
+To create a sphere composed of triangles that have roughly the same size.</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/SphereGeometry">SphereGeometry</a>
+To create the most popular type of sphere where faces looks like quads (quads are just a combination of two triangles).</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/ShapeGeometry">ShapeGeometry</a>
+To create a shape based on a path.</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/TubeGeometry">TubeGeometry</a>
+To create a tube following a path.</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/ExtrudeGeometry">ExtrudeGeometry</a>
+To create an extrusion based on a path. You can add and control the bevel.</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/LatheGeometry">LatheGeometry</a>
+To create a vase or portion of a vase (more like a revolution).</li>
+<li><a target="_blank" href="https://threejs.org/docs/#api/en/geometries/TextGeometry">TextGeometry</a>
+To create a 3D text. You'll have to provide the font in typeface json format.</li>
+</ul>
+<p>If you need a particular geometry that is not supported by Three.js, you can create your own geometry in JavaScript, or you can make it in a 3D software, export it and import it into your project. We will learn more about that later.</p>
+<h2>Box example</h2>
+<p>We already made a cube but we didn't talk much about the parameters. Most geometries have parameters, and you should always take a look at the documentation before using it.</p>
+<p>The <a target="_blank" href="https://threejs.org/docs/#api/en/geometries/BoxGeometry">BoxGeometry</a> has 6 parameters:</p>
+<ul>
+<li><code spellcheck="false">width</code>: The size on the <code spellcheck="false">x</code> axis</li>
+<li><code spellcheck="false">height</code>: The size on the <code spellcheck="false">y</code> axis</li>
+<li><code spellcheck="false">depth</code>: The size on the <code spellcheck="false">z</code> axis</li>
+<li><code spellcheck="false">widthSegments</code>: How many subdivisions in the <code spellcheck="false">x</code> axis</li>
+<li><code spellcheck="false">heightSegments</code>: How many subdivisions in the <code spellcheck="false">y</code> axis</li>
+<li><code spellcheck="false">depthSegments</code>: How many subdivisions in the <code spellcheck="false">z</code> axis</li>
+</ul>
+<p>Subdivisions correspond to how much triangles should compose the face. By default it's <code spellcheck="false">1</code>, meaning that there will only be 2 triangles per face. If you set the subdivision to <code spellcheck="false">2</code>, you'll end up with 8 triangles per face:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BoxGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The problem is that we cannot see these triangles.</p>
+<p>A good solution is to add <code spellcheck="false">wireframe: true</code> to our material. The wireframe will show the lines that delimit each triangle:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> color<span class="token operator">:</span> <span class="token number">0xff0000</span><span class="token punctuation">,</span> wireframe<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/09/step-01.png" src="./assets/lessons/09/step-01.png" width="1792" height="1120" alt="./assets/lessons/09/step-01.png" class="is-loaded"></span></p>
+<p>As you can see, there are 8 triangles by face.</p>
+<p>While this is not relevant for a flat face cube, it gets more interesting when using a <a target="_blank" href="https://threejs.org/docs/#api/en/geometries/SphereGeometry">SphereGeometry</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>SphereGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">32</span><span class="token punctuation">,</span> <span class="token number">32</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/09/step-02.png" src="./assets/lessons/09/step-02.png" width="1792" height="1120" alt="./assets/lessons/09/step-02.png" class="is-loaded"></span></p>
+<p>The more subdivisions we add, the less we can distinguish the faces. But keep in mind that too many vertices and faces will affect performances.</p>
+<h2>Creating your own buffer geometry</h2>
+<p>Sometimes, we need to create our own geometries. If the geometry is very complex or with a precise shape, it's better to create it in a 3D software (and we will cover that in a future lesson), but if the geometry isn't too complex, we can build it ourself by using <a target="_blank" href="https://threejs.org/docs/#api/en/core/BufferGeometry">BufferGeometry</a>.</p>
+<p>To create your own buffer geometry, start by instantiating an empty <a target="_blank" href="https://threejs.org/docs/#api/en/core/BufferGeometry">BufferGeometry</a>. We will create a simple triangle:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Create an empty BufferGeometry</span>
+<span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferGeometry</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>To add vertices to a <a target="_blank" href="https://threejs.org/docs/#api/en/core/BufferGeometry">BufferGeometry</a> you must start with a <a target="_blank" href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Float32Array">Float32Array</a>.</p>
+<p><a target="_blank" href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Float32Array">Float32Array</a> are native JavaScript typed array. You can only store floats inside, and the length of that array is fixed.</p>
+<p>To create a <a target="_blank" href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Float32Array">Float32Array</a>, you can specify its length and then fill it later:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> positionsArray <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Float32Array</span><span class="token punctuation">(</span><span class="token number">9</span><span class="token punctuation">)</span>
+
+<span class="token comment">// First vertice</span>
+positionsArray<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span>
+positionsArray<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span>
+positionsArray<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span>
+
+<span class="token comment">// Second vertice</span>
+positionsArray<span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span>
+positionsArray<span class="token punctuation">[</span><span class="token number">4</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">1</span>
+positionsArray<span class="token punctuation">[</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span>
+
+<span class="token comment">// Third vertice</span>
+positionsArray<span class="token punctuation">[</span><span class="token number">6</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">1</span>
+positionsArray<span class="token punctuation">[</span><span class="token number">7</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span>
+positionsArray<span class="token punctuation">[</span><span class="token number">8</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Or you can pass an array:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> positionsArray <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Float32Array</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+<span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token comment">// First vertex</span>
+<span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token comment">// Second vertex</span>
+<span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span>  <span class="token comment">// Third vertex</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>As you can see, the coordinates of the vertices are specified linearly. The array is a one-dimensional array where you specify the <code spellcheck="false">x</code>, <code spellcheck="false">y</code>, and <code spellcheck="false">z</code> of the first vertex, followed by the <code spellcheck="false">x</code>, <code spellcheck="false">y</code>, and <code spellcheck="false">z</code> of the second vertex, and so on.</p>
+<p>Before you can send that array to the <a target="_blank" href="https://threejs.org/docs/#api/en/core/BufferGeometry">BufferGeometry</a>, you have to transform it into a <a target="_blank" href="https://threejs.org/docs/#api/en/core/BufferAttribute">BufferAttribute</a>.</p>
+<p>The first parameter corresponds to your typed array and the second parameter corresponds to how much values make one vertex attribute. As we saw earlier, to read this array, we have to go 3 by 3 because a vertex position is composed of 3 values (<code spellcheck="false">x</code>, <code spellcheck="false">y</code> and <code spellcheck="false">z</code>):</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> positionsAttribute <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferAttribute</span><span class="token punctuation">(</span>positionsArray<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then we can add this attribute to our <a target="_blank" href="https://threejs.org/docs/#api/en/core/BufferGeometry">BufferGeometry</a> using the <code spellcheck="false">setAttribute(...)</code> method. The first parameter is the name of this attribute and the second parameter is the value:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">geometry<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'position'</span><span class="token punctuation">,</span> positionsAttribute<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We chose <code spellcheck="false">'position'</code> as the name because Three.js internal shaders will look for that value to position the vertices. We will see more about that in the shaders lessons.</p>
+<p>The faces will be automatically created following the order of the vertices.</p>
+<p>All together:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Create an empty BufferGeometry</span>
+<span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferGeometry</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Create a Float32Array containing the vertices position (3 by 3)</span>
+<span class="token keyword">const</span> positionsArray <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Float32Array</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+<span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token comment">// First vertex</span>
+<span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token comment">// Second vertex</span>
+<span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span>  <span class="token comment">// Third vertex</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Create the attribute and name it 'position'</span>
+<span class="token keyword">const</span> positionsAttribute <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferAttribute</span><span class="token punctuation">(</span>positionsArray<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span>
+geometry<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'position'</span><span class="token punctuation">,</span> positionsAttribute<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/09/step-06.png" src="./assets/lessons/09/step-06.png" width="1792" height="1120" alt="./assets/lessons/09/step-06.png" class="is-loaded"></span></p>
+<p>We can also create a bunch of random triangles:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Create an empty BufferGeometry</span>
+<span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferGeometry</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Create 50 triangles (450 values)</span>
+<span class="token keyword">const</span> count <span class="token operator">=</span> <span class="token number">50</span>
+<span class="token keyword">const</span> positionsArray <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Float32Array</span><span class="token punctuation">(</span>count <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">*</span> <span class="token number">3</span><span class="token punctuation">)</span>
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> count <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">*</span> <span class="token number">3</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+positionsArray<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">4</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Create the attribute and name it 'position'</span>
+<span class="token keyword">const</span> positionsAttribute <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferAttribute</span><span class="token punctuation">(</span>positionsArray<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span>
+geometry<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'position'</span><span class="token punctuation">,</span> positionsAttribute<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/09/step-07.png" src="./assets/lessons/09/step-07.png" width="1792" height="1120" alt="./assets/lessons/09/step-07.png" class="is-loaded"></span></p>
+<p>The only difficulty might be the <code spellcheck="false">count * 3 * 3</code> part but it's quite simple to explain: We need <code spellcheck="false">50</code> triangles. Each triangle is composed of <code spellcheck="false">3</code> vertices and each vertex is composed of <code spellcheck="false">3</code> values (<code spellcheck="false">x</code>, <code spellcheck="false">y</code>, and <code spellcheck="false">z</code>).</p>
+<h4>Index</h4>
+<p>One interesting thing with <a target="_blank" href="https://threejs.org/docs/#api/en/core/BufferGeometry">BufferGeometry</a> is that you can mutualize vertices using the <code spellcheck="false">index</code> property. Consider a cube. Multiple faces can use some vertices like the ones in the corners. And if you look closely, every vertex can be used by various neighbor triangles. That will result in a smaller attribute array and performance improvement. But we won't cover this part in that lesson.</p>
+    </section>
+</body>
+
+</html>

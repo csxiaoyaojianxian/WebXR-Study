@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<section class="text js-text">
+    <h2>Introduction</h2>
+<p>Our scene is looking great with the baked texture, but we are not really using the full potential of WebGL. Let's add more details and give more life to the scene.</p>
+<p>First, we are going to add fireflies floating around. Then, we are going to create a cool animation inside the portal. But first, we need to change that black background.</p>
+<h2>Setup</h2>
+<p>The code is exactly the same as we left it in the previous lesson.</p>
+<p>We have our scene already imported in Three.js, we can rotate around with the <code spellcheck="false">OrbitControls</code> and we have our Dat.GUI instance ready.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-1.png" src="./assets/lessons/39/step-1.png" width="1792" height="1120" alt="./assets/lessons/39/step-1.png" class="is-loaded"></span></p>
+<h2>Background color</h2>
+<p>For the background, we are not going to make something too fancy. We will simply change the color to something that matches our scene a bit more. To find the perfect color, we are going to add a tweak to Dat.GUI.</p>
+<p>Right before creating our Dat.GUI instance, add a <code spellcheck="false">debugObject</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Debug</span>
+<span class="token keyword">const</span> debugObject <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token keyword">const</span> gui <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">dat<span class="token punctuation">.</span>GUI</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+width<span class="token operator">:</span> <span class="token number">400</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Like we did in the previous lessons, this object's purpose is only to store the color as a property so that we can add it as a tweak to Dat.GUI. </p>
+<p>After instancing the <code spellcheck="false">renderer</code>, add a <code spellcheck="false">clearColor</code> property to the <code spellcheck="false">debugObject</code> object:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Clear color</span>
+debugObject<span class="token punctuation">.</span>clearColor <span class="token operator">=</span> <span class="token string">'#ff0000'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then add it to the tweaks of Dat.GUI using <code spellcheck="false">gui.addColor(...)</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">addColor</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">,</span> <span class="token string">'clearColor'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-2.png" src="./assets/lessons/39/step-2.png" width="1792" height="1120" alt="./assets/lessons/39/step-2.png" class="is-loaded"></span></p>
+<p>You should see the color tweak but we are not using it yet.</p>
+<p>Use the value to change the background color with <code spellcheck="false">renderer.setClearColor(...)</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">debugObject<span class="token punctuation">.</span>clearColor <span class="token operator">=</span> <span class="token string">'#ff0000'</span>
+renderer<span class="token punctuation">.</span><span class="token function">setClearColor</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">.</span>clearColor<span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">addColor</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">,</span> <span class="token string">'clearColor'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-3.png" src="./assets/lessons/39/step-3.png" width="1792" height="1120" alt="./assets/lessons/39/step-3.png" class="is-loaded"></span></p>
+<p>Unfortunately, changing the tweak won't change the color of the background because we are only changing the <code spellcheck="false">clearColor</code> property.</p>
+<p>We need to call the <code spellcheck="false">renderer.setClearColor(...)</code> again when the tweak changes:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui
+<span class="token punctuation">.</span><span class="token function">addColor</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">,</span> <span class="token string">'clearColor'</span><span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">onChange</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+renderer<span class="token punctuation">.</span><span class="token function">setClearColor</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">.</span>clearColor<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/39/step-4.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You can now find the color that matches your scene the best:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">debugObject<span class="token punctuation">.</span>clearColor <span class="token operator">=</span> <span class="token string">'#201919'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-5.png" src="./assets/lessons/39/step-5.png" width="1792" height="1120" alt="./assets/lessons/39/step-5.png" class="is-loaded"></span></p>
+<h2>Fireflies</h2>
+<p>To create the fireflies, we are going to use particles with a custom geometry.</p>
+<h3>Base</h3>
+<p>Start by creating an empty <a target="_blank" href="https://threejs.org/docs/#api/en/core/BufferGeometry">BufferGeometry</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Fireflies
+*/</span>
+<span class="token comment">// Geometry</span>
+<span class="token keyword">const</span> firefliesGeometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferGeometry</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Create a <code spellcheck="false">BufferAttribute</code> named <code spellcheck="false">position</code> to set the position of each particle:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> firefliesGeometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferGeometry</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> firefliesCount <span class="token operator">=</span> <span class="token number">30</span>
+<span class="token keyword">const</span> positionArray <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Float32Array</span><span class="token punctuation">(</span>firefliesCount <span class="token operator">*</span> <span class="token number">3</span><span class="token punctuation">)</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> firefliesCount<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+positionArray<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">4</span>
+positionArray<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">4</span>
+positionArray<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">4</span>
+<span class="token punctuation">}</span>
+
+firefliesGeometry<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'position'</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferAttribute</span><span class="token punctuation">(</span>positionArray<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The positions of the fireflies are random, but we will improve their positions once we can see the fireflies.</p>
+<p>We are going to use a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/PointsMaterial">PointsMaterial</a> in order to see our fireflies, but we will change it to a custom <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a> later:</p>
+<p>Create a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/PointsMaterial">PointsMaterial</a> with a <code spellcheck="false">size</code> of <code spellcheck="false">0.1</code> and set the <code spellcheck="false">sizeAttenuation</code> to <code spellcheck="false">true</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Material</span>
+<span class="token keyword">const</span> firefliesMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PointsMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> size<span class="token operator">:</span> <span class="token number">0.1</span><span class="token punctuation">,</span> sizeAttenuation<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Finally, create the <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Points">Points</a> instance using the <code spellcheck="false">firefliesGeometry</code> and the <code spellcheck="false">firefliesMaterial</code> and add it to the scene:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Points</span>
+<span class="token keyword">const</span> fireflies <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Points</span><span class="token punctuation">(</span>firefliesGeometry<span class="token punctuation">,</span> firefliesMaterial<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>fireflies<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/39/step-6.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You should see some big square particles.</p>
+<p>Let's change the positions so that it fits in the scene:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> firefliesCount<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+positionArray<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">4</span>
+positionArray<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">1.5</span>
+positionArray<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">4</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-7.png" src="./assets/lessons/39/step-7.png" width="1792" height="1120" alt="./assets/lessons/39/step-7.png" class="is-loaded"></span></p>
+<p>The particles shouldn't go too far on the <code spellcheck="false">x</code> and <code spellcheck="false">z</code> axes and stay above the floor on the <code spellcheck="false">y</code> axis.</p>
+<h3>Custom shader material</h3>
+<p>We can now change the material to a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a> in order to animate them but also draw something other than those ugly squares.</p>
+<ul>
+<li>In the <code spellcheck="false">/src/</code> folder, create a <code spellcheck="false">shaders/</code> folder.</li>
+<li>In that <code spellcheck="false">shaders/</code> folder, create a <code spellcheck="false">fireflies/</code> folder.</li>
+<li>In that <code spellcheck="false">fireflies/</code> folder (hang on), create a <code spellcheck="false">vertex.glsl</code> and a <code spellcheck="false">fragment.glsl</code> file.</li>
+</ul>
+<p>You can try to write those shaders on your own.</p>
+<p>Here's the code for <code spellcheck="false">/src/shaders/fireflies/vertex.glsl</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">vec4</span> modelPosition <span class="token operator">=</span> modelMatrix <span class="token operator">*</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>position<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> viewPosition <span class="token operator">=</span> viewMatrix <span class="token operator">*</span> modelPosition<span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> projectionPosition <span class="token operator">=</span> projectionMatrix <span class="token operator">*</span> viewPosition<span class="token punctuation">;</span>
+
+gl_Position <span class="token operator">=</span> projectionPosition<span class="token punctuation">;</span>
+gl_PointSize <span class="token operator">=</span> <span class="token number">40.0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>This code isn't doing anything special. The vertex get positioned where it should be by applying the various matrices. We also added the <code spellcheck="false">gl_PointSize</code> to control the size of the particles.</p>
+<p>Here's the code for <code spellcheck="false">/src/shaders/fireflies/fragment.glsl</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">0.0</span><span class="token punctuation">,</span> <span class="token number">0.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>As with the vertex shader, this code isn't doing anything special and the particles should look red.</p>
+<p>We can now import those shaders into our script:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> firefliesVertexShader <span class="token keyword">from</span> <span class="token string">'./shaders/fireflies/vertex.glsl'</span>
+<span class="token keyword">import</span> firefliesFragmentShader <span class="token keyword">from</span> <span class="token string">'./shaders/fireflies/fragment.glsl'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The rule to load <code spellcheck="false">.glsl</code> files has already been added to the Webpack configuration. <code spellcheck="false">firefliesVertexShader</code> and <code spellcheck="false">firefliesFragmentShader</code> should contain the two shaders we wrote.</p>
+<p>Replace the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/PointsMaterial">PointsMaterial</a> by a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a> with the <code spellcheck="false">vertexShader</code> and <code spellcheck="false">fragmentShader</code> properties:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> firefliesMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> firefliesVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> firefliesFragmentShader
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-8.png" src="./assets/lessons/39/step-8.png" width="1792" height="1120" alt="./assets/lessons/39/step-8.png" class="is-loaded"></span></p>
+<p>You should get red squares as the fireflies.</p>
+<h3>Point size</h3>
+<p>Those squares might look bigger on your screen and this is due to the pixel ratio. In our vertex shader, we wrote <code spellcheck="false">gl_PointSize = 40.0;</code> which means that each particle will take 40 pixels of the render in width and height, but if you have a high pixel ratio screen, 40 pixels will look smaller because you have more pixels in the same space.</p>
+<p>To fix that, we can send the pixel ratio as a <code spellcheck="false">uniform</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Material</span>
+<span class="token keyword">const</span> firefliesMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+uPixelRatio<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> Math<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span>window<span class="token punctuation">.</span>devicePixelRatio<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+vertexShader<span class="token operator">:</span> firefliesVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> firefliesFragmentShader
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We are not using <code spellcheck="false">renderer.getPixelRatio()</code> because the renderer is being declared afterwards. Doing it this way would result in an error. But if you prefer, you can move the entire fireflies code to after the renderer.</p>
+<p>We can now retrieve the <code spellcheck="false">uPixelRatio</code> uniform in the vertex shader and multiply our <code spellcheck="false">gl_PointSize</code> by it:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">uniform</span> <span class="token keyword">float</span> uPixelRatio<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+gl_PointSize <span class="token operator">=</span> <span class="token number">40.0</span> <span class="token operator">*</span> uPixelRatio<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-9.png" src="./assets/lessons/39/step-9.png" width="1792" height="1120" alt="./assets/lessons/39/step-9.png" class="is-loaded"></span></p>
+<p>You should now see the same particle size regardless of the pixel ratio of the screen.</p>
+<p>We might have a problem if the user changes the window from one screen to another one with a different pixel ratio. Fortunately, most of the time, when a user does that, he is also resizing the window so that it fits better. This is why we can simply update the uniform in the resize callback function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'resize'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Update fireflies</span>
+firefliesMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uPixelRatio<span class="token punctuation">.</span>value <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span>window<span class="token punctuation">.</span>devicePixelRatio<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Another problem with our particles is that the size of the squares is the same regardless of the distance. We need to activate the size attenuation and we can do that with the following code: </p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+gl_PointSize <span class="token operator">=</span> <span class="token number">40.0</span> <span class="token operator">*</span> uPixelRatio<span class="token punctuation">;</span>
+gl_PointSize <span class="token operator">*=</span> <span class="token punctuation">(</span><span class="token number">1.0</span> <span class="token operator">/</span> <span class="token operator">-</span> viewPosition<span class="token punctuation">.</span>z<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/39/step-10.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The particles' size should now depend on the distance to the camera.</p>
+<p>Finally, we can create a <code spellcheck="false">uSize</code> uniform to control the size of the particles:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> firefliesMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+uPixelRatio<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> Math<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span>window<span class="token punctuation">.</span>devicePixelRatio<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+uSize<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">100</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Use it in the shader:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+<span class="token keyword">uniform</span> <span class="token keyword">float</span> uSize<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+gl_PointSize <span class="token operator">=</span> uSize <span class="token operator">*</span> uPixelRatio<span class="token punctuation">;</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>And add a tweak to control it:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>firefliesMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uSize<span class="token punctuation">,</span> <span class="token string">'value'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">500</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'firefliesSize'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/39/step-11.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<h3>Firefly pattern</h3>
+<p>It's time to change those red squares into better looking fireflies. We are going to create some shiny points to represent them.</p>
+<p>We could have used a texture and it's actually more performant to do that. But, for the sake of this lesson and to have more control over the pattern, we are going to draw it in the fragment shader.</p>
+<p>Increase the particle size to something like <code spellcheck="false">200</code>. Start by showing the UV coordinates of the point with <code spellcheck="false">gl_PointCoord</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>gl_PointCoord<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-12.png" src="./assets/lessons/39/step-12.png" width="1792" height="1120" alt="./assets/lessons/39/step-12.png" class="is-loaded"></span></p>
+<p>We are going to use these coordinates to draw a shiny point at each center.</p>
+<p>First, we know that we need to play with the value which contains the distance to the center of the coordinates.</p>
+<p>Create a <code spellcheck="false">distanceToCenter</code> variable and calculate the distance between the center (<code spellcheck="false">vec2(0.5)</code>) and <code spellcheck="false">gl_PointCoord</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">float</span> distanceToCenter <span class="token operator">=</span> <span class="token function">distance</span><span class="token punctuation">(</span>gl_PointCoord<span class="token punctuation">,</span> <span class="token keyword">vec2</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>gl_PointCoord<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Use this <code spellcheck="false">distanceToCenter</code> variable as the alpha of <code spellcheck="false">gl_FragColor</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">float</span> distanceToCenter <span class="token operator">=</span> <span class="token function">distance</span><span class="token punctuation">(</span>gl_PointCoord<span class="token punctuation">,</span> <span class="token keyword">vec2</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">,</span> distanceToCenter<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The particles are all white even though the alpha was supposed to change. This is because we forgot to set the <code spellcheck="false">transparent</code> property of the material to <code spellcheck="false">true</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> firefliesMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+transparent<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-13.png" src="./assets/lessons/39/step-13.png" width="1792" height="1120" alt="./assets/lessons/39/step-13.png" class="is-loaded"></span></p>
+<p>We can now see our pattern through the alpha.</p>
+<p>Next, we will try to create a shiny pattern. To do that, we can start with a very small value and divide it by the <code spellcheck="false">distanceToCenter</code>. </p>
+<p>Create a <code spellcheck="false">strength</code> variable, divide <code spellcheck="false">0.05</code> by <code spellcheck="false">distanceToCenter</code> and send it to the <code spellcheck="false">gl_FragColor</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">float</span> distanceToCenter <span class="token operator">=</span> <span class="token function">distance</span><span class="token punctuation">(</span>gl_PointCoord<span class="token punctuation">,</span> <span class="token keyword">vec2</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> strength <span class="token operator">=</span> <span class="token number">0.05</span> <span class="token operator">/</span> distanceToCenter<span class="token punctuation">;</span>
+
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">,</span> strength<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-14.png" src="./assets/lessons/39/step-14.png" width="1792" height="1120" alt="./assets/lessons/39/step-14.png" class="is-loaded"></span></p>
+<p>They look good, but unfortunately, we can see the edges. This is because this formula gets very low with distance but never reaches <code spellcheck="false">0</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-15.png" src="./assets/lessons/39/step-15.png" width="396" height="332.5" alt="./assets/lessons/39/step-15.png" class="is-loaded"></span></p>
+<p>To fix that, we can subtract a small value but big enough to make sure that the result goes below <code spellcheck="false">0.0</code> before reaching the edges:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">float</span> distanceToCenter <span class="token operator">=</span> <span class="token function">distance</span><span class="token punctuation">(</span>gl_PointCoord<span class="token punctuation">,</span> <span class="token keyword">vec2</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> strength <span class="token operator">=</span> <span class="token number">0.05</span> <span class="token operator">/</span> distanceToCenter <span class="token operator">-</span> <span class="token number">0.1</span><span class="token punctuation">;</span>
+
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">,</span> strength<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-16.png" src="./assets/lessons/39/step-16.png" width="225" height="171" alt="./assets/lessons/39/step-16.png" class="is-loaded"></span></p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-17.png" src="./assets/lessons/39/step-17.png" width="1792" height="1120" alt="./assets/lessons/39/step-17.png" class="is-loaded"></span></p>
+<p>The fireflies now look like little points of light.</p>
+<h3>Scale randomness</h3>
+<p>When creating something organic, it's always good to add randomness. So far, all the fireflies have the same size.</p>
+<p>We are going to send a different scale multiplier to each one.</p>
+<p>Create an <code spellcheck="false">aScale</code> attribute and fill it with random values using <code spellcheck="false">Math.random()</code>. We only need <code spellcheck="false">1</code> value per vertex, so make sure to get the <code spellcheck="false">Float32Array</code> length right and also set the second parameter of the <code spellcheck="false">BufferAttribute</code> to <code spellcheck="false">1</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> scaleArray <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Float32Array</span><span class="token punctuation">(</span>firefliesCount<span class="token punctuation">)</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> firefliesCount<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+scaleArray<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// ...</span>
+firefliesGeometry<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'aScale'</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferAttribute</span><span class="token punctuation">(</span>scaleArray<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can retrieve the attribute in the vertex shader and use it in the <code spellcheck="false">gl_PointSize</code> formula:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+
+<span class="token keyword">attribute</span> <span class="token keyword">float</span> aScale<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+gl_PointSize <span class="token operator">=</span> uSize <span class="token operator">*</span> aScale <span class="token operator">*</span> uPixelRatio<span class="token punctuation">;</span>
+gl_PointSize <span class="token operator">*=</span> <span class="token punctuation">(</span><span class="token number">1.0</span> <span class="token operator">/</span> <span class="token operator">-</span> viewPosition<span class="token punctuation">.</span>z<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-18.png" src="./assets/lessons/39/step-18.png" width="1792" height="1120" alt="./assets/lessons/39/step-18.png" class="is-loaded"></span></p>
+<p>The fireflies now have different sizes.</p>
+<h3>Blending</h3>
+<p>To make them even more shiny and look like points made from light, set the <code spellcheck="false">blending</code> property of the material to <code spellcheck="false">THREE.AdditiveBlending</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> firefliesMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+blending<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>AdditiveBlending<span class="token punctuation">,</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-19.png" src="./assets/lessons/39/step-19.png" width="1792" height="1120" alt="./assets/lessons/39/step-19.png" class="is-loaded"></span></p>
+<h3>Depth write</h3>
+<p>At some specific angles, you will notice some clipping issues where one particle seems to hide the one behind. This is true even if the alpha is supposed to be set at a low value.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-20.png" src="./assets/lessons/39/step-20.png" width="1792" height="1120" alt="./assets/lessons/39/step-20.png" class="is-loaded"></span></p>
+<p>To fix that, we can deactivate depth writing by setting the <code spellcheck="false">depthWrite</code> property to <code spellcheck="false">false</code> on the material:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> firefliesMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+depthWrite<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/39/step-21.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<h3>Floating animation</h3>
+<p>Finally, we want the fireflies to float up and down to give them more life.</p>
+<p>Because we are going to do the animation in the vertex shader, we need to send it the time.</p>
+<p>Create a <code spellcheck="false">uTime</code> uniform and update it in the <code spellcheck="false">tick</code> function by using the <code spellcheck="false">elapsedTime</code> variable:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> firefliesMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+uTime<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+<span class="token keyword">const</span> clock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Clock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> elapsedTime <span class="token operator">=</span> clock<span class="token punctuation">.</span><span class="token function">getElapsedTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Update materials</span>
+firefliesMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uTime<span class="token punctuation">.</span>value <span class="token operator">=</span> elapsedTime
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Retrieve the <code spellcheck="false">uTime</code> uniform in the vertex shader and update the <code spellcheck="false">modelPosition.y</code> using <code spellcheck="false">sin()</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">uniform</span> <span class="token keyword">float</span> uTime<span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">vec4</span> modelPosition <span class="token operator">=</span> modelMatrix <span class="token operator">*</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>position<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+modelPosition<span class="token punctuation">.</span>y <span class="token operator">+=</span> <span class="token function">sin</span><span class="token punctuation">(</span>uTime<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/39/step-22.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>That's a good start but we need to add some randomness. First, let's de-synchronize them.</p>
+<p>We could have sent a new attribute, but instead (since they only move on the <code spellcheck="false">y</code> axis), we can use the <code spellcheck="false">x</code> axis to offset the value in <code spellcheck="false">sin()</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+modelPosition<span class="token punctuation">.</span>y <span class="token operator">+=</span> <span class="token function">sin</span><span class="token punctuation">(</span>uTime <span class="token operator">+</span> modelPosition<span class="token punctuation">.</span>x <span class="token operator">*</span> <span class="token number">100.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/39/step-23.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The animation looks more random, but we also need to randomize and reduce the amplitude.</p>
+<p>We can use the <code spellcheck="false">aScale</code> so that the smallest fireflies move less. We can also multiply by a small value to reduce the general amplitude:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+modelPosition<span class="token punctuation">.</span>y <span class="token operator">+=</span> <span class="token function">sin</span><span class="token punctuation">(</span>uTime <span class="token operator">+</span> modelPosition<span class="token punctuation">.</span>x <span class="token operator">*</span> <span class="token number">100.0</span><span class="token punctuation">)</span> <span class="token operator">*</span> aScale <span class="token operator">*</span> <span class="token number">0.2</span><span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/39/step-24.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>That's it for the fireflies but you can go further by adding more tweaks to Dat.GUI, improving the pattern, or maybe sending a color using a uniform.</p>
+<h2>Portal</h2>
+<p>The final piece of our scene is the portal. We are going to draw something that looks better than this uniform color.</p>
+<h3>Custom shader material</h3>
+<p>We can start by changing the portal material to a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a>.</p>
+<p>In the <code spellcheck="false">/src/shaders/</code> folder, create a <code spellcheck="false">portal/</code> folder.</p>
+<p>In that <code spellcheck="false">portal/</code> folder, create a <code spellcheck="false">vertex.glsl</code> file and a <code spellcheck="false">fragment.glsl</code> file.</p>
+<p>Again, you can try to write those basic vertex and fragment shaders on your own.</p>
+<p>Here's the code for <code spellcheck="false">/src/shaders/portal/vertex.glsl</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">vec4</span> modelPosition <span class="token operator">=</span> modelMatrix <span class="token operator">*</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>position<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> viewPosition <span class="token operator">=</span> viewMatrix <span class="token operator">*</span> modelPosition<span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> projectionPosition <span class="token operator">=</span> projectionMatrix <span class="token operator">*</span> viewPosition<span class="token punctuation">;</span>
+
+gl_Position <span class="token operator">=</span> projectionPosition<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Here's the code for <code spellcheck="false">/src/shaders/portal/fragment.glsl</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">0.0</span><span class="token punctuation">,</span> <span class="token number">0.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We are placing the vertices where they are supposed to be and we are setting the color to a uniform red.</p>
+<p>We can now import those shaders into our script:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> portalVertexShader <span class="token keyword">from</span> <span class="token string">'./shaders/portal/vertex.glsl'</span>
+<span class="token keyword">import</span> portalFragmentShader <span class="token keyword">from</span> <span class="token string">'./shaders/portal/fragment.glsl'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Replace the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a> by a <a target="_blank" href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a> with the <code spellcheck="false">vertexShader</code> and <code spellcheck="false">fragmentShader</code> properties:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> portalLightMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+vertexShader<span class="token operator">:</span> portalVertexShader<span class="token punctuation">,</span>
+fragmentShader<span class="token operator">:</span> portalFragmentShader
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-25.png" src="./assets/lessons/39/step-25.png" width="1792" height="1120" alt="./assets/lessons/39/step-25.png" class="is-loaded"></span></p>
+<p>You should get a red portal which doesn't match the rest of the scene, but we are going to fix that.</p>
+<p>As in the <strong>Shader Patterns</strong> lesson, we are going to use the UV coordinates to draw on the portal.</p>
+<p>Send the UV coordinates from the vertex shader to the fragment shader using a <code spellcheck="false">vUv</code> varying.</p>
+<p>The vertex shader:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">varying</span> <span class="token keyword">vec2</span> vUv<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+vUv <span class="token operator">=</span> uv<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The fragment shader:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">varying</span> <span class="token keyword">vec2</span> vUv<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>vUv<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-26.png" src="./assets/lessons/39/step-26.png" width="1792" height="1120" alt="./assets/lessons/39/step-26.png" class="is-loaded"></span></p>
+<p>If you are using your own model and you don't get this gradient, it might be because your portal hasn't been unwrapped properly.</p>
+<h3>Fix the UV coordinates</h3>
+<p>To fix that, open your <code spellcheck="false">.blend</code> file:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-27.png" src="./assets/lessons/39/step-27.png" width="1792" height="1120" alt="./assets/lessons/39/step-27.png" class="is-loaded"></span></p>
+<p>Select the portal only:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-28.png" src="./assets/lessons/39/step-28.png" width="1792" height="1120" alt="./assets/lessons/39/step-28.png" class="is-loaded"></span></p>
+<p>Go into <code spellcheck="false">Edit Mode</code>, select all the faces and check how the UV is being unwrapped in the <code spellcheck="false">UV Editor</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-29.png" src="./assets/lessons/39/step-29.png" width="1792" height="1120" alt="./assets/lessons/39/step-29.png" class="is-loaded"></span></p>
+<p>Here, the unwrap is good, but you may have a different result or maybe nothing at all.</p>
+<p>Don't worry about the baked texture in the background of the <code spellcheck="false">UV Editor</code>. We don't need to be concerned with it. All we want to do is to unwrap the disc-shaped portal so that it fills the whole map.</p>
+<p>To do that, while still in the <code spellcheck="false">UV Editor</code> with all the faces selected, press <code spellcheck="false">U</code> and choose <code spellcheck="false">Unwrap</code>.</p>
+<p>And that's all. We don't really care about the rotation of the UV because  the pattern we are going to draw will be circular. </p>
+<p>Leave the <code spellcheck="false">Edit Mode</code> and select the merged object and all the emissions. Then, export everything as <code spellcheck="false">portal.glb</code> into the <code spellcheck="false">/static/</code> folder:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-30.png" src="./assets/lessons/39/step-30.png" width="1792" height="1120" alt="./assets/lessons/39/step-30.png" class="is-loaded"></span></p>
+<p>Refresh your scene, and you should now have the same gradient:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-31.png" src="./assets/lessons/39/step-31.png" width="1792" height="1120" alt="./assets/lessons/39/step-31.png" class="is-loaded"></span></p>
+<p>If the gradient isn't oriented the same, it's not a problem. Our pattern will be circular.</p>
+<h3>Perlin</h3>
+<p>Now comes the fun part. You can draw anything you want in the portal, as long as you find the right formula.</p>
+<p>The following steps lead straight to a pleasing result. But, obviously, it was a long process of trying many things until it ended up looking good. Do not be frustrated if it takes you hours when doing it on your own. It's all about time and practice.</p>
+<p>We are going to start with a classic Perlin noise. In this example, we are going to use a 3D one, so we can animate the third value with the time in order to create variations to the noise.</p>
+<p>Take the following function made by Stefan Gustavson, which is available in <a target="_blank" href="https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83">this gist</a>, and add it to your <code spellcheck="false">src/shaders/portal/fragment.glsl</code> file:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">//  Classic Perlin 3D Noise </span>
+<span class="token comment">//  by Stefan Gustavson</span>
+<span class="token comment">//</span>
+<span class="token keyword">vec4</span> <span class="token function">permute</span><span class="token punctuation">(</span><span class="token keyword">vec4</span> x<span class="token punctuation">)</span><span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token function">mod</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">(</span>x<span class="token operator">*</span><span class="token number">34.0</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token number">1.0</span><span class="token punctuation">)</span><span class="token operator">*</span>x<span class="token punctuation">,</span> <span class="token number">289.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+<span class="token keyword">vec4</span> <span class="token function">taylorInvSqrt</span><span class="token punctuation">(</span><span class="token keyword">vec4</span> r<span class="token punctuation">)</span><span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token number">1.79284291400159</span> <span class="token operator">-</span> <span class="token number">0.85373472095314</span> <span class="token operator">*</span> r<span class="token punctuation">;</span> <span class="token punctuation">}</span>
+<span class="token keyword">vec3</span> <span class="token function">fade</span><span class="token punctuation">(</span><span class="token keyword">vec3</span> t<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> t<span class="token operator">*</span>t<span class="token operator">*</span>t<span class="token operator">*</span><span class="token punctuation">(</span>t<span class="token operator">*</span><span class="token punctuation">(</span>t<span class="token operator">*</span><span class="token number">6.0</span><span class="token operator">-</span><span class="token number">15.0</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token number">10.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+
+<span class="token keyword">float</span> <span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span> P<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">vec3</span> Pi0 <span class="token operator">=</span> <span class="token function">floor</span><span class="token punctuation">(</span>P<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Integer part for indexing</span>
+<span class="token keyword">vec3</span> Pi1 <span class="token operator">=</span> Pi0 <span class="token operator">+</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Integer part + 1</span>
+Pi0 <span class="token operator">=</span> <span class="token function">mod</span><span class="token punctuation">(</span>Pi0<span class="token punctuation">,</span> <span class="token number">289.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+Pi1 <span class="token operator">=</span> <span class="token function">mod</span><span class="token punctuation">(</span>Pi1<span class="token punctuation">,</span> <span class="token number">289.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> Pf0 <span class="token operator">=</span> <span class="token function">fract</span><span class="token punctuation">(</span>P<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Fractional part for interpolation</span>
+<span class="token keyword">vec3</span> Pf1 <span class="token operator">=</span> Pf0 <span class="token operator">-</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Fractional part - 1.0</span>
+<span class="token keyword">vec4</span> ix <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>Pi0<span class="token punctuation">.</span>x<span class="token punctuation">,</span> Pi1<span class="token punctuation">.</span>x<span class="token punctuation">,</span> Pi0<span class="token punctuation">.</span>x<span class="token punctuation">,</span> Pi1<span class="token punctuation">.</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> iy <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>Pi0<span class="token punctuation">.</span>yy<span class="token punctuation">,</span> Pi1<span class="token punctuation">.</span>yy<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> iz0 <span class="token operator">=</span> Pi0<span class="token punctuation">.</span>zzzz<span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> iz1 <span class="token operator">=</span> Pi1<span class="token punctuation">.</span>zzzz<span class="token punctuation">;</span>
+
+<span class="token keyword">vec4</span> ixy <span class="token operator">=</span> <span class="token function">permute</span><span class="token punctuation">(</span><span class="token function">permute</span><span class="token punctuation">(</span>ix<span class="token punctuation">)</span> <span class="token operator">+</span> iy<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> ixy0 <span class="token operator">=</span> <span class="token function">permute</span><span class="token punctuation">(</span>ixy <span class="token operator">+</span> iz0<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> ixy1 <span class="token operator">=</span> <span class="token function">permute</span><span class="token punctuation">(</span>ixy <span class="token operator">+</span> iz1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">vec4</span> gx0 <span class="token operator">=</span> ixy0 <span class="token operator">/</span> <span class="token number">7.0</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> gy0 <span class="token operator">=</span> <span class="token function">fract</span><span class="token punctuation">(</span><span class="token function">floor</span><span class="token punctuation">(</span>gx0<span class="token punctuation">)</span> <span class="token operator">/</span> <span class="token number">7.0</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">;</span>
+gx0 <span class="token operator">=</span> <span class="token function">fract</span><span class="token punctuation">(</span>gx0<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> gz0 <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token function">abs</span><span class="token punctuation">(</span>gx0<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token function">abs</span><span class="token punctuation">(</span>gy0<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> sz0 <span class="token operator">=</span> <span class="token function">step</span><span class="token punctuation">(</span>gz0<span class="token punctuation">,</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+gx0 <span class="token operator">-=</span> sz0 <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">,</span> gx0<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+gy0 <span class="token operator">-=</span> sz0 <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">,</span> gy0<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">vec4</span> gx1 <span class="token operator">=</span> ixy1 <span class="token operator">/</span> <span class="token number">7.0</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> gy1 <span class="token operator">=</span> <span class="token function">fract</span><span class="token punctuation">(</span><span class="token function">floor</span><span class="token punctuation">(</span>gx1<span class="token punctuation">)</span> <span class="token operator">/</span> <span class="token number">7.0</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">;</span>
+gx1 <span class="token operator">=</span> <span class="token function">fract</span><span class="token punctuation">(</span>gx1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> gz1 <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token function">abs</span><span class="token punctuation">(</span>gx1<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token function">abs</span><span class="token punctuation">(</span>gy1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> sz1 <span class="token operator">=</span> <span class="token function">step</span><span class="token punctuation">(</span>gz1<span class="token punctuation">,</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+gx1 <span class="token operator">-=</span> sz1 <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">,</span> gx1<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+gy1 <span class="token operator">-=</span> sz1 <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">,</span> gy1<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">vec3</span> g000 <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>gx0<span class="token punctuation">.</span>x<span class="token punctuation">,</span>gy0<span class="token punctuation">.</span>x<span class="token punctuation">,</span>gz0<span class="token punctuation">.</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> g100 <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>gx0<span class="token punctuation">.</span>y<span class="token punctuation">,</span>gy0<span class="token punctuation">.</span>y<span class="token punctuation">,</span>gz0<span class="token punctuation">.</span>y<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> g010 <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>gx0<span class="token punctuation">.</span>z<span class="token punctuation">,</span>gy0<span class="token punctuation">.</span>z<span class="token punctuation">,</span>gz0<span class="token punctuation">.</span>z<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> g110 <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>gx0<span class="token punctuation">.</span>w<span class="token punctuation">,</span>gy0<span class="token punctuation">.</span>w<span class="token punctuation">,</span>gz0<span class="token punctuation">.</span>w<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> g001 <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>gx1<span class="token punctuation">.</span>x<span class="token punctuation">,</span>gy1<span class="token punctuation">.</span>x<span class="token punctuation">,</span>gz1<span class="token punctuation">.</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> g101 <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>gx1<span class="token punctuation">.</span>y<span class="token punctuation">,</span>gy1<span class="token punctuation">.</span>y<span class="token punctuation">,</span>gz1<span class="token punctuation">.</span>y<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> g011 <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>gx1<span class="token punctuation">.</span>z<span class="token punctuation">,</span>gy1<span class="token punctuation">.</span>z<span class="token punctuation">,</span>gz1<span class="token punctuation">.</span>z<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec3</span> g111 <span class="token operator">=</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>gx1<span class="token punctuation">.</span>w<span class="token punctuation">,</span>gy1<span class="token punctuation">.</span>w<span class="token punctuation">,</span>gz1<span class="token punctuation">.</span>w<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">vec4</span> norm0 <span class="token operator">=</span> <span class="token function">taylorInvSqrt</span><span class="token punctuation">(</span><span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token function">dot</span><span class="token punctuation">(</span>g000<span class="token punctuation">,</span> g000<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">dot</span><span class="token punctuation">(</span>g010<span class="token punctuation">,</span> g010<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">dot</span><span class="token punctuation">(</span>g100<span class="token punctuation">,</span> g100<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">dot</span><span class="token punctuation">(</span>g110<span class="token punctuation">,</span> g110<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+g000 <span class="token operator">*=</span> norm0<span class="token punctuation">.</span>x<span class="token punctuation">;</span>
+g010 <span class="token operator">*=</span> norm0<span class="token punctuation">.</span>y<span class="token punctuation">;</span>
+g100 <span class="token operator">*=</span> norm0<span class="token punctuation">.</span>z<span class="token punctuation">;</span>
+g110 <span class="token operator">*=</span> norm0<span class="token punctuation">.</span>w<span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> norm1 <span class="token operator">=</span> <span class="token function">taylorInvSqrt</span><span class="token punctuation">(</span><span class="token keyword">vec4</span><span class="token punctuation">(</span><span class="token function">dot</span><span class="token punctuation">(</span>g001<span class="token punctuation">,</span> g001<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">dot</span><span class="token punctuation">(</span>g011<span class="token punctuation">,</span> g011<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">dot</span><span class="token punctuation">(</span>g101<span class="token punctuation">,</span> g101<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">dot</span><span class="token punctuation">(</span>g111<span class="token punctuation">,</span> g111<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+g001 <span class="token operator">*=</span> norm1<span class="token punctuation">.</span>x<span class="token punctuation">;</span>
+g011 <span class="token operator">*=</span> norm1<span class="token punctuation">.</span>y<span class="token punctuation">;</span>
+g101 <span class="token operator">*=</span> norm1<span class="token punctuation">.</span>z<span class="token punctuation">;</span>
+g111 <span class="token operator">*=</span> norm1<span class="token punctuation">.</span>w<span class="token punctuation">;</span>
+
+<span class="token keyword">float</span> n000 <span class="token operator">=</span> <span class="token function">dot</span><span class="token punctuation">(</span>g000<span class="token punctuation">,</span> Pf0<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> n100 <span class="token operator">=</span> <span class="token function">dot</span><span class="token punctuation">(</span>g100<span class="token punctuation">,</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>Pf1<span class="token punctuation">.</span>x<span class="token punctuation">,</span> Pf0<span class="token punctuation">.</span>yz<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> n010 <span class="token operator">=</span> <span class="token function">dot</span><span class="token punctuation">(</span>g010<span class="token punctuation">,</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>Pf0<span class="token punctuation">.</span>x<span class="token punctuation">,</span> Pf1<span class="token punctuation">.</span>y<span class="token punctuation">,</span> Pf0<span class="token punctuation">.</span>z<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> n110 <span class="token operator">=</span> <span class="token function">dot</span><span class="token punctuation">(</span>g110<span class="token punctuation">,</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>Pf1<span class="token punctuation">.</span>xy<span class="token punctuation">,</span> Pf0<span class="token punctuation">.</span>z<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> n001 <span class="token operator">=</span> <span class="token function">dot</span><span class="token punctuation">(</span>g001<span class="token punctuation">,</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>Pf0<span class="token punctuation">.</span>xy<span class="token punctuation">,</span> Pf1<span class="token punctuation">.</span>z<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> n101 <span class="token operator">=</span> <span class="token function">dot</span><span class="token punctuation">(</span>g101<span class="token punctuation">,</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>Pf1<span class="token punctuation">.</span>x<span class="token punctuation">,</span> Pf0<span class="token punctuation">.</span>y<span class="token punctuation">,</span> Pf1<span class="token punctuation">.</span>z<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> n011 <span class="token operator">=</span> <span class="token function">dot</span><span class="token punctuation">(</span>g011<span class="token punctuation">,</span> <span class="token keyword">vec3</span><span class="token punctuation">(</span>Pf0<span class="token punctuation">.</span>x<span class="token punctuation">,</span> Pf1<span class="token punctuation">.</span>yz<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> n111 <span class="token operator">=</span> <span class="token function">dot</span><span class="token punctuation">(</span>g111<span class="token punctuation">,</span> Pf1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">vec3</span> fade_xyz <span class="token operator">=</span> <span class="token function">fade</span><span class="token punctuation">(</span>Pf0<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec4</span> n_z <span class="token operator">=</span> <span class="token function">mix</span><span class="token punctuation">(</span><span class="token keyword">vec4</span><span class="token punctuation">(</span>n000<span class="token punctuation">,</span> n100<span class="token punctuation">,</span> n010<span class="token punctuation">,</span> n110<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>n001<span class="token punctuation">,</span> n101<span class="token punctuation">,</span> n011<span class="token punctuation">,</span> n111<span class="token punctuation">)</span><span class="token punctuation">,</span> fade_xyz<span class="token punctuation">.</span>z<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">vec2</span> n_yz <span class="token operator">=</span> <span class="token function">mix</span><span class="token punctuation">(</span>n_z<span class="token punctuation">.</span>xy<span class="token punctuation">,</span> n_z<span class="token punctuation">.</span>zw<span class="token punctuation">,</span> fade_xyz<span class="token punctuation">.</span>y<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">float</span> n_xyz <span class="token operator">=</span> <span class="token function">mix</span><span class="token punctuation">(</span>n_yz<span class="token punctuation">.</span>x<span class="token punctuation">,</span> n_yz<span class="token punctuation">.</span>y<span class="token punctuation">,</span> fade_xyz<span class="token punctuation">.</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+
+<span class="token keyword">return</span> <span class="token number">2.2</span> <span class="token operator">*</span> n_xyz<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>At the end of this process, we are going to display a mix between two colors, but for now, we are going to focus on just one variable.</p>
+<p>Create a <code spellcheck="false">strength</code> variable and use the <code spellcheck="false">cnoise</code> function we just added.</p>
+<p>This function needs a <code spellcheck="false">vec3</code> as parameter. For now, we will use the <code spellcheck="false">vUv</code> as the <code spellcheck="false">x</code> and <code spellcheck="false">y</code> and we will use the time variable later for the <code spellcheck="false">z</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">float</span> strength <span class="token operator">=</span> <span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span><span class="token punctuation">(</span>vUv <span class="token operator">*</span> <span class="token number">5.0</span><span class="token punctuation">,</span> <span class="token number">0.0</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>vUv<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>If there is no error, send the <code spellcheck="false">strength</code> to the <code spellcheck="false">gl_FragColor</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">float</span> strength <span class="token operator">=</span> <span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span><span class="token punctuation">(</span>vUv <span class="token operator">*</span> <span class="token number">5.0</span><span class="token punctuation">,</span> <span class="token number">0.0</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>strength<span class="token punctuation">,</span> strength<span class="token punctuation">,</span> strength<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-32.png" src="./assets/lessons/39/step-32.png" width="1792" height="1120" alt="./assets/lessons/39/step-32.png" class="is-loaded"></span></p>
+<p>That's a good start and we can see the Perlin noise.</p>
+<p>In your JavaScript file, create a <code spellcheck="false">uTime</code> uniform and update it in the <code spellcheck="false">tick</code> function like we did with the fireflies:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> portalLightMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+uTime<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">0</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> elapsedTime <span class="token operator">=</span> clock<span class="token punctuation">.</span><span class="token function">getElapsedTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Update materials</span>
+firefliesMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uTime<span class="token punctuation">.</span>value <span class="token operator">=</span> elapsedTime
+portalLightMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uTime<span class="token punctuation">.</span>value <span class="token operator">=</span> elapsedTime
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">tick</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Retrieve it in the fragment shader and use it as the third value of the <code spellcheck="false">vec3</code> that we send to <code spellcheck="false">cnoise</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">uniform</span> <span class="token keyword">float</span> uTime<span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// Perlin noise</span>
+<span class="token keyword">float</span> strength <span class="token operator">=</span> <span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span><span class="token punctuation">(</span>vUv <span class="token operator">*</span> <span class="token number">5.0</span><span class="token punctuation">,</span> uTime<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>strength<span class="token punctuation">,</span> strength<span class="token punctuation">,</span> strength<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/39/step-34.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>We are already getting some Stargate vibes.</p>
+<p>This classic Perlin noise is good, but we can get something even better by displacing the UV coordinates. We are going to create new UV coordinates based on the initial ones, but we are going to offset the <code spellcheck="false">x</code> and the <code spellcheck="false">y</code> by using another Perlin noise:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// Displace the UV</span>
+<span class="token keyword">vec2</span> displacedUv <span class="token operator">=</span> vUv <span class="token operator">+</span> <span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span><span class="token punctuation">(</span>vUv <span class="token operator">*</span> <span class="token number">5.0</span><span class="token punctuation">,</span> uTime<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Perlin noise</span>
+<span class="token keyword">float</span> strength <span class="token operator">=</span> <span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span><span class="token punctuation">(</span>displacedUv <span class="token operator">*</span> <span class="token number">5.0</span><span class="token punctuation">,</span> uTime<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>strength<span class="token punctuation">,</span> strength<span class="token punctuation">,</span> strength<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/39/step-35.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The animation is great but a little too fast. In order to slow it down and get some organic randomness, multiply the <code spellcheck="false">uTime</code> by small values that are different for <code spellcheck="false">displacedUv</code> and for <code spellcheck="false">strength</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// Displace the UV</span>
+<span class="token keyword">vec2</span> displacedUv <span class="token operator">=</span> vUv <span class="token operator">+</span> <span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span><span class="token punctuation">(</span>vUv <span class="token operator">*</span> <span class="token number">5.0</span><span class="token punctuation">,</span> uTime <span class="token operator">*</span> <span class="token number">0.1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Perlin noise</span>
+<span class="token keyword">float</span> strength <span class="token operator">=</span> <span class="token function">cnoise</span><span class="token punctuation">(</span><span class="token keyword">vec3</span><span class="token punctuation">(</span>displacedUv <span class="token operator">*</span> <span class="token number">5.0</span><span class="token punctuation">,</span> uTime <span class="token operator">*</span> <span class="token number">0.2</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>strength<span class="token punctuation">,</span> strength<span class="token punctuation">,</span> strength<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/39/step-36.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<h3>Outer glow</h3>
+<p>We are on the right path, but the main concern now is the junction between the portal itself and the bricks around it. The junction between them should be totally white.</p>
+<p>We need to create an outer glow. To do that, we start by finding the distance to the center and displaying the result in the <code spellcheck="false">gl_FragColor</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Outer glow</span>
+<span class="token keyword">float</span> outerGlow <span class="token operator">=</span> <span class="token function">distance</span><span class="token punctuation">(</span>vUv<span class="token punctuation">,</span> <span class="token keyword">vec2</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>outerGlow<span class="token punctuation">,</span> outerGlow<span class="token punctuation">,</span> outerGlow<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-37.png" src="./assets/lessons/39/step-37.png" width="1792" height="1120" alt="./assets/lessons/39/step-37.png" class="is-loaded"></span></p>
+<p>The gradient is the one we want, but we need to push the value at the edges in order to make sure that the gradient is totally white when we reach those edges. To do that, multiply and offset the value until you are satisfied:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Outer glow</span>
+<span class="token keyword">float</span> outerGlow <span class="token operator">=</span> <span class="token function">distance</span><span class="token punctuation">(</span>vUv<span class="token punctuation">,</span> <span class="token keyword">vec2</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">5.0</span> <span class="token operator">-</span> <span class="token number">1.4</span><span class="token punctuation">;</span>
+
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>outerGlow<span class="token punctuation">,</span> outerGlow<span class="token punctuation">,</span> outerGlow<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-38.png" src="./assets/lessons/39/step-38.png" width="1792" height="1120" alt="./assets/lessons/39/step-38.png" class="is-loaded"></span></p>
+<p>We can now add the <code spellcheck="false">outerGlow</code> to the <code spellcheck="false">strength</code> and send the <code spellcheck="false">strength</code> to the <code spellcheck="false">gl_FragColor</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Outer glow</span>
+<span class="token keyword">float</span> outerGlow <span class="token operator">=</span> <span class="token function">distance</span><span class="token punctuation">(</span>vUv<span class="token punctuation">,</span> <span class="token keyword">vec2</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">5.0</span> <span class="token operator">-</span> <span class="token number">1.4</span><span class="token punctuation">;</span>
+strength <span class="token operator">+=</span> outerGlow<span class="token punctuation">;</span>
+
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>strength<span class="token punctuation">,</span> strength<span class="token punctuation">,</span> strength<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We kind of get the result we want, but unfortunately, the edges aren't perfectly white. This is because the Perlin noise isn't clamped between <code spellcheck="false">0.0</code> to <code spellcheck="false">1.0</code>. That means the value can actually go below <code spellcheck="false">-1.0</code> and above <code spellcheck="false">+1.0</code> . But, we aren't going to do anything about it because the next step will fix it.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-39.png" src="./assets/lessons/39/step-39.png" width="1792" height="1120" alt="./assets/lessons/39/step-39.png" class="is-loaded"></span></p>
+<p>Currently, we have a very smooth pattern, but it's actually too smooth. We want to add some sharpness to it.</p>
+<h3>Step</h3>
+<p>To do that, we can apply a <code spellcheck="false">step()</code> function to the <code spellcheck="false">strength</code>.</p>
+<p>The first parameter of the <code spellcheck="false">step()</code> function is a limit (also called edge). When the value of the second parameter is above this limit, you'll get <code spellcheck="false">1.0</code> and if the value is below this limit, you'll get <code spellcheck="false">0.0</code>.</p>
+<p>You can try different values for this limit:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Apply cool step</span>
+strength <span class="token operator">=</span> <span class="token function">step</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">0.2</span><span class="token punctuation">,</span> strength<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>strength<span class="token punctuation">,</span> strength<span class="token punctuation">,</span> strength<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/39/step-40.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>We get a nice sharp result, but now it's too sharp.</p>
+<p>Instead of replacing the <code spellcheck="false">strength</code> with that <code spellcheck="false">step()</code> function, we are going to add it to the initial <code spellcheck="false">strength</code>. We can also multiply it by a lower value to dim the step effect a little:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Apply cool step</span>
+strength <span class="token operator">+=</span> <span class="token function">step</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">0.2</span><span class="token punctuation">,</span> strength<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.8</span><span class="token punctuation">;</span>
+
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>strength<span class="token punctuation">,</span> strength<span class="token punctuation">,</span> strength<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/39/step-41.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>And here is our final pattern. As you can see, the edges are perfectly white and we get a good mix between smooth and sharp.</p>
+<h3>Colors</h3>
+<p>In this example, we are fine with the black and white result because our portal light was initially white. But, let's add colors in case you went for a different portal color.</p>
+<p>In the JavaScript file, add a <code spellcheck="false">uColorStart</code> and a <code spellcheck="false">uColorEnd</code> uniform with red and blue colors . Use the <a target="_blank" href="https://threejs.org/docs/#api/en/math/Color">Color</a> class:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> portalLightMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+uTime<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+uColorStart<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span><span class="token number">0xff0000</span><span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+uColorEnd<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span><span class="token number">0x0000ff</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Retrieve those uniform in the fragment shader, <code spellcheck="false">mix()</code> them into a <code spellcheck="false">color</code> variable using the <code spellcheck="false">strength</code> and send it to the <code spellcheck="false">gl_FragColor</code>: </p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">uniform</span> <span class="token keyword">float</span> uTime<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">vec3</span> uColorStart<span class="token punctuation">;</span>
+<span class="token keyword">uniform</span> <span class="token keyword">vec3</span> uColorEnd<span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Final color</span>
+<span class="token keyword">vec3</span> color <span class="token operator">=</span> <span class="token function">mix</span><span class="token punctuation">(</span>uColorStart<span class="token punctuation">,</span> uColorEnd<span class="token punctuation">,</span> strength<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+gl_FragColor <span class="token operator">=</span> <span class="token keyword">vec4</span><span class="token punctuation">(</span>color<span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-42.png" src="./assets/lessons/39/step-42.png" width="1792" height="1120" alt="./assets/lessons/39/step-42.png" class="is-loaded"></span></p>
+<p>You should get a nice mix between the red and blue.</p>
+<p>Let's add those colors to our Dat.GUI. As always, we add them as properties of the <code spellcheck="false">debugObject</code> and listen to changes to update the uniforms accordingly:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">debugObject<span class="token punctuation">.</span>portalColorStart <span class="token operator">=</span> <span class="token string">'#ff0000'</span>
+debugObject<span class="token punctuation">.</span>portalColorEnd <span class="token operator">=</span> <span class="token string">'#0000ff'</span>
+
+gui
+<span class="token punctuation">.</span><span class="token function">addColor</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">,</span> <span class="token string">'portalColorStart'</span><span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">onChange</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+portalLightMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uColorStart<span class="token punctuation">.</span>value<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">.</span>portalColorStart<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+gui
+<span class="token punctuation">.</span><span class="token function">addColor</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">,</span> <span class="token string">'portalColorEnd'</span><span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">onChange</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+portalLightMaterial<span class="token punctuation">.</span>uniforms<span class="token punctuation">.</span>uColorEnd<span class="token punctuation">.</span>value<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">.</span>portalColorEnd<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/39/step-43.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You can now tweak the colors.</p>
+<p>But there is a catch. With some colors like deep blue to orange, you'll notice that you end up with yellow on the edges and we also lose the sharpness we had before:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/39/step-44.png" src="./assets/lessons/39/step-44.png" width="1536" height="960" alt="./assets/lessons/39/step-44.png" class="is-loaded"></span></p>
+<p>This is because the <code spellcheck="false">strength</code> is actually going below <code spellcheck="false">0.0</code> and above <code spellcheck="false">1.0</code> which results on the colors being extrapolated. It's not much of a problem with black and white, but it gets messy with some other colors.</p>
+<p>To fix that, we need to make sure that the value is clamped between <code spellcheck="false">0.0</code> and <code spellcheck="false">1.0</code> by using the <code spellcheck="false">clamp(...)</code> function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Clamp the value</span>
+strength <span class="token operator">=</span> <span class="token function">clamp</span><span class="token punctuation">(</span>strength<span class="token punctuation">,</span> <span class="token number">0.0</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Anyway, if you are using the model from the starter, you should probably stick with black and white.</p>
+<p>Don't forget to use the <code spellcheck="false">debugObject.portalColorStart</code> and <code spellcheck="false">debugObject.portalColorEnd</code> in the initial values of the uniforms:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">debugObject<span class="token punctuation">.</span>portalColorStart <span class="token operator">=</span> <span class="token string">'#000000'</span>
+debugObject<span class="token punctuation">.</span>portalColorEnd <span class="token operator">=</span> <span class="token string">'#ffffff'</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> portalLightMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ShaderMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+uniforms<span class="token operator">:</span>
+<span class="token punctuation">{</span>
+uColorStart<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">.</span>portalColorStart<span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+uColorEnd<span class="token operator">:</span> <span class="token punctuation">{</span> value<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">.</span>portalColorEnd<span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h2>Go further</h2>
+<p>That's it for our portal scene. Now would be a good time to add more tweaks and maybe more details.</p>
+<p>You can obviously try to create your own scene from scratch using all the modeling and baking processes you have learnt. Take your time, make sure to have the proper geometries, and clean UV coordinates. Don't hesitate to share your result on Twitter or in the Discord server.</p>
+</section>
+</body>
+
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<section class="text js-text">
+    <h2>Introduction</h2>
+<p>In this lesson, we will learn how to create a scene like the one on the home page of the <a target="_blank" href="https://threejs-journey.xyz/">Three.js Journey</a> website. We are going to create a small landscape with a path leading to a magical portal with some objects along the way like fences, trees, rocks. When you are done, you will be able to use what you've learned to create rooms like the ones on Three.js Journey. Or anything else!</p>
+<p>And, to make our scene look its best, we are going to use a technique called baking.</p>
+<h2>Baking</h2>
+<p>When you do a render in a 3D software like Blender, it usually looks better than the model you import into Three.js, no matter how hard you try to get the exact same lighting and colors. This is because of the technique used while making the render.</p>
+<p>Ray Tracing consists of casting multiple rays toward each pixel of the render. These rays start with the geometry we are rendering. Next, they test the direction of each light in the scene to see which part of the geometry is illuminated as well as to test whether the directions of the light bouncing off the geometry are colliding with other objects in the scene. Then, for each of these collisions, more rays are being cast as they bounce off other objects. And it goes on and on like this multiple times. All of the information collected by these collisions is then computed to define the final color of that pixel.</p>
+<p>The goal is to simulate real-life lighting and enable visual effects like indirect lighting and soft shadows. As an example, if you place a red object close to a white object, you'll see the white object being tinted with red because rays are bouncing from the red surface to the white surface. In the same way, you'll see that the red object looks brighter when the surface is close to the white object.</p>
+<p>This process results in a beautiful realistic render, but doing one render can take many minutes, even hours.</p>
+<p>When we are doing renders with WebGL, we need to do it as fast as possible in order to get a good frame rate. We don't have the luxury to spend minutes on just one render. For this reason, rendering in WebGL uses cheaper techniques that don't look as good but at least keep a decent frame rate.</p>
+<p>The idea of baking is that we save those Ray Tracing renders into textures that we then use in WebGL instead of using the classic render techniques provided by Three.js.</p>
+<p>Here is an example of baked texture:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/baked.jpg" src="./assets/lessons/36/baked.jpg" width="2048" height="2048" alt="./assets/lessons/36/baked.jpg" class="is-loaded"></span></p>
+<p>And here is the result in Three.js:</p>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/36/step-00.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>There is no light, no real-time shadows. It's just the texture you see in the above example being placed on the geometries.</p>
+<p>This way, we will see the Ray Tracing renders directly on the Meshes, and it looks awesome. And when we move around the scene, the performance will be great because all we did was to display a texture on a geometry.</p>
+<p>Unfortunately, there are some drawbacks:</p>
+<ul>
+<li>We have to bake everything in the 3D software and it's a long process.</li>
+<li>We have to load the textures and if you have a complex scene with a lot of objects, you're going to need a lot of textures. This is bad for loading but it can also result in a short freeze at the beginning of the experience because we need to load those textures into the GPU.</li>
+<li>The lights aren't dynamic. We can't move the lights, and we can't change their intensity or color in real time. We have to do it in the 3D software and re-bake everything.</li>
+</ul>
+<p>Choosing to use baking or not is up to you and the project. Keep in mind that you can still mix baked and non-baked materials but it's hard to keep a homogeneous result.</p>
+<h2>Process</h2>
+<p>To create that baked scene, we need to go through multiple steps:</p>
+<ul>
+<li>Create the scene in 3D software.</li>
+<li>Optimize all the objects because we need clean geometries and only the surfaces we can see.</li>
+<li>UV unwrap everything.</li>
+<li>Bake the render into texture(s).</li>
+<li>Export both the scene and the texture(s). If we do this, we are going to have just one big texture. But, we can have multiple textures if there are a lot of objects and we want better quality.</li>
+<li>Import everything in Three.js and apply the texture on the mesh.</li>
+</ul>
+<p>As a bonus, we will also add some details in Three.js to give more life to the scene like a cool portal effect with fireflies floating around.</p>
+<h2>Blender</h2>
+<p>We are going to use Blender to create our scene, bake it, and export it.</p>
+<p>If you don't know Blender yet, you should follow the previous lesson dedicated to it. Assuming you now know the basics of Blender, the following steps are going to be a little more direct. Nevertheless, each part will be explained. Take your time and make sure to get everything right before moving forward.</p>
+<p>If you are familiar with Blender and concepts like UV unwrapping, you can try to diverge from the lesson and create your own scene. If you're not familiar, you should try to follow the steps exactly. Then, once the project is over, you can try on your own and create your dream scene.</p>
+<p>In this lesson, I'll be using the <code spellcheck="false">2.92.0</code> version of Blender, but you'll probably use a more recent version. Keep an eye on potential changes in the interface or in the shortcuts.</p>
+<h2>Setup</h2>
+<p>To begin, we create a new Blender file. The default setup is the one we defined in the Blender lesson but you can use any setup you like.
+If you want the same setup, you can also use the <code spellcheck="false">portal.blend</code> file in the starter:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-01.png" src="./assets/lessons/36/step-01.png" width="1536" height="960" alt="./assets/lessons/36/step-01.png" class="is-loaded"></span></p>
+<p>A <code spellcheck="false">Point Light</code> is already present in the scene with the following parameters.</p>
+<p>If the parameters are different from yours, you might be using <code spellcheck="false">Eeevee</code> as the <code spellcheck="false">Renderer Engine</code>. You can change it now. We will be changing it anyway a little further down.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-02.png" src="./assets/lessons/36/step-02.png" width="285" height="470" alt="./assets/lessons/36/step-02.png" class="is-loaded"></span></p>
+<p>Start by deleting the default cube or any default object you have in the scene, but keep the light. Use <code spellcheck="false">X</code> to delete objects.</p>
+<p>You can now save the file. During the rest of the lesson, remember to save regularly.</p>
+<h2>Floor</h2>
+<p>We are going to start with the floor.</p>
+<p>Create a simple plane with <code spellcheck="false">Shift + A</code></p>
+<p>Scale that plane so that it covers 4 units. You can look at the grid on the floor of the scene to see what 4 units looks like. Also, those units can be anything you want. Actually, you might see something like <code spellcheck="false">4m</code> because your Blender is configured to use meters. This doesn't matter because 4 units in Blender will result in 4 units in Three.js.</p>
+<p>To do that, you can change its size in the small menu that shows up when creating it:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-03.png" src="./assets/lessons/36/step-03.png" width="324" height="296" alt="./assets/lessons/36/step-03.png" class="is-loaded"></span></p>
+<p>You can also scale it using <code spellcheck="false">S</code> after you've created it (you can use <code spellcheck="false">CTRL</code> to round the value):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-04.png" src="./assets/lessons/36/step-04.png" width="1536" height="960" alt="./assets/lessons/36/step-04.png" class="is-loaded"></span></p>
+<p>Or you can go to the <code spellcheck="false">Edit Mode</code> with <code spellcheck="false">TAB</code> and then scale it the same way:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-05.png" src="./assets/lessons/36/step-05.png" width="1536" height="960" alt="./assets/lessons/36/step-05.png" class="is-loaded"></span></p>
+<p>The result will actually be slightly different according to which technique you used. If you scale the object while not using the <code spellcheck="false">Edit Mode</code>, you'll apply a transformation on the object itself and not on the geometry.</p>
+<p>This might become a problem later but, later on, we are going to fix it anyway for every object. So use the technique you prefer.</p>
+<h2>Fences</h2>
+<p>For the first objects in the scene, we can start with the fences. They are simple to create and will give some life to our scene.</p>
+<p>We are going to create 2 flat boxes for the poles (posts) and 2 other flat and wide boxes for the planks (rails).</p>
+<p>Create the first pole by making a cube with <code spellcheck="false">SHIFT + A</code>. Go into  <code spellcheck="false">Edit Mode</code> with <code spellcheck="false">TAB</code> and start scaling it:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-06.png" src="./assets/lessons/36/step-06.png" width="1536" height="960" alt="./assets/lessons/36/step-06.png" class="is-loaded"></span></p>
+<p>If you don't get the exact shape at first, it's not a problem. You can always change it later.</p>
+<p>Right now, we are in <code spellcheck="false">Edit Mode</code> and we are going to stay in that mode for the rest of the fence. We can still create primitives and they will count as part of the same geometry. It's not mandatory but it might get handy to have only one geometry for each fence.</p>
+<p>While in the <code spellcheck="false">Edit Mode</code>, select the box (if that's not already the case) with <code spellcheck="false">A</code>, duplicate it with <code spellcheck="false">SHIFT + D</code> and move it to the side. You can press <code spellcheck="false">Y</code> right after duplicating it to force the movement on the <code spellcheck="false">Y</code> axis only:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-07.png" src="./assets/lessons/36/step-07.png" width="1536" height="960" alt="./assets/lessons/36/step-07.png" class="is-loaded"></span></p>
+<p>Again, duplicate it with <code spellcheck="false">SHIFT + D</code>, scale it with <code spellcheck="false">S</code> and move it with <code spellcheck="false">G</code> to create the two other planks:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-08.png" src="./assets/lessons/36/step-08.png" width="1536" height="960" alt="./assets/lessons/36/step-08.png" class="is-loaded"></span></p>
+<p>Now that you have all the components of the fence, you can rearrange it any way you want. You can also center the whole geometry so that the origin (the small orange dot) is roughly at the bottom center of the fence:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-09.png" src="./assets/lessons/36/step-09.png" width="1536" height="960" alt="./assets/lessons/36/step-09.png" class="is-loaded"></span></p>
+<p>Once you are happy with the result, leave the <code spellcheck="false">Edit Mode</code> by pressing <code spellcheck="false">TAB</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-10.png" src="./assets/lessons/36/step-10.png" width="1536" height="960" alt="./assets/lessons/36/step-10.png" class="is-loaded"></span></p>
+<p>You can now duplicate the fence to create 6 fences with <code spellcheck="false">SHIFT + D</code>. Make sure you are in <code spellcheck="false">Object Mode</code> and add some randomness to their position and rotation:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-11.png" src="./assets/lessons/36/step-11.png" width="1536" height="960" alt="./assets/lessons/36/step-11.png" class="is-loaded"></span></p>
+<p>As always, don't spend too much time on positioning stuff. You can always do that later once you have all the objects.</p>
+<h2>First render</h2>
+<p>Now that we have some stuff visible, we can try to do a first render. Even if the final goal is to export our scene into Three.js we want to see how it looks in Blender because the baking technique is supposed to get us the same result. It's also a good opportunity to create cool renders to share with the community or with your friends.</p>
+<h3>Camera</h3>
+<p>Create a camera with <code spellcheck="false">SHIFT + A</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-12.png" src="./assets/lessons/36/step-12.png" width="1536" height="960" alt="./assets/lessons/36/step-12.png" class="is-loaded"></span></p>
+<p>While hovering over one of the <code spellcheck="false">3D Viewport</code> areas (bottom right in our case) and having the camera selected, press <code spellcheck="false">NUMPAD 0</code>. This will position the camera so that you will see what it views in your viewport.</p>
+<p>Select the camera from another <code spellcheck="false">3D Viewport</code> area and move it with <code spellcheck="false">G</code> so that the scene fills the view:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-13.png" src="./assets/lessons/36/step-13.png" width="1536" height="960" alt="./assets/lessons/36/step-13.png" class="is-loaded"></span></p>
+<p>You can now change the camera shading to <code spellcheck="false">Rendered</code> buy pressing <code spellcheck="false">Z</code> once, in order to show the Shading wheel:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-14.png" src="./assets/lessons/36/step-14.png" width="752" height="446" alt="./assets/lessons/36/step-14.png" class="is-loaded"></span></p>
+<p>You now have a preview of the final render that is seen by the camera:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-15.png" src="./assets/lessons/36/step-15.png" width="1536" height="960" alt="./assets/lessons/36/step-15.png" class="is-loaded"></span></p>
+<p>By default, Blender is using the render engine <strong>Eevee</strong>. Eevee is a little like WebGL. It's really fast, it doesn't use Ray Tracing, but it also doesn't look as good as the other engine named <strong>Cycles</strong>.</p>
+<p>While doing basic modeling for real-time purposes, it can be useful to use Eevee. But in our case, we want the best looking result, which is why we are going to switch to Cycles.</p>
+<p>In the <code spellcheck="false">Properties</code> area, go to the <code spellcheck="false">Render Properties</code> tab and select <code spellcheck="false">Cycles</code> as the <code spellcheck="false">Render Engine</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-16.png" src="./assets/lessons/36/step-16.png" width="307" height="206" alt="./assets/lessons/36/step-16.png" class="is-loaded"></span></p>
+<p>The camera preview should display a better looking result:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-17.png" src="./assets/lessons/36/step-17.png" width="725" height="422" alt="./assets/lessons/36/step-17.png" class="is-loaded"></span></p>
+<h3>Quality</h3>
+<p>There are many parameters to control the quality but the most important one is <code spellcheck="false">Sampling</code>.</p>
+<p>Go to the same <code spellcheck="false">Render Properties</code> tab again and look at the <code spellcheck="false">Sampling</code> section:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-18.png" src="./assets/lessons/36/step-18.png" width="300" height="204" alt="./assets/lessons/36/step-18.png" class="is-loaded"></span></p>
+<p>The higher the value, the better, but also the longer it will take to do the render.</p>
+<ul>
+<li><code spellcheck="false">128</code> is a decent value, but you might see some artifacts which are like a visual noise in the render.</li>
+<li><code spellcheck="false">256</code> will look better and the noise shouldn't be too visible.</li>
+<li><code spellcheck="false">512</code> should be more than enough for a good looking result.</li>
+<li><code spellcheck="false">1024</code> to be sure of the quality, but only if your computer is performant enough. Otherwise, you may have to wait hours.</li>
+</ul>
+<p>Obviously you can use any intermediate value like <code spellcheck="false">200</code> or any other number, but I like to keep numbers that are a power of 2 (developer reflex).</p>
+<p>For now, we will keep <code spellcheck="false">128</code> for the <code spellcheck="false">Render</code> and <code spellcheck="false">32</code> for the <code spellcheck="false">Viewport</code>.</p>
+<h3>Resolution</h3>
+<p>Another parameter is the output resolution.</p>
+<p>You can access this property in the <code spellcheck="false">Output Properties</code> tab:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-19.png" src="./assets/lessons/36/step-19.png" width="298" height="124" alt="./assets/lessons/36/step-19.png" class="is-loaded"></span></p>
+<p>Here you can change the width and height of the output image but also scale it in case you want to do a smaller render without having to calculate the width and height.</p>
+<p>Let's use a classic resolution with <code spellcheck="false">1920x1080</code> and no scale (<code spellcheck="false">100%</code>).</p>
+<h3>First render</h3>
+<p>It's time to do our first render.</p>
+<p>Press <code spellcheck="false">F12</code> to start rendering in a new window. Wait a little while and you'll see the result appearing square by square:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-20.png" src="./assets/lessons/36/step-20.png" width="1536" height="960" alt="./assets/lessons/36/step-20.png" class="is-loaded"></span></p>
+<p>Once the render is done and while the render window is still open, press <code spellcheck="false">ALT + S</code> to save the image.</p>
+<p>Here you can choose the image format, where to save it, and the quality:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-21.png" src="./assets/lessons/36/step-21.png" width="989" height="610" alt="./assets/lessons/36/step-21.png" class="is-loaded"></span></p>
+<p>This part is up to you and depends on the image quality you want.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-22.png" src="./assets/lessons/36/step-22.png" width="1920" height="1080" alt="./assets/lessons/36/step-22.png" class="is-loaded"></span></p>
+<h2>Tree trunks</h2>
+<p>Let's continue our scene and create some tree trunks.</p>
+<p>Because we want to create a low poly style, we will create some cylinders with only 10 sides.</p>
+<p>Create a Cylinder with <code spellcheck="false">SHIFT + A</code> and, in the creation menu that should appear on the bottom left, choose <code spellcheck="false">10</code> vertices:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-23.png" src="./assets/lessons/36/step-23.png" width="671" height="433" alt="./assets/lessons/36/step-23.png" class="is-loaded"></span></p>
+<p>Move the trunk to the side closest to the camera with <code spellcheck="false">G</code> and resize it to match the fences' scale with <code spellcheck="false">S</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-24.png" src="./assets/lessons/36/step-24.png" width="1536" height="960" alt="./assets/lessons/36/step-24.png" class="is-loaded"></span></p>
+<p>Duplicate it with <code spellcheck="false">SHIFT + D</code> and create a bunch of other trunks with different heights.</p>
+<p>You can transform the geometry itself by moving the top face of the cylinder on the <code spellcheck="false">Z</code> axis or you can scale it.</p>
+<p>Make sure they don't float above the ground. These are not magic trunks:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-25.png" src="./assets/lessons/36/step-25.png" width="1536" height="960" alt="./assets/lessons/36/step-25.png" class="is-loaded"></span></p>
+<p>A little later, we are going to create an axe stuck in one of those trunks. We can create some split logs on the ground now to show what the axe has done.</p>
+<p>Start by creating a cylinder again, but this time, in the creation window, choose <code spellcheck="false">Triangle Fan</code> as the <code spellcheck="false">Cap Fill Type</code>.</p>
+<p>If you switch to the <code spellcheck="false">Wireframe</code> shading, you'll see that the top and bottom parts of the cylinder are now triangles:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-26.png" src="./assets/lessons/36/step-26.png" width="876" height="480" alt="./assets/lessons/36/step-26.png" class="is-loaded"></span></p>
+<p>This will enable us to remove the parts we don't need and end up with only a cut of the cylinder.</p>
+<p>Select the log, go to <code spellcheck="false">Edit Mode</code> with tab and remove the parts of the log you don't want. In our case, we can keep 2 portions of it. Press <code spellcheck="false">X</code> to remove the faces you selected.</p>
+<p>Take your time, remove part by part. Undo if you did something wrong:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-27.png" src="./assets/lessons/36/step-27.png" width="379" height="423" alt="./assets/lessons/36/step-27.png" class="is-loaded"></span></p>
+<p>It's a good start but we are missing faces.</p>
+<p>While you are in <code spellcheck="false">Edit Mode</code>, switch to <code spellcheck="false">vertex select</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-28.png" src="./assets/lessons/36/step-28.png" width="187" height="60" alt="./assets/lessons/36/step-28.png" class="is-loaded"></span></p>
+<p>Now select all the 4 vertices of the face you want to create:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-29.png" src="./assets/lessons/36/step-29.png" width="326" height="410" alt="./assets/lessons/36/step-29.png" class="is-loaded"></span></p>
+<p>And press <code spellcheck="false">F</code> to create a new face out of those 4 vertices:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-30.png" src="./assets/lessons/36/step-30.png" width="400" height="434" alt="./assets/lessons/36/step-30.png" class="is-loaded"></span></p>
+<p>Do the same for the other side. You should get a good-looking split log:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-31.png" src="./assets/lessons/36/step-31.png" width="1536" height="960" alt="./assets/lessons/36/step-31.png" class="is-loaded"></span></p>
+<p>Resize the log, leave the <code spellcheck="false">Edit Mode</code> and duplicate it a bunch of times while spreading them on the floor around the trunks:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-32.png" src="./assets/lessons/36/step-32.png" width="1536" height="960" alt="./assets/lessons/36/step-32.png" class="is-loaded"></span></p>
+<h2>Organizing</h2>
+<p>Currently, we are creating objects without taking care of how we structure our scene.</p>
+<p>As with everything, it's good to organize things a little.</p>
+<p>In Blender, we have something called <code spellcheck="false">Collections</code>. You can see that they are like folders in which you can put objects. Be aware that they don't act like Three.js groups which you can scale and all the objects inside will scale as well. It's more like an easy way to organize your objects.</p>
+<p>We could have used a more classic grouping solution by using Blender's parent system, but doing so might create a complex scene graph that might break our code in later lessons. If possible, try to keep a scene graph as flat as possible.</p>
+<p>In the <code spellcheck="false">Outliner</code> area, you can see that we have already two collections:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-33.png" src="./assets/lessons/36/step-33.png" width="277" height="472" alt="./assets/lessons/36/step-33.png" class="is-loaded"></span></p>
+<p>The <code spellcheck="false">Scene Collection</code> is the main one. You can't do much with it. </p>
+<p>The <code spellcheck="false">Collection</code>, is the default one in which all objects are added by default. You can rename it and you can also deactivate it using the checkbox on its right:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-34.png" src="./assets/lessons/36/step-34.png" width="244" height="49" alt="./assets/lessons/36/step-34.png" class="is-loaded"></span></p>
+<p>This will hide the objects both in the viewport and in the render.</p>
+<p>You can have more control over it by adding other buttons. To do that, click on the <code spellcheck="false">Filter</code> button on the top right corner of the <code spellcheck="false">Outliner</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-35.png" src="./assets/lessons/36/step-35.png" width="56" height="52" alt="./assets/lessons/36/step-35.png" class="is-loaded"></span></p>
+<p>Then activate the following buttons:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-36.png" src="./assets/lessons/36/step-36.png" width="245" height="113" alt="./assets/lessons/36/step-36.png" class="is-loaded"></span></p>
+<p>With the arrow icon, we can now make a collection unselectable but still visible.</p>
+<p>We are not going to rename the objects just now. Instead, we are going to create collections and put the objects in them.</p>
+<p>To create a new collection, you can right click on an empty part of the <code spellcheck="false">Outliner</code>, choose <code spellcheck="false">New Collection</code> and then write the name you want.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-37.png" src="./assets/lessons/36/step-37.png" width="496" height="299" alt="./assets/lessons/36/step-37.png" class="is-loaded"></span></p>
+<p>Or you can select the object you want in the scene, press <code spellcheck="false">M</code>, and choose <code spellcheck="false">New Collection</code> (or choose an existing collection):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-38.png" src="./assets/lessons/36/step-38.png" width="490" height="163" alt="./assets/lessons/36/step-38.png" class="is-loaded"></span></p>
+<p>Organize your <code spellcheck="false">Outliner</code> like below, and make the <code spellcheck="false">others</code> collection unselectable:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-39.png" src="./assets/lessons/36/step-39.png" width="283" height="482" alt="./assets/lessons/36/step-39.png" class="is-loaded"></span></p>
+<p>From now on, we will organize all objects into collections.</p>
+<p>You can also add collections inside other collections.</p>
+<p>Collections are also useful to select every object it contains. Right click on the collection and choose <code spellcheck="false">Select Objects</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-40.png" src="./assets/lessons/36/step-40.png" width="492" height="304" alt="./assets/lessons/36/step-40.png" class="is-loaded"></span></p>
+<h2>Axe</h2>
+<p>Let's create a small but more difficult part of the scene, the axe.</p>
+<p>We don't need to make it at the right scale for now. That way, we can work on much bigger shapes.</p>
+<p>We are going to start with the head of the axe.</p>
+<h3>Head</h3>
+<p>Start with a flat cube:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-41.png" src="./assets/lessons/36/step-41.png" width="1536" height="960" alt="./assets/lessons/36/step-41.png" class="is-loaded"></span></p>
+<p>Go in <code spellcheck="false">Edit Mode</code> and add some loop cuts with <code spellcheck="false">CTRL + R</code> (when loop cutting, use the <code spellcheck="false">WHEEL</code> to add more loops):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-42.png" src="./assets/lessons/36/step-42.png" width="1536" height="960" alt="./assets/lessons/36/step-42.png" class="is-loaded"></span></p>
+<p>Move the vertices to round the bottom part and shrink the top part. How you do this step is up to you and the shape you want to achieve, but try to keep a symmetrical shape. Select the vertices you want to change and play with <code spellcheck="false">G</code> to move them and <code spellcheck="false">S</code> to scale them. Don't forget that you can force an axis by pressing <code spellcheck="false">X</code>, <code spellcheck="false">Y</code> or <code spellcheck="false">Z</code> after starting a transformation:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-43.png" src="./assets/lessons/36/step-43.png" width="1536" height="960" alt="./assets/lessons/36/step-43.png" class="is-loaded"></span></p>
+<p>Add a loop cut in the slice (<code spellcheck="false">CTRL + R</code>):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-44.png" src="./assets/lessons/36/step-44.png" width="1536" height="960" alt="./assets/lessons/36/step-44.png" class="is-loaded"></span></p>
+<p>Select the following vertices:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-45.png" src="./assets/lessons/36/step-45.png" width="455" height="208" alt="./assets/lessons/36/step-45.png" class="is-loaded"></span></p>
+<p>Move them up along the edges by pressing <code spellcheck="false">G</code> twice to move them along their edges:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-46.png" src="./assets/lessons/36/step-46.png" width="1536" height="960" alt="./assets/lessons/36/step-46.png" class="is-loaded"></span></p>
+<p>We have our axe head. Don't forget to put it in a collection:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-47.png" src="./assets/lessons/36/step-47.png" width="295" height="86" alt="./assets/lessons/36/step-47.png" class="is-loaded"></span></p>
+<h3>Handle</h3>
+<p>We can now create the handle.</p>
+<p>Start with a box going through the axe head:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-48.png" src="./assets/lessons/36/step-48.png" width="1536" height="960" alt="./assets/lessons/36/step-48.png" class="is-loaded"></span></p>
+<p>Add some curve by creating loop cuts with <code spellcheck="false">CTRL + R</code> in <code spellcheck="false">Edit Mode</code> and moving the vertices. You can also extend the tip of the handle by selecting the face and pressing <code spellcheck="false">E</code> to extrude it:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-49.png" src="./assets/lessons/36/step-49.png" width="1536" height="960" alt="./assets/lessons/36/step-49.png" class="is-loaded"></span></p>
+<p>Resize and place the axe on one of the trunks and don't forget to put the handle in the <code spellcheck="false">axe</code> collection:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-50.png" src="./assets/lessons/36/step-50.png" width="1536" height="960" alt="./assets/lessons/36/step-50.png" class="is-loaded"></span></p>
+<h2>Pole lights</h2>
+<p>For the pole lights, use the same techniques as before. You should be able to handle this yourself.</p>
+<p>Don't forget to put everything in a <code spellcheck="false">poleLights</code> collection.</p>
+<p>Create the base:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-51.png" src="./assets/lessons/36/step-51.png" width="1536" height="960" alt="./assets/lessons/36/step-51.png" class="is-loaded"></span></p>
+<p>Add beams:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-52.png" src="./assets/lessons/36/step-52.png" width="1536" height="960" alt="./assets/lessons/36/step-52.png" class="is-loaded"></span></p>
+<p>Add the rope that will hold the lamp:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-53.png" src="./assets/lessons/36/step-53.png" width="1536" height="960" alt="./assets/lessons/36/step-53.png" class="is-loaded"></span></p>
+<p>Add the lamp itself:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-54.png" src="./assets/lessons/36/step-54.png" width="1536" height="960" alt="./assets/lessons/36/step-54.png" class="is-loaded"></span></p>
+<p>We want to create recesses in the sides of that lamp.</p>
+<p>In <code spellcheck="false">Edit Mode</code> select the 4 sides of the lamp as well as the one below: </p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-55.png" src="./assets/lessons/36/step-55.png" width="1536" height="960" alt="./assets/lessons/36/step-55.png" class="is-loaded"></span></p>
+<p>Press <code spellcheck="false">I</code> to create an inset and <code spellcheck="false">LEFT CLICK</code> immediately without moving your cursor:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-56.png" src="./assets/lessons/36/step-56.png" width="1264" height="482" alt="./assets/lessons/36/step-56.png" class="is-loaded"></span></p>
+<p>By doing so, we created an inset but with the wrong offset because we didn't move the mouse before clicking. But as you can see, we can still change the parameters of the inset with the menu that opened in the bottom left corner.</p>
+<p>Check <code spellcheck="false">Individual</code> and play with the <code spellcheck="false">Thickness</code> value. Make sure that the outer frame is big enough or you might have a problem later:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-57.png" src="./assets/lessons/36/step-57.png" width="748" height="476" alt="./assets/lessons/36/step-57.png" class="is-loaded"></span></p>
+<p>We now want to push those faces inside. We are going to do an extrude, but first, change the <code spellcheck="false">Transform Pivot Point</code> to <code spellcheck="false">Individual Origins</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-58.png" src="./assets/lessons/36/step-58.png" width="441" height="262" alt="./assets/lessons/36/step-58.png" class="is-loaded"></span></p>
+<p>This way, the extrude will be applied on each face independently.</p>
+<p>Press <code spellcheck="false">E</code> and, as with the inset, <code spellcheck="false">LEFT CLICK</code> immediately in order to play with the extrude parameters using the menu that should appear in the bottom left corner.</p>
+<p>Set the <code spellcheck="false">Orientation</code> to <code spellcheck="false">Normal</code> and play with the <code spellcheck="false">Z</code> value:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-59.png" src="./assets/lessons/36/step-59.png" width="776" height="470" alt="./assets/lessons/36/step-59.png" class="is-loaded"></span></p>
+<p>You can set the <code spellcheck="false">Transform Pivot Point</code> back to to <code spellcheck="false">Bounding Box Center</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-60.png" src="./assets/lessons/36/step-60.png" width="381" height="126" alt="./assets/lessons/36/step-60.png" class="is-loaded"></span></p>
+<p>That's a good-looking light, but we also need to separate those faces from the frame. This will get handy later.</p>
+<p>Make sure the inside faces are still selected while in <code spellcheck="false">Edit Mode</code> and press <code spellcheck="false">P</code> to open the separation menu. Choose <code spellcheck="false">Selection</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-61.png" src="./assets/lessons/36/step-61.png" width="660" height="440" alt="./assets/lessons/36/step-61.png" class="is-loaded"></span></p>
+<p>You should have two different objects for the light. One for the frame and one for the faces that will cast the light later.</p>
+<p>Select the entire pole light and duplicate it, but this time using the <code spellcheck="false">ALT + D</code> instead of <code spellcheck="false">SHIFT + D</code>. Place it on the other side:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-62.png" src="./assets/lessons/36/step-62.png" width="1536" height="960" alt="./assets/lessons/36/step-62.png" class="is-loaded"></span></p>
+<p>This will create a <code spellcheck="false">Linked Duplicate</code>. By doing that, editing one geometry will automatically edit all the linked geometries. This way, it's easier to keep those two pole lights identical.</p>
+<p>Now would be a good time to save and do a render (<code spellcheck="false">F12</code>).</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-63.png" src="./assets/lessons/36/step-63.png" width="1920" height="1080" alt="./assets/lessons/36/step-63.png" class="is-loaded"></span></p>
+<h2>Rocks</h2>
+<p>The rocks are a little bit tricky but fun to make. We are going to start with cubes and slice them randomly.</p>
+<p>Make a <code spellcheck="false">rocks</code> collection and create one cube inside:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-64.png" src="./assets/lessons/36/step-64.png" width="1536" height="960" alt="./assets/lessons/36/step-64.png" class="is-loaded"></span></p>
+<p>We are now going to slice that cube.</p>
+<p>Go in <code spellcheck="false">Edit Mode</code> and select all the faces (if that's not already the case).</p>
+<p>To slice the cube, we can use the <code spellcheck="false">Bisect</code> tool. Unfortunately, this tool is a little bit hard to find.</p>
+<p>You can access it using the <code spellcheck="false">Tools</code> menu on the left by holding <code spellcheck="false">LEFT CLICK</code> on the icon as shown below and choosing <code spellcheck="false">Bisect</code> (if you can't see the left menu, press <code spellcheck="false">T</code>):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-65.png" src="./assets/lessons/36/step-65.png" width="216" height="124" alt="./assets/lessons/36/step-65.png" class="is-loaded"></span></p>
+<p>You can also access it in the <code spellcheck="false">Mesh</code> menu on the top of the <code spellcheck="false">3D Viewport</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-65-2.png" src="./assets/lessons/36/step-65-2.png" width="632" height="303" alt="./assets/lessons/36/step-65-2.png" class="is-loaded"></span></p>
+<p>Or you can press <code spellcheck="false">F3</code> and search for <code spellcheck="false">Bisect</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-66.png" src="./assets/lessons/36/step-66.png" width="689" height="218" alt="./assets/lessons/36/step-66.png" class="is-loaded"></span></p>
+<p>You'll have to do this every time you want to cut your cube.</p>
+<p>Now that the <code spellcheck="false">Bisect</code> is active, click and drag through the cube to create a cut:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-67.png" src="./assets/lessons/36/step-67.png" width="1536" height="960" alt="./assets/lessons/36/step-67.png" class="is-loaded"></span></p>
+<p>With the bottom left menu, you can choose to clear one side of the cube with <code spellcheck="false">Clear Outer</code> and to fill the hole it created with <code spellcheck="false">Fill</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-68.png" src="./assets/lessons/36/step-68.png" width="1536" height="960" alt="./assets/lessons/36/step-68.png" class="is-loaded"></span></p>
+<p>There you go, you did your first clean cut.</p>
+<p>Select all the faces again with <code spellcheck="false">A</code> and repeat the process with random angles. Try to break the squareness of the initial shape and repeat the process for a bunch of other cubes.</p>
+<p>Do not try to refine the vertices. You might break the flatness of the faces.</p>
+<p>You should also try to keep the origin of the geometry on the floor. This will get handy if we want to scale them.</p>
+<p>As always, take your time and don't spend to much time on details.</p>
+<p>Do that for 3 or 4 cubes:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-69.png" src="./assets/lessons/36/step-69.png" width="1536" height="960" alt="./assets/lessons/36/step-69.png" class="is-loaded"></span></p>
+<p>Now that you have a bunch of rocks, duplicate / scale / rotate and move them all around the scene. It's time to fill the emptiness. Don't be afraid to re-use the same rocks. People won't notice it and if they do, they'll think it's funny.</p>
+<p>Add more big rocks in the back to create some height without blocking the view. Use small rocks in the front to add details:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-70.png" src="./assets/lessons/36/step-70.png" width="1536" height="960" alt="./assets/lessons/36/step-70.png" class="is-loaded"></span></p>
+<h2>Portal</h2>
+<p>It's time to add the main component of the scene, the portal.</p>
+<p>We are going to start with the bricks positioned in a circle.</p>
+<p>Create a <code spellcheck="false">portal</code> collections and add your first brick to it:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-71.png" src="./assets/lessons/36/step-71.png" width="1536" height="960" alt="./assets/lessons/36/step-71.png" class="is-loaded"></span></p>
+<p>Then, go to <code spellcheck="false">Edit Mode</code> and move the brick geometry down so that its origin is way above:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-72.png" src="./assets/lessons/36/step-72.png" width="1536" height="960" alt="./assets/lessons/36/step-72.png" class="is-loaded"></span></p>
+<p>Leave the <code spellcheck="false">Edit Mode</code> and duplicate the brick using <code spellcheck="false">ALT + D</code> to create a <code spellcheck="false">Linked Duplicate</code> (like we did for the pole light) and while still in the duplicate mode rotate it on the <code spellcheck="false">Y</code> axis.</p>
+<p>It's very important to do the rotation before validating the duplicate:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-73.png" src="./assets/lessons/36/step-73.png" width="1536" height="960" alt="./assets/lessons/36/step-73.png" class="is-loaded"></span></p>
+<p>We are going to repeat the operation. To do that, press <code spellcheck="false">F3</code> and search for <code spellcheck="false">repeat last</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-74.png" src="./assets/lessons/36/step-74.png" width="546" height="297" alt="./assets/lessons/36/step-74.png" class="is-loaded"></span></p>
+<p>This will re-do the last action (which was the duplicate) and because we also did the rotation in that duplication, the new brick will also rotate. Do that multiple times until you get an almost full circle and if the rotation goes in the wrong direction, it's okay, we can duplicate extra bricks:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-75.png" src="./assets/lessons/36/step-75.png" width="1536" height="960" alt="./assets/lessons/36/step-75.png" class="is-loaded"></span></p>
+<p>If those steps are too hard, simply duplicate the brick using <code spellcheck="false">ALT + D</code> (not <code spellcheck="false">SHIFT + D</code>) and place them manually.</p>
+<p>Rotate the whole thing so that the open part is at the bottom:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-76.png" src="./assets/lessons/36/step-76.png" width="1536" height="960" alt="./assets/lessons/36/step-76.png" class="is-loaded"></span></p>
+<p>Select one of the bricks (if possible one aligned with the scene like the one on the top) and go into <code spellcheck="false">Edit Mode</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-77.png" src="./assets/lessons/36/step-77.png" width="1536" height="960" alt="./assets/lessons/36/step-77.png" class="is-loaded"></span></p>
+<p>As you can see, all the bricks look like they are being edited. This is because they are linked duplicates and editing one will edit the others.</p>
+<p>Move the vertices so that the bricks don't overlap anymore:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-78.png" src="./assets/lessons/36/step-78.png" width="1536" height="960" alt="./assets/lessons/36/step-78.png" class="is-loaded"></span></p>
+<p>Leave the <code spellcheck="false">Edit Mode</code>, scale and move the whole portal to the back and slightly above the floor:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-79.png" src="./assets/lessons/36/step-79.png" width="1536" height="960" alt="./assets/lessons/36/step-79.png" class="is-loaded"></span></p>
+<p>Add some stairs with boxes and don't forget to put everything in a collection named <code spellcheck="false">portal</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-80.png" src="./assets/lessons/36/step-80.png" width="1536" height="960" alt="./assets/lessons/36/step-80.png" class="is-loaded"></span></p>
+<p>We need to fill that portal.</p>
+<p>Create a circle and make sure the <code spellcheck="false">Fill Type</code> is on <code spellcheck="false">Triangle Fan</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-81.png" src="./assets/lessons/36/step-81.png" width="851" height="413" alt="./assets/lessons/36/step-81.png" class="is-loaded"></span></p>
+<p>Move it to the center of the portal. It doesn't have to be perfect, as long as the disc covers the hole and it doesn't overflow.</p>
+<p>To rotate it to a perfect 90-degree angle, press <code spellcheck="false">X</code> once (or <code spellcheck="false">Y</code> depending on your scene) when doing the rotation to force the axis. You can also press <code spellcheck="false">CTRL</code> while moving the mouse to round the value:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-82.png" src="./assets/lessons/36/step-82.png" width="1536" height="960" alt="./assets/lessons/36/step-82.png" class="is-loaded"></span></p>
+<p>And that's it for the modeling part.</p>
+<p>Now that you have all the elements, you can improve the general setup, move objects, center the camera, move the light, etc.</p>
+<p>Make sure that every object is properly organized in collections and don't forget to save.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-83.png" src="./assets/lessons/36/step-83.png" width="1920" height="1080" alt="./assets/lessons/36/step-83.png" class="is-loaded"></span></p>
+<h2>Materials</h2>
+<p>It's time to add some color to the scene.</p>
+<p>First, make sure that the lights you have in the scene are white and that the intensity is strong enough. This way, you'll be able to appreciate the colors in a neutral environment. We will apply some changes to the lights later.</p>
+<p>You should also change the main <code spellcheck="false">3D Viewport</code> to <code spellcheck="false">Material Preview</code> shading (by pressing <code spellcheck="false">Z</code>) or even <code spellcheck="false">Renderer</code> shading to really see what you are doing:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-84.png" src="./assets/lessons/36/step-84.png" width="1536" height="960" alt="./assets/lessons/36/step-84.png" class="is-loaded"></span></p>
+<h3>Grass</h3>
+<p>Select the floor. In the <code spellcheck="false">Properties</code> area, go to the <code spellcheck="false">Materials Properties</code> tab and add a material with the <code spellcheck="false">new</code> button:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-85.png" src="./assets/lessons/36/step-85.png" width="907" height="345" alt="./assets/lessons/36/step-85.png" class="is-loaded"></span></p>
+<p>You can rename that material <code spellcheck="false">grass</code> at the top of the material section:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-86.png" src="./assets/lessons/36/step-86.png" width="349" height="55" alt="./assets/lessons/36/step-86.png" class="is-loaded"></span></p>
+<p>Then you can play with the different properties. For the style we want, you can simply change the <code spellcheck="false">Base Color</code> and set the <code spellcheck="false">Roughness</code> to the maximum:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-87.png" src="./assets/lessons/36/step-87.png" width="1536" height="960" alt="./assets/lessons/36/step-87.png" class="is-loaded"></span></p>
+<p>Finding the right color is up to you, but don't spend too much time on it. You need to see the overall scene with all the colors before tweaking.</p>
+<h3>Wood</h3>
+<p>Now select one of the trunks and create a new material named <code spellcheck="false">wood</code>.</p>
+<p>By the way, you might already have default materials in your scene. Usually, the default material created with the scene is named <code spellcheck="false">Material</code>. You can use that material and change its name if you don't like to have unused stuff hanging around:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-88.png" src="./assets/lessons/36/step-88.png" width="1536" height="960" alt="./assets/lessons/36/step-88.png" class="is-loaded"></span></p>
+<p>To apply this material to all other wood objects in the scene, instead of changing them one by one, you can select them by right clicking on the collection and choose <code spellcheck="false">Select objects</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-89.png" src="./assets/lessons/36/step-89.png" width="540" height="276" alt="./assets/lessons/36/step-89.png" class="is-loaded"></span></p>
+<p>This will select all the objects in the collection:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-90.png" src="./assets/lessons/36/step-90.png" width="1536" height="960" alt="./assets/lessons/36/step-90.png" class="is-loaded"></span></p>
+<p>Make sure that the one with the material is the active one (with a brighter outline). You can use <code spellcheck="false">SHIFT + LEFT CLICK</code> to change the active one:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-91.png" src="./assets/lessons/36/step-91.png" width="392" height="270" alt="./assets/lessons/36/step-91.png" class="is-loaded"></span></p>
+<p>You can now press <code spellcheck="false">CTRL + L</code> to open a menu in which you can choose what you want to apply from the active object to all the selected objects. Here, we want to apply the <code spellcheck="false">Materials</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-92.png" src="./assets/lessons/36/step-92.png" width="491" height="295" alt="./assets/lessons/36/step-92.png" class="is-loaded"></span></p>
+<p>All the selected objects should have the <code spellcheck="false">wood</code> material:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-94.png" src="./assets/lessons/36/step-94.png" width="1536" height="960" alt="./assets/lessons/36/step-94.png" class="is-loaded"></span></p>
+<p>We can do the same with the fences.</p>
+<ul>
+<li>Select all the fences.</li>
+<li>Select one of the trunks.</li>
+<li>Make sure the trunk is the active object.</li>
+<li>Press <code spellcheck="false">CTRL + L</code> and choose <code spellcheck="false">Materials</code>.</li>
+</ul>
+<p>All the fences should have the <code spellcheck="false">wood</code> material applied:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-95.png" src="./assets/lessons/36/step-95.png" width="1536" height="960" alt="./assets/lessons/36/step-95.png" class="is-loaded"></span></p>
+<p>Repeat the steps for the wood part of the pole lights and also the axe handle:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-96.png" src="./assets/lessons/36/step-96.png" width="1536" height="960" alt="./assets/lessons/36/step-96.png" class="is-loaded"></span></p>
+<h3>Rocks</h3>
+<p>Select a rock and create a <code spellcheck="false">rock</code> material:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-97.png" src="./assets/lessons/36/step-97.png" width="1536" height="960" alt="./assets/lessons/36/step-97.png" class="is-loaded"></span></p>
+<p>And then apply this <code spellcheck="false">rock</code> material to all rocky materials (the rocks, the portal bricks, the portal stairs and the pole light bases):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-98.png" src="./assets/lessons/36/step-98.png" width="1536" height="960" alt="./assets/lessons/36/step-98.png" class="is-loaded"></span></p>
+<h3>Metal</h3>
+<p>The lamp frames can be made of a darker metal.</p>
+<p>Select one of them and apply a material named <code spellcheck="false">metal</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-99.png" src="./assets/lessons/36/step-99.png" width="1536" height="960" alt="./assets/lessons/36/step-99.png" class="is-loaded"></span></p>
+<p>The other lamp frames will automatically get the same material because they are linked.</p>
+<p>Apply the same <code spellcheck="false">metal</code> material to the axe head:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-100.png" src="./assets/lessons/36/step-100.png" width="1536" height="960" alt="./assets/lessons/36/step-100.png" class="is-loaded"></span></p>
+<h2>Emissive lights</h2>
+<p>We want the portal and the lamp to emit lights. This is possible with a type of material named <code spellcheck="false">Emission</code>.</p>
+<h3>Pole lights</h3>
+<p>Select one of the lamp lights (the faces inside) and create a new material. Name it <code spellcheck="false">poleLightEmission</code> and instead of a <code spellcheck="false">Principled BSDF</code>, choose <code spellcheck="false">Emission</code> for the <code spellcheck="false">Surface</code> property:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-101.png" src="./assets/lessons/36/step-101.png" width="358" height="588" alt="./assets/lessons/36/step-101.png" class="is-loaded"></span></p>
+<p>This kind of material will emit light.</p>
+<p>Change its <code spellcheck="false">Color</code> to a warmer one and increase the <code spellcheck="false">Strength</code> to something like <code spellcheck="false">80</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-102.png" src="./assets/lessons/36/step-102.png" width="1536" height="960" alt="./assets/lessons/36/step-102.png" class="is-loaded"></span></p>
+<h3>Portal</h3>
+<p>Create another <code spellcheck="false">Emission</code> material named <code spellcheck="false">portalEmission</code>. Set the <code spellcheck="false">Strength</code> to something like <code spellcheck="false">40</code> and use the color you want (we can change those later):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-103.png" src="./assets/lessons/36/step-103.png" width="1536" height="960" alt="./assets/lessons/36/step-103.png" class="is-loaded"></span></p>
+<p>We can't see much of the light, but if you remove the all other lights you have in the scene, you'll see that it's working pretty well:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-104.png" src="./assets/lessons/36/step-104.png" width="1920" height="1080" alt="./assets/lessons/36/step-104.png" class="is-loaded"></span></p>
+<h2>Ambient lighting</h2>
+<p>One final touch we can add is an ambient lighting to control the general illumination of the scene.</p>
+<p>If you haven't done so yet, delete all the lights in the scene.</p>
+<p>Then, create an <code spellcheck="false">Area Light</code>, scale it up, move it to the left of the scene and make sure that the perpendicular stroke going out of the light is targeting the middle of the scene:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-105.png" src="./assets/lessons/36/step-105.png" width="1536" height="960" alt="./assets/lessons/36/step-105.png" class="is-loaded"></span></p>
+<p>Add it to the <code spellcheck="false">others</code> collection.</p>
+<p>An <code spellcheck="false">Area Light</code> is a rectangular plane that creates a diffuse light. The bigger the plane, the more diffuse. This will help create an ambiance but also diffuse the shadows for a smoother result.</p>
+<p>Increase the <code spellcheck="false">Power</code> of the light to something like <code spellcheck="false">240</code> and change the <code spellcheck="false">Color</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-106.png" src="./assets/lessons/36/step-106.png" width="1536" height="960" alt="./assets/lessons/36/step-106.png" class="is-loaded"></span></p>
+<h2>Final tweaks</h2>
+<p>Now is a good time to tweak the colors and lighting. Here, with the orange <code spellcheck="false">Area Light</code>, we went for a rising sun effect:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-107.png" src="./assets/lessons/36/step-107.png" width="1920" height="1080" alt="./assets/lessons/36/step-107.png" class="is-loaded"></span></p>
+<p>But if we reduce the light of the portal, change the color of the <code spellcheck="false">Area Light</code> to a blue, and tweak the colors of the objects in the scene, we can create a night effect:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-108.png" src="./assets/lessons/36/step-108.png" width="1920" height="1080" alt="./assets/lessons/36/step-108.png" class="is-loaded"></span></p>
+<p>You can also tweak the portal color:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-109.png" src="./assets/lessons/36/step-109.png" width="1920" height="1080" alt="./assets/lessons/36/step-109.png" class="is-loaded"></span></p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-110.png" src="./assets/lessons/36/step-110.png" width="1920" height="1080" alt="./assets/lessons/36/step-110.png" class="is-loaded"></span></p>
+<p>Choose the settings you like most. What we will be doing in the rest of the lessons will still work.</p>
+<h2>Final render</h2>
+<p>That's it for the creation part. In the next lesson, we will learn how to optimize, bake, and export everything.</p>
+<p>In the mean time, you can create and share your work. To improve your renders, don't forget to increase the sampling in the <code spellcheck="false">Render properties</code> tab. Somewhere between <code spellcheck="false">512</code> and <code spellcheck="false">1024</code> should be more than enough:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-111.png" src="./assets/lessons/36/step-111.png" width="342" height="146" alt="./assets/lessons/36/step-111.png" class="is-loaded"></span></p>
+<p>In the same section, you can also get rid of the visual noise by checking the <code spellcheck="false">Denoise</code> property and choosing <code spellcheck="false">NLM</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/36/step-112.png" src="./assets/lessons/36/step-112.png" width="335" height="113" alt="./assets/lessons/36/step-112.png" class="is-loaded"></span></p>
+</section>
+</body>
+
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<section class="text js-text">
+    <h2>Introduction</h2>
+<p>Three.js lets you create many primitive geometries, but when it comes to more complex shapes, we better use a dedicated 3D software.</p>
+<p>In this lesson, we will use already made models, but we will learn how to create a model entirely within a 3D software in a future lesson.</p>
+<h2>Formats</h2>
+<p>Through times, many 3D model formats have been used. Each one responded to a problem, such as what data is embedded in the model, the weight, its compression, compatibility, copyrights, etc.</p>
+<p>That is why, today, we have access to hundreds of model formats: <a target="_blank" href="https://en.wikipedia.org/wiki/List_of_file_formats#3D_graphics">https://en.wikipedia.org/wiki/List_of_file_formats#3D_graphics</a>.</p>
+<p>Some formats are dedicated to one software. Some are known to be very light but sometimes lack specific data. Some are known to have almost all data you could need in them but are heavy. Some formats are open source, some formats are not, some are binary, some are ASCII, and it goes on and on.</p>
+<p>If you need precise data and can't find the adequate format supported by your software, you can even create your own quite easily.</p>
+<p>Here's a list of popular formats you might come across:</p>
+<ul>
+<li>OBJ</li>
+<li>FBX</li>
+<li>STL</li>
+<li>PLY</li>
+<li>COLLADA</li>
+<li>3DS</li>
+<li>GLTF</li>
+</ul>
+<p>We won't cover all of these formats. It would be boring, and we don't need to because one format is becoming a standard and should cover most of your needs.</p>
+<h2>GLTF</h2>
+<p>GLTF stands for GL Transmission Format. It's made by the Khronos Group (the guys behind OpenGL, WebGL, Vulkan, Collada and with many members like AMD / ATI, Nvidia, Apple, id Software, Google, Nintendo, etc.)</p>
+<p>GLTF has become very popular these past few years.</p>
+<p>It supports very different sets of data. You can obviously have data like the geometries and the materials but you can also have data like cameras, lights, scene graph, animations, skeletons, morphing and even multiple scene.</p>
+<p>It also supports various file formats like json, binary, embed textures.</p>
+<p>GLTF has become the standard when it comes to real-time. And because it's becoming a standard, most 3D softwares, game engines, and libraries support it. That means that you can easily have a similar result in different environments.</p>
+<p>That doesn't mean that you have to use GLTF in all cases. If you merely need a geometry, you better use another format like OBJ, FBX, STL, or PLY. You should test different formats on every project to see if you have all the data you need, if the file isn't too heavy, how long it takes to uncompress the information if it's compressed, etc.</p>
+<h2>Find a model</h2>
+<p>First, we need a model. As we said earlier, we will learn how to create our own model in a 3D software later, but for now, let's use a pre-made one.</p>
+<p>The GLTF team also provides various models from a simple triangle to realistic models and things like animations, morphings, clearcoat materials, etc.</p>
+<p>You can find them in this repository: <a target="_blank" href="https://github.com/KhronosGroup/glTF-Sample-Models">https://github.com/KhronosGroup/glTF-Sample-Models</a></p>
+<p>If you want to test those models, you'll have to download or clone the whole repository and take the files you need. But we will start with a simple <a target="_blank" href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/Duck">duck</a> that you can already find in the <code spellcheck="false">/static/models/</code> folder in the starter.</p>
+<h2>GLTF formats</h2>
+<p>While GLTF is a format itself, it can have different file formats too. It's a little complex but for good reasons.</p>
+<p>If you open the <code spellcheck="false">/static/models/Duck/</code> folder, you'll see 4 different folders. Each one contains the duck but in different GLTF formats:</p>
+<ul>
+<li>glTF</li>
+<li>glTF-Binary</li>
+<li>glTF-Draco</li>
+<li>glTF-Embedded</li>
+</ul>
+<p>You can even find other formats, but those 4 are the most important and cover what we need to learn.</p>
+<p>Be careful; your OS might hide the extension of some of these files. Refer to the file names from your code editor that should show the extension.</p>
+<h3>glTF</h3>
+<p>This format is kind of the default format. The <code spellcheck="false">Duck.gltf</code> file is a JSON that you can open in your editor. It contains various information like cameras, lights, scenes, materials, objects transformations, but neither the geometries nor the textures. The <code spellcheck="false">Duck0.bin</code> file is a binary that you can't read like this. It usually contains data like the geometries and all information associated with the vertices like UV coordinates, normals, vertex colors, etc. The <code spellcheck="false">DuckCM.png</code> is simply the texture of the duck.</p>
+<p>When we load this format, we only load the <code spellcheck="false">Duck.gltf</code> that contains references to the other files that will then be loaded automatically.</p>
+<h3>glTF-Binary</h3>
+<p>This format is composed of only one file. It contains all the data we talked about in the glTF default format. That is a binary file, and you can't just open it in your code editor to see what's inside.</p>
+<p>This format can be a little lighter and more comfortable to load because there is only one file, but you won't be able to easily alter its data. For example, if you want to resize or compress the textures, you just can't because it's inside that binary file, merge with the rest.</p>
+<h3>glTF-Draco</h3>
+<p>This format is like the <strong>glTF default</strong> format, but the buffer data (typically the geometry) is compressed using the <a target="_blank" href="https://github.com/google/draco">Draco algorithm</a>. If you compare the <code spellcheck="false">.bin</code> file size, you'll see that it's much lighter.</p>
+<p>While there is a separate folder for this format, you can apply the Draco compression to the other formats.</p>
+<p>Let's put this one on the side, and we will talk more about it later.</p>
+<h3>glTF-Embedded</h3>
+<p>This format is like the <strong>glTF-Binary</strong> format because it's only one file, but this file is actually a JSON that you can open in your editor.</p>
+<p>The only benefit of this format is to have only one easily editable file.</p>
+<h3>Choosing</h3>
+<p>Choosing the right format is a matter of how you want to handle the assets.</p>
+<p>If you want to be able to alter the textures or the coordinates of the lights after exporting, you better go for the <strong>glTF-default</strong>. It also presents the advantage of loading the different files separately, resulting in a load speed improvement.</p>
+<p>If you want only one file per model and don't care about modifying the assets, you better go for <strong>glTF-Binary</strong>.</p>
+<p>In both cases, you must decide if you want to use the <strong>Draco</strong> compression or not, but we will cover this part later.</p>
+<h2>Setup</h2>
+<p>The starter is composed of one empty plane.</p>
+<p>Because GLTF is a standard, it clearly supports lights. Usually, when you import a GLTF into your Three.js project, you'll end up with <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Meshes</a> that have <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshStandardMaterial">MeshStandardMaterial</a> and, as you probably remember, if you don't have lights in your scene, you won't see much of those materials.</p>
+<p>There is already an <a target="_blank" href="https://threejs.org/docs/#api/en/lights/AmbientLight">AmbientLight</a> and a <a target="_blank" href="https://threejs.org/docs/#api/en/lights/DirectionalLight">DirectionalLight</a> in the starter.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/23/step-01.png" src="./assets/lessons/23/step-01.png" width="1792" height="1120" alt="./assets/lessons/23/step-01.png" class="is-loaded"></span></p>
+<h2>Load the model in Three.js</h2>
+<p>To load GLTF files in Three.js, we must use the <a target="_blank" href="https://threejs.org/docs/#examples/en/loaders/GLTFLoader">GLTFLoader</a>. This class isn't available by default in the <code spellcheck="false">THREE</code> variable. We need to import it from the <code spellcheck="false">examples/</code> folder located in the <code spellcheck="false">three</code> dependency:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token punctuation">{</span> GLTFLoader <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'three/examples/jsm/loaders/GLTFLoader.js'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>then we can instantiate it like we did for the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/loaders/TextureLoader">TextureLoader</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Models
+*/</span>
+<span class="token keyword">const</span> gltfLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">GLTFLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>And if we need it, we can also use a <a target="_blank" href="https://threejs.org/docs/#api/en/loaders/managers/LoadingManager">LoadingManager</a> as we did in the <strong>Textures</strong> lesson.</p>
+<p>To load models, great news, it's almost as easy as loading a texture. We call the <code spellcheck="false">load(...)</code> method and use the right parameters:</p>
+<ul>
+<li>The path to the file</li>
+<li>The success callback function</li>
+<li>The progress callback function</li>
+<li>The error callback function</li>
+</ul>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/Duck/glTF/Duck.gltf'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'success'</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>gltf<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">progress</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'progress'</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>progress<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">error</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'error'</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You should see the progress and the success function being called. If the file couldn't be loaded, the error functions might be called. Check the path, and don't forget that we must not add the <code spellcheck="false">/static</code> part.</p>
+<p>Let's pretend we know what we are doing and remove the progress and error callback:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/Duck/glTF/Duck.gltf'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>gltf<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h2>Add the loaded model to our scene</h2>
+<p>If you look at the object logged in the console, you'll find a lot of elements. The most important part is the <code spellcheck="false">scene</code> property because we have only one scene in the exported model.</p>
+<p>This <code spellcheck="false">scene</code> contains everything we need. But it also includes more. Always start by studying what is available in it and watch the <code spellcheck="false">scale</code> property of the different <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Group">Groups</a>, <a target="_blank" href="https://threejs.org/docs/#api/en/core/Object3D">Object3D</a>, and <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a>.</p>
+<p>We get something like this:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token constant">THREE</span><span class="token punctuation">.</span>Group<span class="token operator">:</span> scene
+└───Array<span class="token operator">:</span> children
+└───<span class="token constant">THREE</span><span class="token punctuation">.</span>Object3D
+└───Array<span class="token operator">:</span> children
+├───<span class="token constant">THREE</span><span class="token punctuation">.</span>PerspectiveCamera
+└───<span class="token constant">THREE</span><span class="token punctuation">.</span>Mesh</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The Mesh should be our duck. We don't really care about the <a target="_blank" href="https://threejs.org/docs/#api/en/cameras/PerspectiveCamera">PerspectiveCamera</a>. Both the camera and the duck seem to be in the first and only <a target="_blank" href="https://threejs.org/docs/#api/en/core/Object3D">Object3D</a> in the scene's children array. Even worst, that <a target="_blank" href="https://threejs.org/docs/#api/en/core/Object3D">Object3D</a> has a <code spellcheck="false">scale</code> set to a minimal value.</p>
+<p>As you can see, it's a little complex even to get our duck, and it's where most beginners get lost.</p>
+<p>All we want is to get our duck in the scene. We have multiples ways of doing it:</p>
+<ul>
+<li>Add the whole <code spellcheck="false">scene</code> in our scene. We can do that because even if its name is <code spellcheck="false">scene</code>, it's in fact a <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Group">Group</a>.</li>
+<li>Add the children of the <code spellcheck="false">scene</code> to our scene and ignore the unused <a target="_blank" href="https://threejs.org/docs/#api/en/cameras/PerspectiveCamera">PerspectiveCamera</a>.</li>
+<li>Filter the children before adding to the scene to remove the unwanted objects like the <a target="_blank" href="https://threejs.org/docs/#api/en/cameras/PerspectiveCamera">PerspectiveCamera</a>.</li>
+<li>Add only the <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a> but end up with a duck that could be wrongly scaled, positioned or rotated.</li>
+<li>Open the file in a 3D software and remove the <a target="_blank" href="https://threejs.org/docs/#api/en/cameras/PerspectiveCamera">PerspectiveCamera</a> then export it again.</li>
+</ul>
+<p>Because our model structure is simple, we will add the <a target="_blank" href="https://threejs.org/docs/#api/en/core/Object3D">Object3D</a> to our scene, and ignore the unused <a target="_blank" href="https://threejs.org/docs/#api/en/cameras/PerspectiveCamera">PerspectiveCamera</a> inside. In future lessons, we will add the whole scene as one object:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/Duck/glTF/Duck.gltf'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/23/step-02.png" src="./assets/lessons/23/step-02.png" width="1792" height="1120" alt="./assets/lessons/23/step-02.png" class="is-loaded"></span></p>
+<p>You should see the duck.</p>
+<p>You can try with other formats, but not the Draco that won't work yet:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/Duck/glTF/Duck.gltf'</span><span class="token punctuation">,</span> <span class="token comment">// Default glTF</span>
+
+<span class="token comment">// Or</span>
+gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/Duck/glTF-Binary/Duck.glb'</span><span class="token punctuation">,</span> <span class="token comment">// glTF-Binary</span>
+
+<span class="token comment">// Or</span>
+gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/Duck/glTF-Embedded/Duck.gltf'</span><span class="token punctuation">,</span> <span class="token comment">// glTF-Embedded</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Another model named <code spellcheck="false">FlightHelmet</code> (also taken from the <a target="_blank" href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0">glTF model samples</a>) is available in the <code spellcheck="false">/static/models/</code> folder. This model comes in only one format, which is the default glTF.</p>
+<p>Try to load this model:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/FlightHelmet/glTF/FlightHelmet.gltf'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/23/step-03.png" src="./assets/lessons/23/step-03.png" width="1792" height="1120" alt="./assets/lessons/23/step-03.png" class="is-loaded"></span></p>
+<p>Instead of a beautiful helmet, we only get a few parts.</p>
+<p>The problem is that we added only the first child of the loaded <code spellcheck="false">scene</code> to our scene.</p>
+<p>What we can try is to loop on the children and add them to the scene:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">const</span> child <span class="token keyword">of</span> gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>child<span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/23/step-04.png" src="./assets/lessons/23/step-04.png" width="1792" height="1120" alt="./assets/lessons/23/step-04.png" class="is-loaded"></span></p>
+<p>That will result in more elements, but not all of them. Even worst, when refreshing, you may get different parts.</p>
+<p>The problem is that when we add a child from one scene to the other, it gets automatically removed from the first scene. That means that the first scene now has fewer children in it.</p>
+<p>When we add the first object, it gets removed from the first scene, and the second element just moved to the first place. But your loop now takes the second element of the array. You'll always have elements left in the <code spellcheck="false">children</code> array.</p>
+<p>There are multiple solutions to this problem. The first solution is to take the first children of the loaded scene and add it to our scene until there is none left:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">        <span class="token keyword">while</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">.</span>length<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/23/step-05.png" src="./assets/lessons/23/step-05.png" width="1792" height="1120" alt="./assets/lessons/23/step-05.png" class="is-loaded"></span></p>
+<p>We now get the whole helmet.</p>
+<p>Another solution would be to duplicate the <code spellcheck="false">children</code> array in order to have an unaltered independent array. To do that, we can use the spread operator <code spellcheck="false">...</code> and put the result in a brand new array <code spellcheck="false">[]</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">        <span class="token keyword">const</span> children <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">...</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>children<span class="token punctuation">]</span>
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">const</span> child <span class="token keyword">of</span> children<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>child<span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>This is a native JavaScript technique to duplicate an array without touching the original one.</p>
+<p>Finally, one good and simple solution we mentioned earlier is to add the <code spellcheck="false">scene</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">        scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Our helmet is too small, and we could just increase the scale, but instead, we'll get back to our Duck and try the Draco compressed version.</p>
+<h2>Draco compression</h2>
+<p>Let's get back to our duck but this time, we are going to use the Draco version:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/Duck/glTF-Draco/Duck.gltf'</span><span class="token punctuation">,</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/23/step-06.png" src="./assets/lessons/23/step-06.png" width="1792" height="1120" alt="./assets/lessons/23/step-06.png" class="is-loaded"></span></p>
+<p>Sadly, we don't get any duck. If you look at the logs, you should see a warning looking like this <code spellcheck="false">No DRACOLoader instance provided</code>. We need to provide a <a target="_blank" href="https://threejs.org/docs/#examples/en/loaders/DRACOLoader">DRACOLoader</a> instance to our <a target="_blank" href="https://threejs.org/docs/#examples/en/loaders/GLTFLoader">GLTFLoader</a> so it can load compressed files.</p>
+<p>As we saw when browsing the files, the Draco version can be much lighter than the default version. Compression is applied to the buffer data (typically the geometry). It doesn't matter if you are using the <strong>default glTF</strong>, the <strong>binary glTF</strong> or the <strong>embedded glTF</strong>.</p>
+<p>It's not even exclusive to glTF, and you can use it with other formats. But both glTF and Draco got popular simultaneously, so the implementation went faster with glTF exporters.</p>
+<p>Google develops the algorithm under the open-source Apache License:</p>
+<ul>
+<li>Website: <a target="_blank" href="https://google.github.io/draco/">https://google.github.io/draco/</a></li>
+<li>Git repository: <a target="_blank" href="https://github.com/google/draco">https://github.com/google/draco</a></li>
+</ul>
+<h3>Add the DRACOLoader</h3>
+<p>Three.js already supports Draco. We must start by importing the <a target="_blank" href="https://threejs.org/docs/#examples/en/loaders/DRACOLoader">DRACOLoader</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token punctuation">{</span> DRACOLoader <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'three/examples/jsm/loaders/DRACOLoader.js'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then we can instantiate the loader (before the <code spellcheck="false">gltfLoader</code>):</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> dracoLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DRACOLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The decoder is available in native JavaScript but also Web Assembly (wasm), and it can run in a worker (another thread as we saw at the end of the Physics lesson). Those two features significantly improve performances, but they imply having a wholly separated code.</p>
+<p>Three.js already provided this seperated code. To find it, we must browse into the Three.js dependency and copy the Draco decoder folder into our <code spellcheck="false">/static/</code> folder.</p>
+<p>This Draco folder is located in <code spellcheck="false">/node_modules/three/examples/js/libs/</code>. Take the whole <code spellcheck="false">/draco/</code> folder and copy it into your <code spellcheck="false">/static/</code> folder. We can now provide the path to this folder to our <code spellcheck="false">dracoLoader</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">dracoLoader<span class="token punctuation">.</span><span class="token function">setDecoderPath</span><span class="token punctuation">(</span><span class="token string">'/draco/'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Finally, we can provide the <a target="_blank" href="https://threejs.org/docs/#examples/en/loaders/DRACOLoader">DRACOLoader</a> instance to the <a target="_blank" href="https://threejs.org/docs/#examples/en/loaders/GLTFLoader">GLTFLoader</a> instance with the <code spellcheck="false">setDRACOLoader(...)</code> method:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">setDRACOLoader</span><span class="token punctuation">(</span>dracoLoader<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/23/step-07.png" src="./assets/lessons/23/step-07.png" width="1792" height="1120" alt="./assets/lessons/23/step-07.png" class="is-loaded"></span></p>
+<p>Your duck should be back but this time it's a Draco compressed version.</p>
+<p>You can still load not compressed glTF file with the <a target="_blank" href="https://threejs.org/docs/#examples/en/loaders/GLTFLoader">GLTFLoader</a> and the Draco decoder is only loaded when needed.</p>
+<h3>When to use the Draco compression</h3>
+<p>While you might think that the Draco compression is a win-win situation, it is not. Yes, the geometries are lighter, but first, you have to load the <a target="_blank" href="https://threejs.org/docs/#examples/en/loaders/DRACOLoader">DRACOLoader</a> class and the decoder. Secondly, it takes time and resources for your computer to decode a compressed file that can result in a short freeze at the start of the experience, even if we are using a worker and Web Assembly code.</p>
+<p>You'll have to adapt and decide what the best solution is. If you only have one model with a 100kB geometry, you probably don't need Draco. But if you have many MB of models to load and don't care about some freezes at the start of the experience, you might need the Draco compression.</p>
+<h2>Animations</h2>
+<p>As we said earlier, glTF also supports animations. And Three.js can handle those animations.</p>
+<h3>Load an animated model</h3>
+<p>First, we need an animated model. We can use the fox located in <code spellcheck="false">/static/models/Fox/</code> folder (also taken from the <a target="_blank" href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/Fox">glTF model samples</a>).</p>
+<p>Change the path to load that fox:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/Fox/glTF/Fox.gltf'</span><span class="token punctuation">,</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/23/step-08.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>We have a problem; the fox is way too big. If you can't see it, look above or zoom out.</p>
+<p>Before handling the animation, let's fix the scale. If you look at the composition of the imported scene, the fox is composed of one <a target="_blank" href="https://threejs.org/docs/#api/en/core/Object3D">Object3D</a>, itself made of a <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Bone">Bone</a> and a <a target="_blank" href="https://threejs.org/docs/#api/en/objects/SkinnedMesh">SkinnedMesh</a>. We won't explain what those are, but the idea is that we shouldn't simply scale the <a target="_blank" href="https://threejs.org/docs/#api/en/core/Object3D">Object3D</a>. Even if it would work in this case, it would probably not work with more complex models.</p>
+<p>What we can do here, is scale the loaded scene and add it directly to our scene:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/Fox/glTF/Fox.gltf'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>scale<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">0.025</span><span class="token punctuation">,</span> <span class="token number">0.025</span><span class="token punctuation">,</span> <span class="token number">0.025</span><span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/23/step-09.png" src="./assets/lessons/23/step-09.png" width="1792" height="1120" alt="./assets/lessons/23/step-09.png" class="is-loaded"></span></p>
+<h3>Handle the animation</h3>
+<p>If you look at the loaded <code spellcheck="false">gltf</code> object, you can see a property named <code spellcheck="false">animations</code> containing multiple <a target="_blank" href="https://threejs.org/docs/#api/en/animation/AnimationClip">AnimationClip</a>.</p>
+<p>These <a target="_blank" href="https://threejs.org/docs/#api/en/animation/AnimationClip">AnimationClip</a> cannot be used easily. We first need to create an <a target="_blank" href="https://threejs.org/docs/#api/en/animation/AnimationMixer">AnimationMixer</a>. An <a target="_blank" href="https://threejs.org/docs/#api/en/animation/AnimationMixer">AnimationMixer</a> is like a player associated with an object that can contain one or many <a target="_blank" href="https://threejs.org/docs/#api/en/animation/AnimationClip">AnimationClips</a>. The idea is to create one for each object that needs to be animated.</p>
+<p>Inside the success function, create a mixer and send the <code spellcheck="false">gltf.scene</code> as parameter:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> mixer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>AnimationMixer</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can now add the <a target="_blank" href="https://threejs.org/docs/#api/en/animation/AnimationClip">AnimationClips</a> to the mixer with the <code spellcheck="false">clipAction(...)</code> method. Let's start with the first animation:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> action <span class="token operator">=</span> mixer<span class="token punctuation">.</span><span class="token function">clipAction</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>animations<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>This method returns a <a target="_blank" href="https://threejs.org/docs/#api/en/animation/AnimationAction">AnimationAction</a>, and we can finally call the <code spellcheck="false">play()</code> method on it:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">action<span class="token punctuation">.</span><span class="token function">play</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Regrettably, still no animation.</p>
+<p>To play the animation, we must tell the mixer to update itself at each frame. The problem is that our <code spellcheck="false">mixer</code> variable has been declared in the load callback function, and we don't have access to it in the <code spellcheck="false">tick</code> function. To fix that, we can declare the <code spellcheck="false">mixer</code> variable with a <code spellcheck="false">null</code> value outside of the load callback function and update it when the model is loaded:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">let</span> mixer <span class="token operator">=</span> <span class="token keyword">null</span>
+
+gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/Fox/glTF/Fox.gltf'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>scale<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">0.03</span><span class="token punctuation">,</span> <span class="token number">0.03</span><span class="token punctuation">,</span> <span class="token number">0.03</span><span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">)</span>
+
+mixer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>AnimationMixer</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">)</span>
+<span class="token keyword">const</span> action <span class="token operator">=</span> mixer<span class="token punctuation">.</span><span class="token function">clipAction</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>animations<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+action<span class="token punctuation">.</span><span class="token function">play</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>And finally, we can update the mixer in the <code spellcheck="false">tick</code> function with the already calculated <code spellcheck="false">deltaTime</code>.</p>
+<p>But before updating it, we must test if the <code spellcheck="false">mixer</code> variable is different from <code spellcheck="false">null</code>. This way, we update the mixer if the model is loaded, meaning that the animation is not ready:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token keyword">if</span><span class="token punctuation">(</span>mixer<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+mixer<span class="token punctuation">.</span><span class="token function">update</span><span class="token punctuation">(</span>deltaTime<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/23/step-10.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The animation should be running. You can test the other animations by changing the value in the <code spellcheck="false">clipAction(...)</code> method.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">        <span class="token keyword">const</span> action <span class="token operator">=</span> mixer<span class="token punctuation">.</span><span class="token function">clipAction</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>animations<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/23/step-11.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<h2>Three.js editor</h2>
+<p>Three.js posses its own online editor. You can find it here: <a target="_blank" href="https://threejs.org/editor/">https://threejs.org/editor/</a></p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/23/step-12.png" src="./assets/lessons/23/step-12.png" width="1792" height="1120" alt="./assets/lessons/23/step-12.png" class="is-loaded"></span></p>
+<p>It's like a 3D software but online and with fewer features. You can create primitives, lights, materials, etc.</p>
+<p>And because you can import models, it's a good way to test if your model is working fine. Though be careful; you can only test models composed of one file. You can try with the glTF-Binary or the glTF-Embedded duck.</p>
+<p>Drag and drop the model into the editor.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/23/step-13.png" src="./assets/lessons/23/step-13.png" width="1792" height="1120" alt="./assets/lessons/23/step-13.png" class="is-loaded"></span></p>
+<p>You should see a black duck because there is no light. Add an <code spellcheck="false">AmbientLight</code> and a <code spellcheck="false">DirectionalLight</code> from the <code spellcheck="false">Add</code> menu to see it more clearly.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/23/step-14.png" src="./assets/lessons/23/step-14.png" width="1792" height="1120" alt="./assets/lessons/23/step-14.png" class="is-loaded"></span></p>
+<p>Finally, you can export your scene in various formats that you can re-use in your code but we are getting out of the scope.</p>
+<p>That's it for the moment but we're going to use loaded models multiple time in the following lessons.</p>
+</section>
+</body>
+
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<section class="text js-text">
+    <h2>Introduction</h2>
+<p>Now that we know how to import a model into our scene; let's learn how to create our own model using a 3D software.</p>
+<h2>Choosing a software</h2>
+<p>There are many software like Cinema 4D, Maya, 3DS Max, Blender, ZBrush, Marmoset Toolbag, Substance Painter, etc. These are great, and they differ on divers criteria like the UX, the performance, the features, the compatibility, the price, etc.</p>
+<p>In this lesson, we are going to use Blender because it's free, the performances are remarkable, it works with all primary OS, it has many features, it has a vast community, and it became a lot easier since the 2.8 version.</p>
+<p>Be aware that you won't be a Blender expert at the end of the lesson. It would take a full course to learn all its aspects, and they are already many great resources to learn. The idea is to understand the basics and de-mystify the software to have sufficient baggage to create simple models.</p>
+<p>At the start, we will discover all the basics. That will be a lot to take in but don't worry; we will repeat most of the shortcuts, the mechanics, and the features multiple times.</p>
+<p>If you pressed a wrong shortcut at some point, you lost your scene, or the interface is completely messed up, just close and re-open Blender.</p>
+<h2>Downloading Blender</h2>
+<p>Go to the blender website download page and download the latest version: <a target="_blank" href="https://www.blender.org/download/">https://www.blender.org/download/</a></p>
+<p>The software is pretty light, and it shouldn't take more than a few minutes.</p>
+<p>Once downloaded, simply install it.</p>
+<p>The lesson has been written and recorded with Blender <code spellcheck="false">2.83.5</code>. While there shouldn't be major differences, keep an eye on potential changes.</p>
+<h2>Interface</h2>
+<h3>Splash screen</h3>
+<p>The splash screen gives you access to some useful links, templates, and recently opened files.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/01.png" src="./assets/lessons/24/01.png" width="3072" height="1920" alt="./assets/lessons/24/01.png" class="is-loaded"></span></p>
+<p>The image changes with the Blender version, so don't be surprised if you have a different one.</p>
+<p>You can also see the exact version on the top right of it.</p>
+<p>Click anywhere out of the splash screen to close it.</p>
+<h3>Areas</h3>
+<p>The different parts of the interface are called areas. Areas are very flexible, and you can create the layout that you want.</p>
+<h4>Default areas</h4>
+<p>By default, you have the main area called the <code spellcheck="false">3D Viewport</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/02.png" src="./assets/lessons/24/02.png" width="1269" height="700" alt="./assets/lessons/24/02.png" class="is-loaded"></span></p>
+<p>The <code spellcheck="false">Timeline</code> to create animations:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/03.png" src="./assets/lessons/24/03.png" width="1270" height="190" alt="./assets/lessons/24/03.png" class="is-loaded"></span></p>
+<p>The <code spellcheck="false">Outliner</code> to see and manage the scene graph (or scene tree):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/04.png" src="./assets/lessons/24/04.png" width="267" height="282" alt="./assets/lessons/24/04.png" class="is-loaded"></span></p>
+<p>The <code spellcheck="false">Properties</code> to manage the properties of the active object (selection) and the environment:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/05.png" src="./assets/lessons/24/05.png" width="267" height="591" alt="./assets/lessons/24/05.png" class="is-loaded"></span></p>
+<h4>Change an area</h4>
+<p>To change what an area is displaying, click on the top-left button of that area. Here, we are going to change the <strong>Timeline</strong> area.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/06.png" src="./assets/lessons/24/06.png" width="61" height="39" alt="./assets/lessons/24/06.png" class="is-loaded"></span></p>
+<p>We are going to change the <code spellcheck="false">Timeline</code> area for another <code spellcheck="false">3D Viewport</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-07.png" src="./assets/lessons/24/screenshot-07.png" width="212" height="284" alt="./assets/lessons/24/screenshot-07.png" class="is-loaded"></span></p>
+<h4>Resize an area</h4>
+<p>To resize an area, position your cursor between two areas and drag &amp; drop:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/08.png" src="./assets/lessons/24/08.png" width="422" height="123" alt="./assets/lessons/24/08.png" class="is-loaded"></span></p>
+<h4>Create new areas</h4>
+<p>To create a new area, first, we must decide what area we want to split. Then, we must position our cursor in one of the four corners of our area (a few pixels inside the area):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/09.png" src="./assets/lessons/24/09.png" width="69" height="108" alt="./assets/lessons/24/09.png" class="is-loaded"></span></p>
+<p>Finally, we drag and drop in the area we want to split:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/10.png" src="./assets/lessons/24/10.png" width="1290" height="318" alt="./assets/lessons/24/10.png" class="is-loaded"></span></p>
+<h4>Remove an area</h4>
+<p>Removing an area is a little tricky, and you might end up with dozens of unwanted areas. Don't worry, once you get the idea, it will be fine.</p>
+<p>In a way, we don't remove an area; we un-split two areas. First, you must decide which one of the two areas is going to take over the other. If you want to remove the right area, start from the left area. Then place your cursor in one of the two corners adjacent to the area we want to remove (few pixels inside the area that is supposed to take over the other):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/11.png" src="./assets/lessons/24/11.png" width="102" height="206" alt="./assets/lessons/24/11.png" class="is-loaded"></span></p>
+<p>And then drag &amp; drop (just like we did to create an area) but this time in the opposite direction (toward the area we want to remove):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/12.png" src="./assets/lessons/24/12.png" width="756" height="317" alt="./assets/lessons/24/12.png" class="is-loaded"></span></p>
+<p>It can take a few tries but you'll get it.</p>
+<h2>Shortcuts</h2>
+<p>One of the strengths of Blender is its shortcuts. There are tons of them, and once you master the basics, you can be very efficient. Don't worry; you can use all the shortcut actions through the interface or with the search panel that we will see later. Throughout this lesson, we will discover some of the more critical shortcuts.</p>
+<p>Here's a non-exhaustive list of shortcuts: <a target="_blank" href="https://docs.google.com/document/d/1wZzJrEgNye2ZQqwe8oBh54AXwF5cYIe56EGFe2bb0QU/edit?usp=sharing">https://docs.google.com/document/d/1wZzJrEgNye2ZQqwe8oBh54AXwF5cYIe56EGFe2bb0QU/edit?usp=sharing</a></p>
+<p>One important thing to understand is that shortcuts are hovered area sensitive. That means that the same shortcut can have different actions depending on what's behind our cursor. Most of the shortcuts we will see in this lesson concern the <code spellcheck="false">3D Viewport</code>. You should always make sure to keep your cursor above one of these areas when pressing the shortcut keys.</p>
+<p>The shortcuts are also mode sensitive, but we will talk about modes later.</p>
+<p>Only one or two shortcuts that we will see are different between Mac and Windows. If there is a difference, both versions will be cited. If the shortcut includes the <code spellcheck="false">CTRL</code> key and you are using a Mac, do not assume it's <code spellcheck="false">CMD</code>. Use the <code spellcheck="false">CTRL</code> key instead.</p>
+<h2>View</h2>
+<p>As you can see, you can move the view in every possible direction. While you can use a trackpad, I recommend using a mouse with a wheel that you can press (or a third button) for productive reasons. From now, we will refer to the wheel button (the one that we can press) as <code spellcheck="false">MIDDLE MOUSE</code>.</p>
+<p>If you are using a trackpad, you can use two fingers.</p>
+<p>If you are using a Magic Mouse, you can replicate the <code spellcheck="false">MIDDLE MOUSE</code>. Go to the preferences through <code spellcheck="false">Edit &gt; Preferences</code>. Using the navigation menu on left, choose the <code spellcheck="false">Input</code> section. Check the <code spellcheck="false">Emulate 3 Button Mouse</code> checkbox.</p>
+<p>It's also better to have a numeric pad.</p>
+<h3>Orbit rotate</h3>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/cameraOrbit.png" src="./assets/lessons/24/cameraOrbit.png" width="1920" height="1080" alt="./assets/lessons/24/cameraOrbit.png" class="is-loaded"></span></p>
+<p>We can rotate the view by pressing the <code spellcheck="false">MIDDLE MOUSE</code> and drag &amp; drop in the <code spellcheck="false">3D Viewport</code>.</p>
+<p>Or we can use the gizmo on the top-right part of each <code spellcheck="false">3D Viewport</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/13.png" src="./assets/lessons/24/13.png" width="105" height="90" alt="./assets/lessons/24/13.png" class="is-loaded"></span></p>
+<p>We call this rotation orbit (like the Three.js <a target="_blank" href="https://threejs.org/docs/#examples/en/controls/OrbitControls">OrbitControl</a>) because the view rotates around an invisible center called view-point. We will talk about that point later.</p>
+<h3>Truck and pedestal</h3>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/cameraTruck.png" src="./assets/lessons/24/cameraTruck.png" width="1920" height="1080" alt="./assets/lessons/24/cameraTruck.png" class="is-loaded"></span></p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/cameraPedestal.png" src="./assets/lessons/24/cameraPedestal.png" width="1920" height="1080" alt="./assets/lessons/24/cameraPedestal.png" class="is-loaded"></span></p>
+<p>Truck is when the view moves on the left and right, while pedestal is when the view moves up and down. We can do both simultaneously by pressing the <code spellcheck="false">MIDDLE MOUSE</code> again, but this time with the <code spellcheck="false">SHIFT</code> key pressed.</p>
+<p>Or we can use the hand icon on the top right:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/14.png" src="./assets/lessons/24/14.png" width="46" height="35" alt="./assets/lessons/24/14.png" class="is-loaded"></span></p>
+<p>Truck is also called track.</p>
+<p>Some might also wrongly call those movements "pan".</p>
+<h3>Dolly</h3>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/cameraDolly.png" src="./assets/lessons/24/cameraDolly.png" width="1920" height="1080" alt="./assets/lessons/24/cameraDolly.png" class="is-loaded"></span></p>
+<p>Dolly is when the view moves forward and backward. We can use the <code spellcheck="false">WHEEL</code> to achieve that.</p>
+<p>Or we can use the magnifier icon on the top right:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/15.png" src="./assets/lessons/24/15.png" width="47" height="31" alt="./assets/lessons/24/15.png" class="is-loaded"></span></p>
+<p>Be careful though; zooming isn't exactly like going forward and backward. We are getting closer or further from the view-point we talked about in the <strong>Orbit</strong> section, but we cannot zoom beyond that point, and zooming too much will result in a stuck view.</p>
+<p>To resolve this zoom limit issue, we can move forward and backward by pressing <code spellcheck="false">SHIFT + CTRL + MIDDLE MOUSE</code> and drag &amp; drop in the <code spellcheck="false">3D Viewport</code> (won't work with the two fingers technique with a trackpad). This way, we won't get stuck at the view-point.</p>
+<p>There is no icon in the interface to do that.</p>
+<h3>Tilt and pan</h3>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/cameraTilt.png" src="./assets/lessons/24/cameraTilt.png" width="1920" height="1080" alt="./assets/lessons/24/cameraTilt.png" class="is-loaded"></span></p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/cameraPan.png" src="./assets/lessons/24/cameraPan.png" width="1920" height="1080" alt="./assets/lessons/24/cameraPan.png" class="is-loaded"></span></p>
+<p>Tilt and pan are simple rotation on the camera point.</p>
+<p>We have to go to the <strong>Walk mode</strong> —also called Fly mode— to use those moves.</p>
+<p>To do that, if you are using a <strong>QWERTY</strong> keyboard, press <code spellcheck="false">SHIFT + BACK QUOTE</code>. The back quote —also called backtick, acute or left quote— is an inclined simple quote that can be used to add a grave accent. </p>
+<p>Finding that character might be a little hard because its position changes a lot depending on your keyboard. You can find it on the top right corner, on the bottom left corner or very close to the <code spellcheck="false">ENTER</code> key.</p>
+<p>If you are using an <strong>AZERTY</strong> keyboard, the shortcut won't work. We need to change the keymap. Go to the preferences through <code spellcheck="false">Edit &gt; Preferences</code>. Using the navigation menu on left, choose the <code spellcheck="false">Keymap</code> section. In the search input, write <code spellcheck="false">view navigation</code> and change the shortcut for <code spellcheck="false">View Navigation (Walk/Fly)</code> to <code spellcheck="false">SHIFT + F</code>.</p>
+<p>That's it, you can use the walk mode with <code spellcheck="false">SHIFT + F</code>. </p>
+<p>You can also go forward, backward, and on the sides, in the walk mode with the <code spellcheck="false">ARROWS</code> or <code spellcheck="false">WASD</code> if using a <code spellcheck="false">QWERTY</code>.</p>
+<h3>Perspective / Orthographic</h3>
+<p>The default view uses perspective. We can toggle with the orthographic version with <code spellcheck="false">NUMPAD 5</code> or the grid icon on the top right:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/16.png" src="./assets/lessons/24/16.png" width="43" height="32" alt="./assets/lessons/24/16.png" class="is-loaded"></span></p>
+<h3>Axes</h3>
+<p>We can align the camera on the <code spellcheck="false">X</code>, <code spellcheck="false">Y</code> and <code spellcheck="false">Z</code> axes by pressing the <code spellcheck="false">NUMPAD 1</code>, <code spellcheck="false">NUMPAD 3</code>, and <code spellcheck="false">NUMPAD 7</code>. We are talking about the numeric pad numbers, not the numbers at the top of the keyboard.</p>
+<p>To position the camera at the opposite, press the same keys but with <code spellcheck="false">CTRL</code>.</p>
+<p>Or we can use the gizmo and click on the axes:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/13%201.png" src="./assets/lessons/24/13%201.png" width="105" height="90" alt="./assets/lessons/24/13%201.png" class="is-loaded"></span></p>
+<p>In Blender, we consider the top axes as the <code spellcheck="false">Z</code>, unlike in Three.js, where it's <code spellcheck="false">Y</code>.</p>
+<h3>Camera</h3>
+<p>You might have seen the camera in the <code spellcheck="false">3D Viewport</code>. To get the camera viewpoint, press <code spellcheck="false">NUMPAD 0</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/17.png" src="./assets/lessons/24/17.png" width="50" height="33" alt="./assets/lessons/24/17.png" class="is-loaded"></span></p>
+<p>The camera will be used when doing renders. You can't render the scene without a camera.</p>
+<h3>Reset</h3>
+<p>Sometimes, we get lost, and we don't even know where our scene is. We can focus back on our scene by pressing <code spellcheck="false">SHIFT + C</code>.</p>
+<h3>Focus</h3>
+<p>To focus the camera on an object, select the object with <code spellcheck="false">LEFT MOUSE</code>, then press <code spellcheck="false">NUMPAD ,</code> (we are talking about the comma on the numeric pad and it might be a dot depending on the keyboard you are using).</p>
+<p>We can also focus on an object and hide everything else with <code spellcheck="false">NUMPAD /</code>. Use the same shortcut to leave the focus mode.</p>
+<h2>Selecting</h2>
+<p>As we just saw, we can select objects with the <code spellcheck="false">LEFT MOUSE</code>. We can also select multiple objects with <code spellcheck="false">SHIFT + LEFT MOUSE</code>.</p>
+<p>You might have noticed that one of the objects always has a brighter outline. This object isn't just selected; it's also the <strong>active</strong> one. We will see more about that later.</p>
+<p>To undo a selection, press <code spellcheck="false">CMD + Z</code> (<code spellcheck="false">CTRL + Z</code> on Windows). Yes, selecting objects is considered as an action we can undo. While this might seem strange, it's really helpful when you miss-click.</p>
+<p>To unselect an object, use <code spellcheck="false">SHIFT + LEFT MOUSE</code> again. If it's not the active one, it'll become active, and if it's active, it'll be unselected.</p>
+<p>To select everything, press <code spellcheck="false">A</code>.</p>
+<p>To unselect everything, double press <code spellcheck="false">A</code>.</p>
+<p>To select a rectangle area, press <code spellcheck="false">B</code>.</p>
+<p>To select like if you were painting, press <code spellcheck="false">C</code>. While in this mode, use <code spellcheck="false">WHEEL</code> to change the radius.</p>
+<h2>Creating objects</h2>
+<p>To create objects, with the cursor above a <code spellcheck="false">3D Viewport</code>, press <code spellcheck="false">SHIFT + A</code>. A menu should open behind your cursor. Navigate through this menu to create various objects. Most of what we will see in the lessons are in the <code spellcheck="false">Mesh</code> sub-menu:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-18.png" src="./assets/lessons/24/screenshot-18.png" width="432" height="485" alt="./assets/lessons/24/screenshot-18.png" class="is-loaded"></span></p>
+<p>When you create an object, a small button should appear in the bottom left corner:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-19.png" src="./assets/lessons/24/screenshot-19.png" width="195" height="62" alt="./assets/lessons/24/screenshot-19.png" class="is-loaded"></span></p>
+<p>Click on it to change various properties like the size, the subdivision, and many other properties related to the object you're trying to make:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/20.png" src="./assets/lessons/24/20.png" width="303" height="334" alt="./assets/lessons/24/20.png" class="is-loaded"></span></p>
+<p>If you click anywhere else, you'll lose that menu. You can re-open it with <code spellcheck="false">F9</code> but if you start doing modifications on the geometry, you won't be able to re-open this menu.</p>
+<h2>Deleting objects</h2>
+<p>To delete an object, select it and, with the cursor above a <code spellcheck="false">3D Viewport</code>, press <code spellcheck="false">X</code>. A confirmation menu should open behind the cursor. Click on it to delete the object:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-21.png" src="./assets/lessons/24/screenshot-21.png" width="249" height="118" alt="./assets/lessons/24/screenshot-21.png" class="is-loaded"></span></p>
+<h2>Hiding objects</h2>
+<p>To hide selected objects, press <code spellcheck="false">H</code>.</p>
+<p>To show hidden objects, press <code spellcheck="false">ALT + H</code>.</p>
+<p>To hide non-selected objects, press <code spellcheck="false">SHIFT + H</code>.</p>
+<p>You can also manage this in the <code spellcheck="false">Outliner</code> with the eye icon.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-21_a.png" src="./assets/lessons/24/screenshot-21_a.png" width="46" height="140" alt="./assets/lessons/24/screenshot-21_a.png" class="is-loaded"></span></p>
+<h2>Transforming objects</h2>
+<p>There are 3 types of transformations —as in Three.js. We can change the position, the rotation, and the scale.</p>
+<p>We can use the menu on the left to activate each separately or activate them even all together with the fourth button:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-22.png" src="./assets/lessons/24/screenshot-22.png" width="54" height="154" alt="./assets/lessons/24/screenshot-22.png" class="is-loaded"></span></p>
+<p>Or we can use shortcuts:</p>
+<ul>
+<li><code spellcheck="false">G</code> for the position</li>
+<li><code spellcheck="false">R</code> for the rotation</li>
+<li><code spellcheck="false">S</code> for the scale</li>
+</ul>
+<p>After activating one of these shortcuts, you can force the transformation to operate in a specific axis by pressing the corresponding key (<code spellcheck="false">X</code>, <code spellcheck="false">Y</code>, and <code spellcheck="false">Z</code>).</p>
+<h2>Modes</h2>
+<p>We are currently in <code spellcheck="false">Object Mode</code>, where we can create, delete, and transform objects. There are many other modes.</p>
+<h3>Change mode</h3>
+<p>We can change the mode with the menu on the top-left select button of any <code spellcheck="false">3D Viewport</code> area:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-23.png" src="./assets/lessons/24/screenshot-23.png" width="141" height="54" alt="./assets/lessons/24/screenshot-23.png" class="is-loaded"></span></p>
+<p>Or we can press <code spellcheck="false">CTRL + TAB</code> to open a wheel menu (aka, the coolest kind of menu):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/24.png" src="./assets/lessons/24/24.png" width="552" height="352" alt="./assets/lessons/24/24.png" class="is-loaded"></span></p>
+<p>We won't cover all the modes, but we are going to use the <code spellcheck="false">Edit Mode</code>. Select a mesh (or create one) and switch to the <code spellcheck="false">Edit Mode</code>.</p>
+<h3>Edit Mode</h3>
+<p>There is actually a shortcut to toggle the <code spellcheck="false">Edit Mode</code>. Simply press <code spellcheck="false">TAB</code>.</p>
+<p>The <code spellcheck="false">Edit Mode</code> is very similar to the <code spellcheck="false">Object Mode</code> but we can edit the vertices, the edges and the faces. By default, we can change the vertex. Try to select vertices, transform them with the usual shortcuts —<code spellcheck="false">G</code> for position, <code spellcheck="false">R</code> for rotation, <code spellcheck="false">S</code> for scale.</p>
+<p>To switch to edges and faces, we can use the buttons on the top-right part of the <code spellcheck="false">3D Viewport</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-25.png" src="./assets/lessons/24/screenshot-25.png" width="111" height="48" alt="./assets/lessons/24/screenshot-25.png" class="is-loaded"></span></p>
+<p>Or we can press the first three numbers on top of the keyboard <code spellcheck="false">1</code>, <code spellcheck="false">2</code>, and <code spellcheck="false">3</code>.</p>
+<p>Once you finish editing the object, leave the <code spellcheck="false">Edit Mode</code> with <code spellcheck="false">TAB</code>.</p>
+<h2>Shading</h2>
+<p>Shading is how you see objects in the <code spellcheck="false">3D Viewport</code>.</p>
+<p>We are currently in <code spellcheck="false">Solid</code> shading. This shading lets you see the objects with a default material and no light support. It's performant and convenient.</p>
+<p>We can change the shading with the buttons on the top-right corner of the <code spellcheck="false">3D Viewport</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-26.png" src="./assets/lessons/24/screenshot-26.png" width="157" height="59" alt="./assets/lessons/24/screenshot-26.png" class="is-loaded"></span></p>
+<p>Or we can press <code spellcheck="false">Z</code> to open a wheel menu:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-27.png" src="./assets/lessons/24/screenshot-27.png" width="527" height="343" alt="./assets/lessons/24/screenshot-27.png" class="is-loaded"></span></p>
+<ul>
+<li><code spellcheck="false">Solid</code>: The default with the same material for every objects.</li>
+<li><code spellcheck="false">Material</code>: Like the <code spellcheck="false">Solid</code> shading, but with a preview of the materials and their textures.</li>
+<li><code spellcheck="false">Wireframe</code>: All the geometries are in wireframe.</li>
+<li><code spellcheck="false">Renderer</code>: Low quality render —it's the most realistic but the least performant.</li>
+</ul>
+<p>If you can't see much in the <code spellcheck="false">Render</code>, it might be because you don't have enough lights in your scene. Just add one or two by pressing <code spellcheck="false">SHIFT + A</code> to open the <code spellcheck="false">Add</code> menu.</p>
+<h2>Properties</h2>
+<p>Unless you changed the layout, the bottom right area, named <code spellcheck="false">Properties</code>, lets you play with render properties, environment properties and the active object's properties. Remember that the active object is the one with the brightest outline.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/28.png" src="./assets/lessons/24/28.png" width="313" height="592" alt="./assets/lessons/24/28.png" class="is-loaded"></span></p>
+<p>We won't cover all these tabs but the top ones deal with the renders and the environment:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/29.png" src="./assets/lessons/24/29.png" width="49" height="187" alt="./assets/lessons/24/29.png" class="is-loaded"></span></p>
+<p>The ones below relate to the active object, and they can differ depending on the type of active object because we don't have the same properties for a cube as for a light:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/30.png" src="./assets/lessons/24/30.png" width="56" height="249" alt="./assets/lessons/24/30.png" class="is-loaded"></span></p>
+<h3>Object Properties</h3>
+<p>The <code spellcheck="false">Object Properties</code> let you change with accuracy properties such as transformations:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/31.png" src="./assets/lessons/24/31.png" width="54" height="36" alt="./assets/lessons/24/31.png" class="is-loaded"></span></p>
+<h3>Modifier Properties</h3>
+<p>The <code spellcheck="false">Modifiers Properties</code> let you add what we call modifiers. These are non-destructive modifications. You can subdivide, bend, grow, shrink, etc. and turn them off as you please:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/32.png" src="./assets/lessons/24/32.png" width="49" height="32" alt="./assets/lessons/24/32.png" class="is-loaded"></span></p>
+<h3>Material Properties</h3>
+<p>The <code spellcheck="false">Material Properties</code> let you play with materials:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/33.png" src="./assets/lessons/24/33.png" width="48" height="36" alt="./assets/lessons/24/33.png" class="is-loaded"></span></p>
+<p>By default, you have access to one material named <code spellcheck="false">Material</code>, and it should be applied to the default cube if you didn't delete it:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-34.png" src="./assets/lessons/24/screenshot-34.png" width="247" height="153" alt="./assets/lessons/24/screenshot-34.png" class="is-loaded"></span></p>
+<p>You can remove the material with the <code spellcheck="false">-</code> button and combine them with the <code spellcheck="false">+</code> button, but we usually use only one material per mesh:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-35.png" src="./assets/lessons/24/screenshot-35.png" width="50" height="70" alt="./assets/lessons/24/screenshot-35.png" class="is-loaded"></span></p>
+<p>If there is no material on the mesh, we can choose an existing one, or we can create a new one with the <code spellcheck="false">New</code> button:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-36.png" src="./assets/lessons/24/screenshot-36.png" width="485" height="113" alt="./assets/lessons/24/screenshot-36.png" class="is-loaded"></span></p>
+<p>We can have different types of surfaces for one material. The default one is called <code spellcheck="false">Principled BSDF</code> and this type of surface uses the PBR principles as the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshStandardMaterial">MeshStandardMaterial</a> does in Three.js. This means that we should get a very similar result if we export this kind of material to a Three.js scene.</p>
+<p>We won't see other types of materials in this lesson.</p>
+<h2>Render engines</h2>
+<p>Go to the <code spellcheck="false">Render Properties</code> tab:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/37.png" src="./assets/lessons/24/37.png" width="52" height="33" alt="./assets/lessons/24/37.png" class="is-loaded"></span></p>
+<p>In this panel, we can change the <code spellcheck="false">Render Engine</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-38.png" src="./assets/lessons/24/screenshot-38.png" width="248" height="59" alt="./assets/lessons/24/screenshot-38.png" class="is-loaded"></span></p>
+<p>There are 3 types of render engine:</p>
+<ul>
+<li><code spellcheck="false">Eevee</code>: A real-time render engine. It uses the GPU just like Three.js, it's very performant, but it has limitations like realism, light bounce, reflection, and refraction.</li>
+<li><code spellcheck="false">Workbench</code>: A legacy render engine that we don't use a lot anymore. Its performance is pretty good, but the result isn't very realistic.</li>
+<li><code spellcheck="false">Cycles</code>: A raytracing engine. It's very realistic. It handles light bounce, deep reflection, deep refraction, and many other features, but it's very sluggish, and you might end up waiting hours or even days to render your scene.</li>
+</ul>
+<p>You can change this property and see if anything changes in the scene. Make sure to use the <code spellcheck="false">Renderer</code> shading —press <code spellcheck="false">Z</code> to change the shading. Blender developers did an excellent job of keeping a very similar result between render engines.</p>
+<p>The default one is <code spellcheck="false">Eevee</code> and it's perfect in our case because it's real-time rendering, and Three.js is also real-time rendering.</p>
+<p>If you want to render the scene, press <code spellcheck="false">F12</code>. The render will be seen from the camera —make sure to have a camera well oriented in your scene.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/39.png" src="./assets/lessons/24/39.png" width="1059" height="688" alt="./assets/lessons/24/39.png" class="is-loaded"></span></p>
+<h2>Search</h2>
+<p>There are so many possible actions that we cannot remember how to trigger them all. The right solution when we can't figure out where the button is, or the shortcut is to use the <code spellcheck="false">Search</code> panel.</p>
+<p>To open the <code spellcheck="false">Search</code> panel, press <code spellcheck="false">F3</code> (you might need to add the <code spellcheck="false">fn</code> key depending on your keyboard and OS) and write the action name:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-40.png" src="./assets/lessons/24/screenshot-40.png" width="569" height="302" alt="./assets/lessons/24/screenshot-40.png" class="is-loaded"></span></p>
+<h2>Save our setup</h2>
+<p>Create a solid setup. It's up to you, but because we are using Blender to export for Three.js, we don't need a camera. We can also create two side views below the main <code spellcheck="false">3D Viewport</code> on the <code spellcheck="false">Z</code> and <code spellcheck="false">Y</code> axis with <code spellcheck="false">Wireframe</code> shading:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/41.png" src="./assets/lessons/24/41.png" width="3072" height="1920" alt="./assets/lessons/24/41.png" class="is-loaded"></span></p>
+<p>Once you're happy with your setup, go to <code spellcheck="false">File &gt; Defaults &gt; Save Startup File</code>. That will set your current setup as the default one when opening Blender:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-42.png" src="./assets/lessons/24/screenshot-42.png" width="398" height="447" alt="./assets/lessons/24/screenshot-42.png" class="is-loaded"></span></p>
+<p>Be careful when clicking on <code spellcheck="false">Save Startup File</code>; a confirmation menu should open and if you move the mouse out of it, you'll lose it. Click again to confirm:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-43.png" src="./assets/lessons/24/screenshot-43.png" width="214" height="92" alt="./assets/lessons/24/screenshot-43.png" class="is-loaded"></span></p>
+<h2>Hamburger time</h2>
+<p>It's time to create our own model. In this lesson, we are going to make a hamburger and import it into Three.js.</p>
+<p>Like in Three.js, a good practice is to decide on a unit scale. If you look at the grid, one square truly represents one unit, and by default, Blender considers that one unit means one meter:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/44.png" src="./assets/lessons/24/44.png" width="187" height="86" alt="./assets/lessons/24/44.png" class="is-loaded"></span></p>
+<p>We could create a giant hamburger, but sorry, we better start with a regular-sized sandwich. We could just think of <code spellcheck="false">1m</code> as <code spellcheck="false">1cm</code> but if you don't like seeing this <code spellcheck="false">m</code> you can remove it in the <code spellcheck="false">Scene Properties</code> tab of the <code spellcheck="false">Properties</code> area by choosing <code spellcheck="false">None</code> as our <code spellcheck="false">Unit System</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-45.png" src="./assets/lessons/24/screenshot-45.png" width="265" height="136" alt="./assets/lessons/24/screenshot-45.png" class="is-loaded"></span></p>
+<p>We can now consider <code spellcheck="false">1</code> as <code spellcheck="false">1cm</code>.</p>
+<h3>Bottom bun</h3>
+<p>For our bottom bun, as strange as it may sound, we will start with a 10cm cube:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-46.png" src="./assets/lessons/24/screenshot-46.png" width="317" height="134" alt="./assets/lessons/24/screenshot-46.png" class="is-loaded"></span></p>
+<p>Then, after making sure that our cube is active, go to the <code spellcheck="false">Modifier Properties</code> tab and add the <code spellcheck="false">Subdivision Surface</code> modifier:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-47.png" src="./assets/lessons/24/screenshot-47.png" width="315" height="108" alt="./assets/lessons/24/screenshot-47.png" class="is-loaded"></span></p>
+<p>The cube now somewhat resembles a sphere.</p>
+<p>The <code spellcheck="false">Subdivision Surface</code> is one of the most famous modifiers. It subdivides the geometry but smoothes the angles at the same time.</p>
+<p>Add more subdivision in the <code spellcheck="false">Subdivisions &gt; viewport</code> field:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-48.png" src="./assets/lessons/24/screenshot-48.png" width="146" height="98" alt="./assets/lessons/24/screenshot-48.png" class="is-loaded"></span></p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/49.png" src="./assets/lessons/24/49.png" width="629" height="528" alt="./assets/lessons/24/49.png" class="is-loaded"></span></p>
+<p>The faces are flat but we want a smooth surface. To achieve this, right-click on the sphere and choose <code spellcheck="false">Shade Smooth</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-50.png" src="./assets/lessons/24/screenshot-50.png" width="315" height="132" alt="./assets/lessons/24/screenshot-50.png" class="is-loaded"></span></p>
+<p>The good thing with modifiers is that you preserve the original geometry. Go to the <code spellcheck="false">Edit Mode</code> by pressing <code spellcheck="false">TAB</code> and move the vertices until you get a pebble right above the ground:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/51.png" src="./assets/lessons/24/51.png" width="751" height="449" alt="./assets/lessons/24/51.png" class="is-loaded"></span></p>
+<p>So it's still not a bun. To get the right shape, we must add more vertices at the edge of the bun. What we need is a loop cut. Press <code spellcheck="false">CTRL + R</code> while in <code spellcheck="false">Edit Mode</code> and move the mouse on one of the four vertical edges:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/52.png" src="./assets/lessons/24/52.png" width="743" height="361" alt="./assets/lessons/24/52.png" class="is-loaded"></span></p>
+<p>Click once to create the cut but do not click again. At this point, you can move the loop cut up and down. Put the loop cut closer to the top edge:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/53.png" src="./assets/lessons/24/53.png" width="674" height="328" alt="./assets/lessons/24/53.png" class="is-loaded"></span></p>
+<p>Repeat the process for the down part of the bun. We want our bun to be flat at the bottom, but not too flat:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/54.png" src="./assets/lessons/24/54.png" width="826" height="353" alt="./assets/lessons/24/54.png" class="is-loaded"></span></p>
+<p>Improve your bun until you are satisfied but don't spend too much time on it. Don't worry, we'll come back to it once we have the whole scene.</p>
+<h3>Save</h3>
+<p>It's time to save. Press <code spellcheck="false">CMD + S</code> (<code spellcheck="false">CTRL + S</code> on Windows) or go to <code spellcheck="false">Files &gt; Save</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-55.png" src="./assets/lessons/24/screenshot-55.png" width="217" height="184" alt="./assets/lessons/24/screenshot-55.png" class="is-loaded"></span></p>
+<p>Save anywhere you want.</p>
+<p>If you make some changes and you save again, you'll see a <code spellcheck="false">.blend1</code> file in the same folder as your original <code spellcheck="false">.blend</code> file. That is a backup of the latest save automatically generated by Blender. There was a time where Blender wasn't as stable as it is today. Saving your file could result in corrupting it. That is why they created those automatic backups. Today, Blender is very stable, but they keep the backup just in case or because the user can make a mistake like deleting an object, saving, and closing Blender. Fortunately, you only need to rename the <code spellcheck="false">.blend1</code> file <code spellcheck="false">.blend</code> to access your previous save.</p>
+<h3>Meat</h3>
+<p>Repeat the same process for the meat. You can also duplicate the bottom bun with <code spellcheck="false">SHIFT + D</code> in <code spellcheck="false">Object Mode</code> (the default one)</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/56.png" src="./assets/lessons/24/56.png" width="717" height="338" alt="./assets/lessons/24/56.png" class="is-loaded"></span></p>
+<p>Don't forget to save.</p>
+<h3>Cheese</h3>
+<p>For the cheese, start with a plane right above the meat:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/57.png" src="./assets/lessons/24/57.png" width="515" height="326" alt="./assets/lessons/24/57.png" class="is-loaded"></span></p>
+<p>Go to <code spellcheck="false">Edit Mode</code> (where you can edit the vertices, edges and faces) and subdivide the geometry. Select the only face, right click on it and select <code spellcheck="false">Subdivide</code>. Set the <code spellcheck="false">Number of Cuts</code> to <code spellcheck="false">10</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/58.png" src="./assets/lessons/24/58.png" width="696" height="392" alt="./assets/lessons/24/58.png" class="is-loaded"></span></p>
+<p>We are going to melt the cheese corners.</p>
+<p>While we're still in <code spellcheck="false">Edit Mode</code>, select one of the cheese corners. If we were to move one vertex at a time, it would take too long, and the result would probably look disappointing. What we can do is use the <code spellcheck="false">Proportional Editing</code>. Press <code spellcheck="false">O</code> —the letter— or click on the icon at the <code spellcheck="false">3D Viewport</code> top center:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-59.png" src="./assets/lessons/24/screenshot-59.png" width="337" height="157" alt="./assets/lessons/24/screenshot-59.png" class="is-loaded"></span></p>
+<p>Now that the <code spellcheck="false">Proportional Editing</code> is active, transforming one vertex will also transform the neighbor vertices. Increase the area of effect by using the <code spellcheck="false">WHEEL</code> after pressing a transformation key —like <code spellcheck="false">G</code> to move:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-60.png" src="./assets/lessons/24/screenshot-60.png" width="561" height="377" alt="./assets/lessons/24/screenshot-60.png" class="is-loaded"></span></p>
+<p>The way the neighbor vertices move isn't correct. To change that click on the <code spellcheck="false">Proportional Editing Falloff</code> icon and choose <code spellcheck="false">Sharp</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-61.png" src="./assets/lessons/24/screenshot-61.png" width="275" height="237" alt="./assets/lessons/24/screenshot-61.png" class="is-loaded"></span></p>
+<p>Now play with the vertices and the <code spellcheck="false">Proportional Editing</code> size until you get a nice cheesy shape:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/62.png" src="./assets/lessons/24/62.png" width="614" height="348" alt="./assets/lessons/24/62.png" class="is-loaded"></span></p>
+<p>In <code spellcheck="false">Object Mode</code>, right click and choose <code spellcheck="false">Shade Smooth</code> for a smooth surface:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-63.png" src="./assets/lessons/24/screenshot-63.png" width="646" height="354" alt="./assets/lessons/24/screenshot-63.png" class="is-loaded"></span></p>
+<p>Our cheese doesn't look thick enough. To solve this, go to the <code spellcheck="false">Modifier Properties</code> and add the <code spellcheck="false">Solidify</code> modifier:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-64.png" src="./assets/lessons/24/screenshot-64.png" width="318" height="120" alt="./assets/lessons/24/screenshot-64.png" class="is-loaded"></span></p>
+<p>Then increase the thickness to <code spellcheck="false">0.08</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-65.png" src="./assets/lessons/24/screenshot-65.png" width="147" height="95" alt="./assets/lessons/24/screenshot-65.png" class="is-loaded"></span></p>
+<p>Change the shading to wireframe if you want to appreciate the result even more —press <code spellcheck="false">Z</code> to open the shading wheel menu:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/66.png" src="./assets/lessons/24/66.png" width="849" height="465" alt="./assets/lessons/24/66.png" class="is-loaded"></span></p>
+<p>Not to sound too picky but, the <code spellcheck="false">Shade Smooth</code> on the edges looks kind of strange:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/67.png" src="./assets/lessons/24/67.png" width="624" height="290" alt="./assets/lessons/24/67.png" class="is-loaded"></span></p>
+<p>To fix that, go to the <code spellcheck="false">Object Data Properties</code> panel, then the <code spellcheck="false">Normals</code> section, and check <code spellcheck="false">Auto Smooth</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-68.png" src="./assets/lessons/24/screenshot-68.png" width="282" height="110" alt="./assets/lessons/24/screenshot-68.png" class="is-loaded"></span></p>
+<p>This feature will smooth the surface only if its edge's angle is inferior to 30°. At that point, you should get a realistic and appetizing melted cheese:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/69.png" src="./assets/lessons/24/69.png" width="579" height="325" alt="./assets/lessons/24/69.png" class="is-loaded"></span></p>
+<h3>Top bun</h3>
+<p>Add the top bun just like we did for the bottom one but make it rounder:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/70.png" src="./assets/lessons/24/70.png" width="716" height="392" alt="./assets/lessons/24/70.png" class="is-loaded"></span></p>
+<h3>Final tweaks</h3>
+<p>Now that we have all the ingredients, we can fix the proportions, go back to the previous ingredients, and improve the general shape.</p>
+<p>Don't forget to save.</p>
+<h3>Materials</h3>
+<p>It's time to add some colors and surface properties to our hamburger. For simplicity reasons, we won't apply textures or use painting.</p>
+<p>We need 3 materials —one for the buns, one for the meat and one for the cheese.</p>
+<p>Select the bottom bun and go to the <code spellcheck="false">Material Properties</code> panel:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/71.png" src="./assets/lessons/24/71.png" width="73" height="33" alt="./assets/lessons/24/71.png" class="is-loaded"></span></p>
+<p>You should have no material associated with the bun. If you have one, click on it and press the <code spellcheck="false">-</code> button.</p>
+<p>To create a new material, click on the <code spellcheck="false">New</code> button:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-72.png" src="./assets/lessons/24/screenshot-72.png" width="268" height="159" alt="./assets/lessons/24/screenshot-72.png" class="is-loaded"></span></p>
+<p>It's good practice to rename materials. Double click on its name and call it <code spellcheck="false">BunMaterial</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/73.png" src="./assets/lessons/24/73.png" width="181" height="45" alt="./assets/lessons/24/73.png" class="is-loaded"></span></p>
+<p>Now, tweak the properties to get a tasty color. We only need to change the <code spellcheck="false">Base Color</code> and the <code spellcheck="false">Roughness</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-74.png" src="./assets/lessons/24/screenshot-74.png" width="255" height="558" alt="./assets/lessons/24/screenshot-74.png" class="is-loaded"></span></p>
+<p>If you can't see the color on the <code spellcheck="false">3D Viewport</code>, it might be because you are not using proper shading. To change the shading, press <code spellcheck="false">Z</code> and choose <code spellcheck="false">Renderer</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-75.png" src="./assets/lessons/24/screenshot-75.png" width="753" height="381" alt="./assets/lessons/24/screenshot-75.png" class="is-loaded"></span></p>
+<p>If the hamburger looks really dark, it's probably because of the light. Select the light, position it a little further away from the hamburger, go to the <code spellcheck="false">Object Data Properties</code> panel, and increase its power to <code spellcheck="false">5000</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-76.png" src="./assets/lessons/24/screenshot-76.png" width="267" height="186" alt="./assets/lessons/24/screenshot-76.png" class="is-loaded"></span></p>
+<p>Repeat the material process for the meat and the cheese:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/77.png" src="./assets/lessons/24/77.png" width="618" height="347" alt="./assets/lessons/24/77.png" class="is-loaded"></span></p>
+<p>For the top bun, you only need to select the <code spellcheck="false">BunMaterial</code> you already worked on:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/78.png" src="./assets/lessons/24/78.png" width="642" height="373" alt="./assets/lessons/24/78.png" class="is-loaded"></span></p>
+<p>Take your time, delete and try again, until you get a delicious looking hamburger.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-79.png" src="./assets/lessons/24/screenshot-79.png" width="308" height="96" alt="./assets/lessons/24/screenshot-79.png" class="is-loaded"></span></p>
+<p>You can even add other ingredients like salad, tomatoes, maybe a pickle slice if you're one of these people— but does anybody even likes pickles?</p>
+<p>Don't forget to save.</p>
+<h2>Export</h2>
+<p>It's finally time to export our hamburger. Download and run the starter. The Three.js scene is ready, and the only thing left is to provide the model.</p>
+<p>Select all the ingredients of the hamburger. If you select other elements like lights or cameras, you might export them as well. That can be useful but not in our case.</p>
+<p>Go to <code spellcheck="false">File &gt; Export &gt; glTF 2.0 (.glb/.gltf)</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-80.png" src="./assets/lessons/24/screenshot-80.png" width="534" height="519" alt="./assets/lessons/24/screenshot-80.png" class="is-loaded"></span></p>
+<p>A panel should open in the middle of the screen. Use it to navigate to the <code spellcheck="false">/static/models/</code> folder of the project (ignore the <code spellcheck="false">.gitkeep</code> file if you see it).</p>
+<p>In the bottom part of the panel, choose a name for your file. We will go for <code spellcheck="false">hamburger</code>. Do not add the extension:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/81.png" src="./assets/lessons/24/81.png" width="171" height="63" alt="./assets/lessons/24/81.png" class="is-loaded"></span></p>
+<p>In the right section, we can choose the <code spellcheck="false">Format</code>. The choices correspond to the GLTF formats we talked about in the previous lesson. We will go for <code spellcheck="false">glTF Binary</code> because we don't have any texture, and we want the smallest possible file:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/screenshot-82.png" src="./assets/lessons/24/screenshot-82.png" width="334" height="210" alt="./assets/lessons/24/screenshot-82.png" class="is-loaded"></span></p>
+<p>For the rest of the properties, here are the settings:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/83.png" src="./assets/lessons/24/83.png" width="236" height="647" alt="./assets/lessons/24/83.png" class="is-loaded"></span></p>
+<p>Most of those are obvious but here's the list</p>
+<ul>
+<li><code spellcheck="false">Remember Export Settings</code>: To keep these settings the next time we export.</li>
+<li>Include:
+<ul>
+<li><code spellcheck="false">Selected Objects</code>: Only the selected objects.</li>
+<li><code spellcheck="false">Custom Properties</code>: A text information that we can add to any object in Blender, but we didn't add any.</li>
+<li><code spellcheck="false">Cameras</code>: The cameras.</li>
+<li><code spellcheck="false">Punctual Lights</code>: The lights.</li>
+</ul></li>
+<li>Transform:
+<ul>
+<li><code spellcheck="false">+Y Up</code>: Convert the axes so that positive Y is the upper one —the default property for Three.js.</li>
+</ul></li>
+<li>Geometry:
+<ul>
+<li><code spellcheck="false">Apply Modifiers</code>: Applies the modifiers like the <code spellcheck="false">Subdivision Surface</code>. If you don't check this one, you'll end up with the original cubes instead of your round buns.</li>
+<li><code spellcheck="false">UVs</code>: Adds the UV coordinates. These are the coordinates that Three.js —and other environments— use to apply textures on a geometry. Because we don't have textures, we don't need those coordinates.</li>
+<li><code spellcheck="false">Normals</code>: The outside direction of each face. We do need this one if we want the light to work properly.</li>
+<li><code spellcheck="false">Tangents</code>: Works in tandem with the normals, but they are perpendicular to them.</li>
+<li><code spellcheck="false">Vertex Colors</code>: The color associated with each vertex. Useful if we painted the vertices, but we didn't.</li>
+<li><code spellcheck="false">Materials</code>: The different materials we used.</li>
+<li><code spellcheck="false">Compression</code>: The legendary Draco compression.</li>
+</ul></li>
+<li>Animation
+<ul>
+<li>Everything related to the animations, but we don't need any of those because we don't have animations.</li>
+</ul></li>
+</ul>
+<p>Click <code spellcheck="false">Export glTF 2.0</code> and check the file. The file size should be pretty light. Try to export the same hamburger without the <code spellcheck="false">compression</code>, and it should be much bigger. In a real project, this would be when you have to decide between using the compressed version and win a few <code spellcheck="false">kB</code> load the whole Draco decoder or go for the uncompressed version.</p>
+<p>It doesn't matter as long as we have our file.</p>
+<h2>Test in Three.js</h2>
+<p>Run the project and change the hamburger path if needed:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/hamburger.glb'</span><span class="token punctuation">,</span>
+
+<span class="token comment">// ...</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/24/step-84.png" src="./assets/lessons/24/step-84.png" width="1792" height="1120" alt="./assets/lessons/24/step-84.png" class="is-loaded"></span></p>
+<p>You should see your burger in your Three.js scene.</p>
+<p>Regrettably, our hamburger appears way too orange compared to the Blender version. That is due to Three.js settings, and we have to do some tweaks. That will be the next lesson's topic, but feel free to come back to your burger once you finish applying the features we will learn.</p>
+<h2>Go further</h2>
+<p>There are tons of great online tutorials, and most of them are free. Here's a non-exhaustive list of ressources you can use:</p>
+<ul>
+<li>Blender Youtube Channel: <a target="_blank" href="https://www.youtube.com/user/BlenderFoundation">https://www.youtube.com/user/BlenderFoundation</a></li>
+<li>Blender Guru Youtube Channel: <a target="_blank" href="https://www.youtube.com/channel/UCOKHwx1VCdgnxwbjyb9Iu1g">https://www.youtube.com/channel/UCOKHwx1VCdgnxwbjyb9Iu1g</a></li>
+<li>Grant Abbitt Youtube Channel: <a target="_blank" href="https://www.youtube.com/channel/UCZFUrFoqvqlN8seaAeEwjlw">https://www.youtube.com/channel/UCZFUrFoqvqlN8seaAeEwjlw</a></li>
+<li>CGFastTrack: <a target="_blank" href="https://www.youtube.com/c/CGFastTrack/videos">https://www.youtube.com/c/CGFastTrack/videos</a></li>
+<li>CGCookie: <a target="_blank" href="https://cgcookie.com/">https://cgcookie.com/</a></li>
+</ul>
+<p>Make sure always to follow tutorials using at least version 2.8 of Blender.</p>
+</section>
+</body>
+
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<body>
+    <section class="text js-text">
+        <h2>Introduction</h2>
+<p>Now that we have everything in place, we can explore Three.js functionalities.</p>
+<p>Before animating our scene, we need to know how to transform objects in our scene. We've already done that with the camera by moving it backward using the <code spellcheck="false">camera.position.z = 3</code>.</p>
+<p>There are 4 properties to transform objects in our scene</p>
+<ul>
+<li><code spellcheck="false">position</code> (to move the object)</li>
+<li><code spellcheck="false">scale</code> (to resize the object)</li>
+<li><code spellcheck="false">rotation</code> (to rotate the object)</li>
+<li><code spellcheck="false">quaternion</code> (to also rotate the object; more about that later)</li>
+</ul>
+<p>All classes that inherit from the <a target="_blank" href="https://threejs.org/docs/#api/en/core/Object3D">Object3D</a> class possess those properties like <a target="_blank" href="https://threejs.org/docs/#api/en/cameras/PerspectiveCamera">PerspectiveCamera</a> or <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a> and classes that we haven't covered yet.</p>
+<p>You can see from what classes inherit each class on top of the Three.js documentation.</p>
+<p>Those properties will be compiled in what we call matrices. Matrices are used internally by Three.js, by the WebGL, and by the GPU to transform things. Fortunately, you don't have to handle matrices by yourself and you can just modify the previously-mentioned properties.</p>
+<h2>Setup</h2>
+<p>In the starter, all we have is the project how we left it in the previous lesson with the cube in the center of the view.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/05/step-01.png" src="./assets/lessons/05/step-01.png" width="1792" height="1120" alt="./assets/lessons/05/step-01.png" class="is-loaded"></span></p>
+<h2>Move objects</h2>
+<p>The <code spellcheck="false">position</code> possesses 3 essential properties, which are <code spellcheck="false">x</code>, <code spellcheck="false">y</code>, and <code spellcheck="false">z</code>. Those are the 3 necessary axes to position something in a 3D space.</p>
+<p>The direction of each axis is purely arbitrary, and it can vary according to the environment. In Three.js, we usually consider that the <code spellcheck="false">y</code> axis is going upward, the <code spellcheck="false">z</code> axis is going backward, and the <code spellcheck="false">x</code> axis is going to the right.</p>
+<p>As for the meaning of <code spellcheck="false">1</code> unit, it's up to you. <code spellcheck="false">1</code> can be 1 centimeter, 1 meter, or even 1 kilometer. I recommend that you adapt the unit to what you want to build. If you're going to create a house, you probably should think of <code spellcheck="false">1</code> unit as 1 meter.</p>
+<p>You can play around with the <code spellcheck="false">position</code> property of your <code spellcheck="false">mesh</code> and try to guess where the cube will get (try to keep it in the screen).</p>
+<p>Make sure to do that before you call the <code spellcheck="false">render(...)</code> method or you will render the <code spellcheck="false">mesh</code> before moving it.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">0.7</span>
+mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token operator">-</span> <span class="token number">0.6</span>
+mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span>z <span class="token operator">=</span> <span class="token number">1</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/05/step-02.png" src="./assets/lessons/05/step-02.png" width="1792" height="1120" alt="./assets/lessons/05/step-02.png"></span></p>
+<p>The <code spellcheck="false">position</code> property is not any object. It's an instance of the <a target="_blank" href="https://threejs.org/docs/#api/en/math/Vector3">Vector3</a> class. While this class has an <code spellcheck="false">x</code>, a  <code spellcheck="false">y</code>, and a <code spellcheck="false">z</code> property, it also has many useful methods.</p>
+<p>You can get the length of a vector:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You can get the distance from another <a target="_blank" href="https://threejs.org/docs/#api/en/math/Vector3">Vector3</a> (make sure to use this code after creating the camera):</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">distanceTo</span><span class="token punctuation">(</span>camera<span class="token punctuation">.</span>position<span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You can normalize its values (meaning that you will reduce the length of the vector to <code spellcheck="false">1</code> unit but preserve its direction):</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">normalize</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>To change the values, instead of changing <code spellcheck="false">x</code>, <code spellcheck="false">y</code> and <code spellcheck="false">z</code> separately, you can also use the <code spellcheck="false">set(...)</code> method:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">0.7</span><span class="token punctuation">,</span> <span class="token operator">-</span> <span class="token number">0.6</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h2>Axes helper</h2>
+<p>Before we go any further, as you can see, positioning things in space can be a real challenge. Knowing where each axis is oriented is complicated especially when we start to move the camera.</p>
+<p>One good solution is to use the Three.js <a target="_blank" href="https://threejs.org/docs/#api/en/helpers/AxesHelper">AxesHelper</a>.</p>
+<p>The <a target="_blank" href="https://threejs.org/docs/#api/en/helpers/AxesHelper">AxesHelper</a> will display 3 lines corresponding to the <code spellcheck="false">x</code>, <code spellcheck="false">y</code> and <code spellcheck="false">z</code> axes, each one starting at the center of the scene and going in the corresponding direction.</p>
+<p>To create the <a target="_blank" href="https://threejs.org/docs/#api/en/helpers/AxesHelper">AxesHelper</a>, instantiate it and add it to the <code spellcheck="false">scene</code> right after instantiating that <code spellcheck="false">scene</code>. You can specify the length of the lines as the only parameter. We are going to use <code spellcheck="false">2</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Axes Helper
+*/</span>
+<span class="token keyword">const</span> axesHelper <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>AxesHelper</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>axesHelper<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/05/step-03.png" src="./assets/lessons/05/step-03.png" width="1792" height="1120" alt="./assets/lessons/05/step-03.png"></span></p>
+<p>You should see a <strong>green</strong> and a <strong>red</strong> line.</p>
+<p>The <strong>green</strong> line corresponds to the <code spellcheck="false">y</code> axis. The <strong>red</strong> line corresponds to the <code spellcheck="false">x</code> axis and there is a <strong>blue</strong> line corresponding to the <code spellcheck="false">z</code> axis but we can't see it because it's perfectly aligned with the camera.</p>
+<p>We won't use this <a target="_blank" href="https://threejs.org/docs/#api/en/helpers/AxesHelper">AxesHelper</a> in the next lessons but feel free to add it if you need a visual reference.</p>
+<h2>Scale objects</h2>
+<p><code spellcheck="false">scale</code> is also a <a target="_blank" href="https://threejs.org/docs/#api/en/math/Vector3">Vector3</a>. By default, <code spellcheck="false">x</code>, <code spellcheck="false">y</code> and <code spellcheck="false">z</code> are equal to <code spellcheck="false">1</code>, meaning that the object has no scaling applied. If you put <code spellcheck="false">0.5</code> as a value, the object will be half of its size on this axis, and if you put <code spellcheck="false">2</code> as a value, it will be twice its original size on this axis.</p>
+<p>If you change those values, the object will start to scale accordingly. Comment the <code spellcheck="false">position</code> and add these scales:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">mesh<span class="token punctuation">.</span>scale<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">2</span>
+mesh<span class="token punctuation">.</span>scale<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token number">0.25</span>
+mesh<span class="token punctuation">.</span>scale<span class="token punctuation">.</span>z <span class="token operator">=</span> <span class="token number">0.5</span> </code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/05/step-04.png" src="./assets/lessons/05/step-04.png" width="1792" height="1120" alt="./assets/lessons/05/step-04.png"></span></p>
+<p>Clearly, we cannot see the <code spellcheck="false">z</code> scale because our <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a> is facing the camera.</p>
+<p>While you can use negative values, it might generate bugs later on because axes won't be oriented in the logical direction. Try to avoid doing it.</p>
+<p>Because it's a <a target="_blank" href="https://threejs.org/docs/#api/en/math/Vector3">Vector3</a>, we can use all the previously mentioned methods.</p>
+<h2>Rotate objects</h2>
+<p>Rotation is a little more troublesome than <code spellcheck="false">position</code> and <code spellcheck="false">scale</code>. There are two ways of handling a rotation.</p>
+<p>You can use the self-evident <code spellcheck="false">rotation</code> property, but you can also use the less obvious <code spellcheck="false">quaternion</code> property. Three.js supports both, and updating one will automatically update the other. It's just a matter of which one you prefer.</p>
+<h4>Rotation</h4>
+<p>The <code spellcheck="false">rotation</code> property also has <code spellcheck="false">x</code>, <code spellcheck="false">y</code>, and <code spellcheck="false">z</code> properties, but instead of a <a target="_blank" href="https://threejs.org/docs/#api/en/math/Vector3">Vector3</a>, it's a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/math/Euler">Euler</a>. When you change the <code spellcheck="false">x</code>, <code spellcheck="false">y</code>, and <code spellcheck="false">z</code> properties of a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/math/Euler">Euler</a>, you can imagine putting a stick through your object's center in the axis's direction and then rotating that object on that stick.</p>
+<ul>
+<li>If you spin on the <code spellcheck="false">y</code> axis, you can picture it like a carousel.</li>
+<li>If you spin on the <code spellcheck="false">x</code> axis, you can imagine that you are rotating the wheels of a car you'd be in.</li>
+<li>And if you rotate on the <code spellcheck="false">z</code> axis, you can imagine that you are rotating the propellers in front of an aircraft you'd be in.</li>
+</ul>
+<p>The value of these axes is expressed in radians. If you want to achieve half a rotation, you'll have to write something like 3.14159... You probably recognize that number as π. In native JavaScript, you can end up with an approximation of π using <code spellcheck="false">Math.PI</code>. </p>
+<p>Comment the <code spellcheck="false">scale</code> and add an eighth of a complete rotation in both <code spellcheck="false">x</code> and <code spellcheck="false">y</code> axes:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>x <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">0.25</span>
+mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>y <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">0.25</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/05/step-05.png" src="./assets/lessons/05/step-05.png" width="1792" height="1120" alt="./assets/lessons/05/step-05.png"></span></p>
+<p>Is it easy? Yes, but when you combine those rotations, you might end up with strange results. Why? Because, while you rotate the <code spellcheck="false">x</code> axis, you also change the other axes' orientation. The rotation applies in the following order: <code spellcheck="false">x</code>, <code spellcheck="false">y</code>, and then <code spellcheck="false">z</code>. That can result in weird behaviors like one named gimbal lock when one axis has no more effect, all because of the previous ones. </p>
+<p>We can change this order by using the <code spellcheck="false">reorder(...)</code> method  <code spellcheck="false">object.rotation.reorder('yxz')</code></p>
+<p>While <a target="_blank" href="https://threejs.org/docs/index.html#api/en/math/Euler">Euler</a> is easier to understand, this order problem can cause issues. And this is why most engines and 3D softwares use another solution named <a target="_blank" href="https://threejs.org/docs/#api/en/math/Quaternion">Quaternion</a>.</p>
+<h4>Quaternion</h4>
+<p>The <code spellcheck="false">quaternion</code> property also expresses a rotation, but in a more mathematical way, which solves the order problem.</p>
+<p>We will not cover how quaternions work in this lesson but keep in mind that the <code spellcheck="false">quaternion</code> updates when you change the <code spellcheck="false">rotation</code>. This means that you can use any one of the two as you please.</p>
+<h4>Look at this!</h4>
+<p><a target="_blank" href="https://threejs.org/docs/#api/en/core/Object3D">Object3D</a> instances have an excellent method named <code spellcheck="false">lookAt(...)</code> that lets you ask an object to look at something. The object will automatically rotate its <code spellcheck="false">-z</code> axis toward the target you provided. No complicated maths needed.</p>
+<p>You can use it to rotate the camera toward an object, orientate a cannon to face an enemy, or move the character's eyes to an object.</p>
+<p>The parameter is the target and must be a <a target="_blank" href="https://threejs.org/docs/#api/en/math/Vector3">Vector3</a>. You can create one just to try it:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">camera<span class="token punctuation">.</span><span class="token function">lookAt</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Vector3</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/05/step-06.png" src="./assets/lessons/05/step-06.png" width="1792" height="1120" alt="./assets/lessons/05/step-06.png"></span></p>
+<p>The cube seems to be higher, but in fact, the camera is looking below the cube.</p>
+<p>We can also use any existing <a target="_blank" href="https://threejs.org/docs/#api/en/math/Vector3">Vector3</a> such as the <code spellcheck="false">mesh</code>'s <code spellcheck="false">position</code>, but that will result in the default camera position because our <code spellcheck="false">mesh</code> is in the center of the <code spellcheck="false">scene</code>.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">camera<span class="token punctuation">.</span><span class="token function">lookAt</span><span class="token punctuation">(</span>mesh<span class="token punctuation">.</span>position<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h2>Combining transformations</h2>
+<p>You can combine the <code spellcheck="false">position</code>, the <code spellcheck="false">rotation</code> (or <code spellcheck="false">quaternion</code>), and the <code spellcheck="false">scale</code> in any order. The result will be the same. It's equivalent to the state of the object.</p>
+<p>Let's combine all the transformations we tried before:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">0.7</span>
+mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token operator">-</span> <span class="token number">0.6</span>
+mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span>z <span class="token operator">=</span> <span class="token number">1</span>
+mesh<span class="token punctuation">.</span>scale<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">2</span>
+mesh<span class="token punctuation">.</span>scale<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token number">0.25</span>
+mesh<span class="token punctuation">.</span>scale<span class="token punctuation">.</span>z <span class="token operator">=</span> <span class="token number">0.5</span>
+mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>x <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">0.25</span>
+mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>y <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">0.25</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/05/step-07.png" src="./assets/lessons/05/step-07.png" width="1792" height="1120" alt="./assets/lessons/05/step-07.png"></span></p>
+<h2>Scene graph</h2>
+<p>At some point, you might want to group things. Let's say you are building a house with walls, doors, windows, a roof, bushes, etc.</p>
+<p>When you think you're done, you become aware that the house is too small, and you have to re-scale each object and update their positions.</p>
+<p>A good alternative would be to group all those objects into a container and scale that container.</p>
+<p>You can do that with the <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Group">Group</a> class.</p>
+<p>Instantiate a <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Group">Group</a> and add it to the scene. Now, when you want to create a new object, you can add it to the <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Group">Group</a> you just created using the <code spellcheck="false">add(...)</code> method rather than adding it directly to the scene</p>
+<p>Because the <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Group">Group</a> class inherits from the <a target="_blank" href="https://threejs.org/docs/#api/en/core/Object3D">Object3D</a> class, it has access to the previously-mentioned properties and methods like <code spellcheck="false">position</code>, <code spellcheck="false">scale</code>, <code spellcheck="false">rotation</code>, <code spellcheck="false">quaternion</code>, and <code spellcheck="false">lookAt</code>.</p>
+<p>Comment the <code spellcheck="false">lookAt(...)</code> call and, instead of our previously created cube, create 3 cubes and add them to a <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Group">Group</a>. Then apply transformations on the <code spellcheck="false">group</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Objects
+*/</span>
+<span class="token keyword">const</span> group <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Group</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+group<span class="token punctuation">.</span>scale<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token number">2</span>
+group<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token number">0.2</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>group<span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> cube1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BoxGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> color<span class="token operator">:</span> <span class="token number">0xff0000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span>
+cube1<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token operator">-</span> <span class="token number">1.5</span>
+group<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>cube1<span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> cube2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BoxGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> color<span class="token operator">:</span> <span class="token number">0xff0000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span>
+cube2<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">0</span>
+group<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>cube2<span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> cube3 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BoxGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> color<span class="token operator">:</span> <span class="token number">0xff0000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span>
+cube3<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">1.5</span>
+group<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>cube3<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/05/step-08.png" src="./assets/lessons/05/step-08.png" width="1792" height="1120" alt="./assets/lessons/05/step-08.png"></span></p>
+<p>The order doesn't really matter, as long as it's valid JavaScript.</p>
+<p>Now that we know how to transform objects, it's time to create some animations.</p>
+    </section>
+</body>
+
+</html>

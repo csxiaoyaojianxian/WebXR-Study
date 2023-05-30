@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<body>
+    <section class="text js-text">
+        <h2>Introduction</h2>
+<p>An essential aspect of every creative project is making debugging easy and tweaking your code. The developer (you) and other actors working on the project (like designers or even the client) must be able to change as many parameters as possible.</p>
+<p>You have to take this into account for them to find the perfect color, speed, quantity, etc. for the best experience. You might even get unexpected results that look great.</p>
+<p>First, we need a debug UI.</p>
+<p>While you can create your own debug UI using HTML / CSS / JS, there are already multiple libraries:</p>
+<ul>
+<li><a target="_blank" href="https://github.com/dataarts/dat.gui">dat.GUI</a></li>
+<li><a target="_blank" href="https://github.com/freeman-lab/control-panel">control-panel</a></li>
+<li><a target="_blank" href="https://github.com/automat/controlkit.js">ControlKit</a></li>
+<li><a target="_blank" href="https://github.com/lo-th/uil">Uil</a></li>
+<li><a target="_blank" href="https://cocopon.github.io/tweakpane/">Tweakpane</a></li>
+<li><a target="_blank" href="https://github.com/colejd/guify">Guify</a></li>
+<li><a target="_blank" href="https://github.com/wearekuva/oui">Oui</a></li>
+</ul>
+<p>All of these can do what we want, but we will use the most popular one, which is <a target="_blank" href="https://github.com/dataarts/dat.gui">dat.GUI</a>. Feel free to try the other ones.</p>
+<h3>Dat.GUI vulnerabilities</h3>
+<p>Dat.GUI hasn't been updated for a long time and some vulnerabilities warnings might show up if we add the library to our project.</p>
+<p>Fortunately, there is an alternative library named <a target="_blank" href="https://lil-gui.georgealways.com/">lil-gui</a> that can be used as a "drop-in replacement for dat.gui". Meaning that we can use it the same way we would have use dat.gui.</p>
+<p>The course has been mostly written and recorded with dat.gui and the texts, screenshots and videos will refer to dat.gui, but you should install and use lil-gui instead (which is what we are going to do right below).</p>
+<p>The next lesson's starters files will be using lil-gui.</p>
+<h2>Example</h2>
+<p>You can find a pretty good example of debug UI on my portfolio. This UI only shows up when you add <code spellcheck="false">#debug</code> to the URL.</p>
+<p><a target="_blank" href="https://bruno-simon.com/#debug">https://bruno-simon.com/#debug</a></p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/10/debug-1.png" src="./assets/lessons/10/debug-1.png" width="850" height="320" alt="./assets/lessons/10/debug-1.png" class="is-loaded"></span></p>
+<p>You can tweak the gravity, the colors, the speed, the elements position, etc.</p>
+<p>While it took me a lot of time to create all those tweaks, the game would appear less balanced without it.</p>
+<h2>Setup</h2>
+<p>In the starter, we have our cube, but the dependencies don't include Dat.GUI. We will add it and create some tweaks.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/10/step-01.png" src="./assets/lessons/10/step-01.png" width="1792" height="1120" alt="./assets/lessons/10/step-01.png" class="is-loaded"></span></p>
+<h2>How to implement Dat.GUI</h2>
+<p>To add Dat.GUI to our Webpack project, we can use the dependency manager provided with Node.js called NPM (just like we did for GSAP in a previous lesson).</p>
+<p>In your terminal (while the server is not running or by using another terminal window on the same folder) run <code spellcheck="false">npm install --save lil-gui</code></p>
+<p>As mentioned earlier, we are installing lil-gui instead of dat.gui, but we will refer to it as dat.gui in the rest of the course.</p>
+<p>Dat.GUI is now available in the <code spellcheck="false">/node_modules/</code> folder and we can import it in our <code spellcheck="false">script.js</code>. Don't forget to relaunch the server:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token string">'./style.css'</span>
+<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> <span class="token constant">THREE</span> <span class="token keyword">from</span> <span class="token string">'three'</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> OrbitControls <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'three/examples/jsm/controls/OrbitControls.js'</span>
+<span class="token keyword">import</span> gsap <span class="token keyword">from</span> <span class="token string">'gsap'</span>
+<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> dat <span class="token keyword">from</span> <span class="token string">'lil-gui'</span>
+
+<span class="token comment">// ...</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You can now instantiate Dat.GUI:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Debug
+*/</span>
+<span class="token keyword">const</span> gui <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">dat<span class="token punctuation">.</span>GUI</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/10/step-02.png" src="./assets/lessons/10/step-02.png" width="1792" height="1120" alt="./assets/lessons/10/step-02.png" class="is-loaded"></span></p>
+<p>This will result in an empty panel on the top right corner of the screen.</p>
+<p>There are different types of elements you can add to that panel:</p>
+<ul>
+<li><strong>Range</strong> —for numbers with minimum and maximum value</li>
+<li><strong>Color</strong> —for colors with various formats</li>
+<li><strong>Text</strong> —for simple texts</li>
+<li><strong>Checkbox</strong> —for booleans (<code spellcheck="false">true</code> or <code spellcheck="false">false</code>)</li>
+<li><strong>Select</strong> —for a choice from a list of values</li>
+<li><strong>Button</strong> —to trigger functions</li>
+<li><strong>Folder</strong> —to organize your panel if you have too many elements</li>
+</ul>
+<p>Let's see some of those.</p>
+<h4>Add elements</h4>
+<p>To add an element to the panel, you must use <code spellcheck="false">gui.add(...)</code>. The first parameter is an object and the second parameter is the property of that object you want to tweak. You need to set it after you created the concerned object:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh<span class="token punctuation">.</span>position<span class="token punctuation">,</span> <span class="token string">'y'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/10/step-03.png" src="./assets/lessons/10/step-03.png" width="1792" height="1120" alt="./assets/lessons/10/step-03.png" class="is-loaded"></span></p>
+<p>A range should appears in the panel. Try to change it and watch the cube moving accordingly.</p>
+<p>To specify the minimum value, the maximum value and the precision, you can set them in the parameters:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh<span class="token punctuation">.</span>position<span class="token punctuation">,</span> <span class="token string">'y'</span><span class="token punctuation">,</span> <span class="token operator">-</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">0.01</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/10/step-04.png" src="./assets/lessons/10/step-04.png" width="1792" height="1120" alt="./assets/lessons/10/step-04.png" class="is-loaded"></span></p>
+<p>Or you can use the methods <code spellcheck="false">min(...)</code>, <code spellcheck="false">max(...)</code> and <code spellcheck="false">step(...)</code> by chaining directly after the <code spellcheck="false">add(...)</code> method:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh<span class="token punctuation">.</span>position<span class="token punctuation">,</span> <span class="token string">'y'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.01</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>If you don't like having too many methods chained in one line, you can simply add line breaks:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui
+<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh<span class="token punctuation">.</span>position<span class="token punctuation">,</span> <span class="token string">'y'</span><span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">3</span><span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.01</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>To change the label, use the the <code spellcheck="false">name(...)</code> method:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui
+<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh<span class="token punctuation">.</span>position<span class="token punctuation">,</span> <span class="token string">'y'</span><span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">3</span><span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.01</span><span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'elevation'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/10/step-05.png" src="./assets/lessons/10/step-05.png" width="1792" height="1120" alt="./assets/lessons/10/step-05.png" class="is-loaded"></span></p>
+<p>Dat.GUI will automatically detect what kind of property you want to tweak and use the corresponding element. A good example is the <code spellcheck="false">visible</code> property of <a target="_blank" href="https://threejs.org/docs/#api/en/core/Object3D.visible">Object3D</a>. It is a boolean that, if <code spellcheck="false">false</code>, will hide the object:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh<span class="token punctuation">,</span> <span class="token string">'visible'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/10/step-06.png" src="./assets/lessons/10/step-06.png" width="1792" height="1120" alt="./assets/lessons/10/step-06.png" class="is-loaded"></span></p>
+<p>As you can see, Dat.GUI chose a checkbox because the <code spellcheck="false">visible</code> property is a boolean.</p>
+<p>We can do the same with the <code spellcheck="false">wireframe</code> property of the material:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>material<span class="token punctuation">,</span> <span class="token string">'wireframe'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/10/step-07.png" src="./assets/lessons/10/step-07.png" width="1792" height="1120" alt="./assets/lessons/10/step-07.png" class="is-loaded"></span></p>
+<h4>Colors</h4>
+<p>Handling colors is a little harder.</p>
+<p>First, we need to use <code spellcheck="false">addColor(...)</code> instead of <code spellcheck="false">add(...)</code>. This is due to Dat.GUI not being able to know if you want to tweak a text, a number or a color just by the type of the property.</p>
+<p>Secondly, you'll have to create an intermediate object with the color in its properties and use that property in your material. That is due to the Three.js material not having a clean and accessible value like <code spellcheck="false">#ff0000</code>.</p>
+<p>Create a <code spellcheck="false">parameter</code> variable at the start of your code right after the <code spellcheck="false">import</code> part:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> parameters <span class="token operator">=</span> <span class="token punctuation">{</span>
+color<span class="token operator">:</span> <span class="token number">0xff0000</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, after instantiating your <code spellcheck="false">gui</code> variable, add the following tweak:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">addColor</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'color'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/10/step-08.png" src="./assets/lessons/10/step-08.png" width="1792" height="1120" alt="./assets/lessons/10/step-08.png" class="is-loaded"></span></p>
+<p>You should see a color picker in your panel. The problem is that changing this color doesn't affect the material. It does change the <code spellcheck="false">color</code> property of the <code spellcheck="false">parameter</code> variable, but we don't even use that variable in our material.</p>
+<p>To fix that, we need Dat.GUI to alert us when the value changed. We can do that by chaining the <code spellcheck="false">onChange(...)</code> method and updating the material color using <code spellcheck="false">material.color.set(...)</code>. This method is very useful because of how many formats you can use like <code spellcheck="false">'#ff0000'</code>, <code spellcheck="false">'#f00'</code>, <code spellcheck="false">0xff0000</code> or even <code spellcheck="false">'red'</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> parameters <span class="token operator">=</span> <span class="token punctuation">{</span>
+color<span class="token operator">:</span> <span class="token number">0xff0000</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// ...</span>
+
+gui
+<span class="token punctuation">.</span><span class="token function">addColor</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'color'</span><span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">onChange</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+material<span class="token punctuation">.</span>color<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>parameters<span class="token punctuation">.</span>color<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/10/step-09.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>Currently, the <code spellcheck="false">0xff0000</code> color is specified at two places: in the <code spellcheck="false">parameters</code> object and in the <code spellcheck="false">material</code>.</p>
+<p>While it's not a big deal, if we want to change the color, we'll have to do it at those two places.</p>
+<p>Let's simply fix that by using the  <code spellcheck="false">parameters.color</code> property in our material:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> color<span class="token operator">:</span> parameters<span class="token punctuation">.</span>color <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h4>Functions</h4>
+<p>To trigger a function, like the color value, we must add that function to an object. We can use the <code spellcheck="false">parameters</code> object we created earlier to add a  <code spellcheck="false">spin</code> property containing the function that will animate the cube:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> parameters <span class="token operator">=</span> <span class="token punctuation">{</span>
+color<span class="token operator">:</span> <span class="token number">0xff0000</span><span class="token punctuation">,</span>
+<span class="token function-variable function">spin</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+gsap<span class="token punctuation">.</span><span class="token function">to</span><span class="token punctuation">(</span>mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">,</span> <span class="token punctuation">{</span> duration<span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> y<span class="token operator">:</span> mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>y <span class="token operator">+</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">2</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>And again, we can add the tweak to our <code spellcheck="false">gui</code> after instantiating it:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'spin'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/10/step-10.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>You should see a <code spellcheck="false">spin</code> button, and clicking on it will result on your cube doing a 360 rotation.</p>
+<h2>Tips</h2>
+<h4>Hide</h4>
+<p>Press <code spellcheck="false">H</code> to hide the panel.</p>
+<p>If you want the panel to be hidden from start, call <code spellcheck="false">gui.hide()</code> after instantiating it.</p>
+<h4>Close</h4>
+<p>You can close the panel by clicking on its bottom part.</p>
+<p>If you want the panel to be closed by default, you can send an object when instantiating Dat.GUI and pass it <code spellcheck="false">closed: true</code> in its properties:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> gui <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">dat<span class="token punctuation">.</span>GUI</span><span class="token punctuation">(</span><span class="token punctuation">{</span> closed<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h4>Width</h4>
+<p>You can change the panel's width by drag and dropping its left border (although please note, it doesn't always work).</p>
+<p>If you want to change the default width of the panel, add <code spellcheck="false">width: ...</code> in the properties:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> gui <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">dat<span class="token punctuation">.</span>GUI</span><span class="token punctuation">(</span><span class="token punctuation">{</span> width<span class="token operator">:</span> <span class="token number">400</span> <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>If you want to know more about Dat.GUI, here are some links:</p>
+<ul>
+<li>Github repository: <a target="_blank" href="https://github.com/dataarts/dat.gui">https://github.com/dataarts/dat.gui</a></li>
+<li>API documentation: <a target="_blank" href="https://github.com/dataarts/dat.gui/blob/HEAD/API.md">https://github.com/dataarts/dat.gui/blob/HEAD/API.md</a></li>
+<li>A simple but complete example: <a target="_blank" href="https://jsfiddle.net/ikatyang/182ztwao/">https://jsfiddle.net/ikatyang/182ztwao/</a></li>
+</ul>
+<h2>How and when to use it</h2>
+<p>We will use our debug panel at specific moments of the next exercises. But feel free to add as many tweaks as you want. It's an excellent way to practice and to start building some creative stuff.</p>
+<p>I would recommend you to add tweaks as you progress. If you think of adding all the tweaks at the end of the project, you'll probably end up with no tweak at all.</p>
+    </section>
+</body>
+
+</html>

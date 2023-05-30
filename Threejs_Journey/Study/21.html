@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<section class="text js-text">
+    <h2>Introduction</h2>
+<p>Having an experience composed of only WebGL is great, but sometimes, you'll want the experience to be part of a classic website.</p>
+<p>The experience can be in the background to add some beauty to the page, but then, you'll want that experience to integrate properly with the HTML content.</p>
+<p>In this lesson, we will learn how to use Three.js as a background of a classic HTML page. We will make the camera translate to follow the scroll. We will discover some tricks to make this scroll more immersive. We will add a cool parallax animation based on the cursor position. And finally, we will trigger some animations when arriving at the corresponding sections.</p>
+<h2>Setup</h2>
+<p>This lesson is a good opportunity to practice many of the techniques we've already learned. Instead of having the environment already set up, we will do most of the work ourselves.</p>
+<p>The <code spellcheck="false">OrbitControls</code> has been removed because we want the camera to move according to the scroll and to not let the user rotate about as in prior lessons.</p>
+<p>Dat.GUI is already available and one color as been created to be used later:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Debug
+*/</span>
+<span class="token keyword">const</span> gui <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">dat<span class="token punctuation">.</span>GUI</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> parameters <span class="token operator">=</span> <span class="token punctuation">{</span>
+materialColor<span class="token operator">:</span> <span class="token string">'#ffeded'</span>
+<span class="token punctuation">}</span>
+
+gui<span class="token punctuation">.</span><span class="token function">addColor</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'materialColor'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Some very simple HTML content has been setup already. Currently, you can only see one title but there are two sections right below. We can't see them because the scroll is blocked.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/21/01.png" src="./assets/lessons/21/01.png" width="1792" height="1120" alt="01.png" class="is-loaded"></span></p>
+<h2>HTML Scroll</h2>
+<h3>Activate the scroll</h3>
+<p>Earlier in the course, we deactivated the scroll using this CSS:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-css"><code spellcheck="false" class=" language-css"><span class="token selector">html,
+body</span>
+<span class="token punctuation">{</span>
+<span class="token property">overflow</span><span class="token punctuation">:</span> hidden<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>CSS</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>To reactivate it, remove the <code spellcheck="false">overflow</code> line in <code spellcheck="false">/src/style.css</code>.</p>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/02.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You should be able to scroll and see the two other sections below.</p>
+<h3>Fix the elastic scroll</h3>
+<p>In some environments, you might notice that, if you scroll too far, you get a kind of elastic animation when the page goes beyond the limit.</p>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/03.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>While this is a cool feature, by default, the back of the page is white and doesn't match our experience.</p>
+<p>To fix that, we could have set the <code spellcheck="false">background-color</code> of the page to the same color as the <code spellcheck="false">clearColor</code> of the <code spellcheck="false">renderer</code> . Instead, we are going to make the <code spellcheck="false">clearColor</code> transparent and only set the <code spellcheck="false">background-color</code> on the page.</p>
+<p>To do that, in <code spellcheck="false">/src/script.js</code>, you need to set the <code spellcheck="false">alpha</code> property to <code spellcheck="false">true</code> on the <code spellcheck="false">WebGLRenderer</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> renderer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>WebGLRenderer</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+canvas<span class="token operator">:</span> canvas<span class="token punctuation">,</span>
+alpha<span class="token operator">:</span> <span class="token boolean">true</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>By default, the clear alpha value is <code spellcheck="false">0</code> which is why we didn't have to set it ourselves. Telling the renderer to handle alpha is enough. But if you want to change that value, you can do it with <code spellcheck="false">setClearAlpha</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">renderer<span class="token punctuation">.</span><span class="token function">setClearAlpha</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/21/04.png" src="./assets/lessons/21/04.png" width="1792" height="1120" alt="04.png" class="is-loaded"></span></p>
+<p>We can now see the back of the page which is white.</p>
+<p>In <code spellcheck="false">/src/style.css</code>, add a <code spellcheck="false">background-color</code> to the <code spellcheck="false">html</code> in CSS:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-css"><code spellcheck="false" class=" language-css"><span class="token selector">html</span>
+<span class="token punctuation">{</span>
+<span class="token property">background</span><span class="token punctuation">:</span> #1e1a20<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>CSS</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/05.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>We get a nice uniform background color and the elastic scroll isn't an issue anymore.</p>
+<h2>Objects</h2>
+<p>We are going to create an object for each section to illustrate each of them.</p>
+<p>To keep things simple, we will use Three.js primitives, but you can create whatever you want. And later in the course, you'll learn how to import custom models into the scene.</p>
+<p>In <code spellcheck="false">/src/script.js</code>, remove the code for the cube. In its place, create three <a target="_blank" href="https://threejs.org/docs/index.html?q=mesh#api/en/objects/Mesh">Meshes</a> using a <a target="_blank" href="https://threejs.org/docs/index.html?q=torus#api/en/geometries/TorusGeometry">TorusGeometry</a>, a <a target="_blank" href="https://threejs.org/docs/index.html?q=ConeGeometry#api/en/geometries/ConeGeometry">ConeGeometry</a> and a <a target="_blank" href="https://threejs.org/docs/index.html?q=torusk#api/en/geometries/TorusKnotGeometry">TorusKnotGeometry</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Objects
+*/</span>
+<span class="token comment">// Meshes</span>
+<span class="token keyword">const</span> mesh1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>TorusGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0.4</span><span class="token punctuation">,</span> <span class="token number">16</span><span class="token punctuation">,</span> <span class="token number">60</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> color<span class="token operator">:</span> <span class="token string">'#ff0000'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span>
+<span class="token keyword">const</span> mesh2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ConeGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">32</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> color<span class="token operator">:</span> <span class="token string">'#ff0000'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span>
+<span class="token keyword">const</span> mesh3 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>TorusKnotGeometry</span><span class="token punctuation">(</span><span class="token number">0.8</span><span class="token punctuation">,</span> <span class="token number">0.35</span><span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">,</span> <span class="token number">16</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> color<span class="token operator">:</span> <span class="token string">'#ff0000'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span>
+
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh1<span class="token punctuation">,</span> mesh2<span class="token punctuation">,</span> mesh3<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/21/06.png" src="./assets/lessons/21/06.png" width="1792" height="1120" alt="06.png" class="is-loaded"></span></p>
+<p>All the objects are, of course, on top of each other. We will fix that later.</p>
+<p>Again, in order to keep things simple, our code will be a bit redundant. But don't hesitate to use arrays or other code structuring solutions if you have more sections.</p>
+<h3>Material</h3>
+<h4>Base material</h4>
+<p>We are going to use the <a target="_blank" href="https://threejs.org/docs/index.html?q=toon#api/en/materials/MeshToonMaterial">MeshToonMaterial</a> on all three <a target="_blank" href="https://threejs.org/docs/index.html?q=mesh#api/en/objects/Mesh">Meshes</a>.</p>
+<p>As in the <strong>Materials</strong> lesson, we are going to create one instance of the material and use it for all three <a target="_blank" href="https://threejs.org/docs/index.html?q=mesh#api/en/objects/Mesh">Meshes</a>.</p>
+<p>When creating the <a target="_blank" href="https://threejs.org/docs/index.html?q=toon#api/en/materials/MeshToonMaterial">MeshToonMaterial</a>, use the <code spellcheck="false">parameters.materialColor</code> for the <code spellcheck="false">color</code> property and apply it to all 3 <a target="_blank" href="https://threejs.org/docs/index.html?q=mesh#api/en/objects/Mesh">Meshes</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Material</span>
+<span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshToonMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> color<span class="token operator">:</span> parameters<span class="token punctuation">.</span>materialColor <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Meshes</span>
+<span class="token keyword">const</span> mesh1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>TorusGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0.4</span><span class="token punctuation">,</span> <span class="token number">16</span><span class="token punctuation">,</span> <span class="token number">60</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+material
+<span class="token punctuation">)</span>
+<span class="token keyword">const</span> mesh2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ConeGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">32</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+material
+<span class="token punctuation">)</span>
+<span class="token keyword">const</span> mesh3 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>TorusKnotGeometry</span><span class="token punctuation">(</span><span class="token number">0.8</span><span class="token punctuation">,</span> <span class="token number">0.35</span><span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">,</span> <span class="token number">16</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+material
+<span class="token punctuation">)</span>
+
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh1<span class="token punctuation">,</span> mesh2<span class="token punctuation">,</span> mesh3<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/21/07.png" src="./assets/lessons/21/07.png" width="1792" height="1120" alt="07.png" class="is-loaded"></span></p>
+<p>Unfortunately, it seems that the objects are now black.</p>
+<p>The reason is that the <a target="_blank" href="https://threejs.org/docs/index.html?q=toon#api/en/materials/MeshToonMaterial">MeshToonMaterial</a> is one of the Three.js materials that appears only when there is light.</p>
+<h4>Light</h4>
+<p>Add one <a target="_blank" href="https://threejs.org/docs/index.html?q=Direc#api/en/lights/DirectionalLight">DirectionalLight</a> to the scene:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Lights
+*/</span>
+<span class="token keyword">const</span> directionalLight <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>DirectionalLight</span><span class="token punctuation">(</span><span class="token string">'#ffffff'</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+directionalLight<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>directionalLight<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/21/08.png" src="./assets/lessons/21/08.png" width="1792" height="1120" alt="08.png" class="is-loaded"></span></p>
+<p>You should now see your objects.</p>
+<p>We are using the color stored in the <code spellcheck="false">parameters</code> object, but changing this value with the Tweaker doesn't change the material itself.</p>
+<p>To fix that, we can listen to the change event on the already existing tweak and update the material accordingly:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui
+<span class="token punctuation">.</span><span class="token function">addColor</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'materialColor'</span><span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">onChange</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+material<span class="token punctuation">.</span>color<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>parameters<span class="token punctuation">.</span>materialColor<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h4>Gradient texture</h4>
+<p>As we saw in the <strong>Materials</strong> lesson, by default, the <a target="_blank" href="https://threejs.org/docs/index.html?q=toon#api/en/materials/MeshToonMaterial">MeshToonMaterial</a> will have one color for the part in the light and one darker color for the part in the shade.</p>
+<p>We can improve that by providing a gradient texture.</p>
+<p>Two gradient images are provided in the <code spellcheck="false">/static/textures/gradients/</code> folder.</p>
+<p>Instantiate the <a target="_blank" href="https://threejs.org/docs/#api/en/loaders/TextureLoader">TextureLoader</a> before instantiating the <code spellcheck="false">material</code>. Then load the <code spellcheck="false">textures/gradients/3.jpg</code> texture:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Texture</span>
+<span class="token keyword">const</span> textureLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>TextureLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> gradientTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'textures/gradients/3.jpg'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Use it in the <code spellcheck="false">gradientMap</code> property of the material:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Material</span>
+<span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshToonMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+color<span class="token operator">:</span> parameters<span class="token punctuation">.</span>materialColor<span class="token punctuation">,</span>
+gradientMap<span class="token operator">:</span> gradientTexture
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/21/09.png" src="./assets/lessons/21/09.png" width="1792" height="1120" alt="09.png" class="is-loaded"></span></p>
+<p>Not the toon effect we were expecting.</p>
+<p>The reason is that the texture is a very small image composed of 3 pixels going from dark to bright. By default, instead of picking the nearest pixel on the texture, WebGL will try to interpolate the pixels. That's usually a good idea for the look of our experiences, but in this case, it creates a gradient instead of a toon effect.</p>
+<p>To fix that, we need to set the <code spellcheck="false">magFilter</code> of the texture to <code spellcheck="false">THREE.NearestFilter</code> so that the closest pixel is used without interpolating it with neighbor pixels:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> gradientTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'textures/gradients/3.jpg'</span><span class="token punctuation">)</span>
+gradientTexture<span class="token punctuation">.</span>magFilter <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>NearestFilter</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/21/10.png" src="./assets/lessons/21/10.png" width="1792" height="1120" alt="10.png" class="is-loaded"></span></p>
+<p>Much better, but we still need to position the meshes properly.</p>
+<h3>Position</h3>
+<p>By default, in Three.js, the field of view is vertical. This means that if you put one object on the top part of the render and one object on the bottom part of the render and then you resize the window, you'll notice that the objects stay put at the top and at the bottom.</p>
+<p>To illustrate this, temporarily add this code:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">mesh1<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token number">2</span>
+mesh1<span class="token punctuation">.</span>scale<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">)</span>
+
+mesh2<span class="token punctuation">.</span>visible <span class="token operator">=</span> <span class="token boolean">false</span>
+
+mesh3<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token operator">-</span> <span class="token number">2</span>
+mesh3<span class="token punctuation">.</span>scale<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/11.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The torus stays at the top and the torus knot stays at the bottom. When you're done, remove the code above.</p>
+<p>This is good because it means that we only need to make sure that each object is far enough away from the other on the <code spellcheck="false">y</code> axis, so that we don't see them together.</p>
+<p>Create an <code spellcheck="false">objectsDistance</code> variable and choose a random value like <code spellcheck="false">2</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> objectsDistance <span class="token operator">=</span> <span class="token number">2</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Use that variable to position the meshes on the <code spellcheck="false">y</code> axis. The values must be negative so that the objects go down:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">mesh1<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token operator">-</span> objectsDistance <span class="token operator">*</span> <span class="token number">0</span>
+mesh2<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token operator">-</span> objectsDistance <span class="token operator">*</span> <span class="token number">1</span>
+mesh3<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token operator">-</span> objectsDistance <span class="token operator">*</span> <span class="token number">2</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/21/12.png" src="./assets/lessons/21/12.png" width="1792" height="1120" alt="12.png" class="is-loaded"></span></p>
+<p>Increase the <code spellcheck="false">objectsDistance</code> until the objects are far enough apart. A good amount should be <code spellcheck="false">4</code>, but you can go back to change that value later.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> objectsDistance <span class="token operator">=</span> <span class="token number">4</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/21/13.png" src="./assets/lessons/21/13.png" width="1792" height="1120" alt="13.png" class="is-loaded"></span></p>
+<p>Now, we can only see the first object. The two others will be below. We will position them horizontally once we move the camera with the scroll and they appear again.</p>
+<p>The <code spellcheck="false">objectsDistance</code> will get handy a bit later, which is why we saved the value in a variable.</p>
+<h3>Permanent rotation</h3>
+<p>To give more life to the experience, we are going to add a permanent rotation to the objects.</p>
+<p>First, add the objects to a <code spellcheck="false">sectionMeshes</code> array:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> sectionMeshes <span class="token operator">=</span> <span class="token punctuation">[</span> mesh1<span class="token punctuation">,</span> mesh2<span class="token punctuation">,</span> mesh3 <span class="token punctuation">]</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, in the <code spellcheck="false">tick</code> function, loop through the <code spellcheck="false">sectionMeshes</code> array and apply a slow rotation by using the <code spellcheck="false">elapsedTime</code> already available:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> elapsedTime <span class="token operator">=</span> clock<span class="token punctuation">.</span><span class="token function">getElapsedTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Animate meshes</span>
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">const</span> mesh <span class="token keyword">of</span> sectionMeshes<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>x <span class="token operator">=</span> elapsedTime <span class="token operator">*</span> <span class="token number">0.1</span>
+mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>y <span class="token operator">=</span> elapsedTime <span class="token operator">*</span> <span class="token number">0.12</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/14.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>All the meshes (though we can see only one here) should slowly rotate.</p>
+<h2>Camera</h2>
+<h3>Scroll</h3>
+<p>It's time to make the camera move with the scroll.</p>
+<p>First, we need to retrieve the scroll value. This can be done with the <code spellcheck="false">window.scrollY</code> property.</p>
+<p>Create a <code spellcheck="false">scrollY</code> variable and assign it <code spellcheck="false">window.scrollY</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Scroll
+*/</span>
+<span class="token keyword">let</span> scrollY <span class="token operator">=</span> window<span class="token punctuation">.</span>scrollY</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>But then, we need to update that value when the user scrolls. To do that, listen to the <code spellcheck="false">'scroll'</code> event on <code spellcheck="false">window</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'scroll'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+scrollY <span class="token operator">=</span> window<span class="token punctuation">.</span>scrollY
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>scrollY<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You should see the scroll value in the logs. Remove the <code spellcheck="false">console.log</code>.</p>
+<p>In the <code spellcheck="false">tick</code> function, use <code spellcheck="false">scrollY</code> to make the camera move (before doing the render): </p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Animate camera</span>
+camera<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> scrollY
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/15.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Not quite right yet. The camera is way too sensitive and going in the wrong direction. We need to work a little on that value.</p>
+<p><code spellcheck="false">scrollY</code> is positive when scrolling down, but the camera should go down on the <code spellcheck="false">y</code> axis. Let's invert the value:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">camera<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token operator">-</span> scrollY</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/16.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Better, but still too sensitive. Here's why.</p>
+<p><code spellcheck="false">scrollY</code> contains the amount of pixels that have been scrolled. If we scroll 1000 pixels (which is not that much), the camera will go down of 1000 units in the scene (which is a lot).</p>
+<p>Each section has exactly the same size as the viewport. This means that when we scroll the distance of one viewport height, the camera should reach the next object.</p>
+<p>To do that, we need to divide <code spellcheck="false">scrollY</code> by the height of the viewport which is <code spellcheck="false">sizes.height</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">camera<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token operator">-</span> scrollY <span class="token operator">/</span> sizes<span class="token punctuation">.</span>height</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The camera is now going down of <code spellcheck="false">1</code> unit for each section scrolled. But the objects are currently separated by <code spellcheck="false">4</code> units which is the <code spellcheck="false">objectsDistance</code> variable:</p>
+<p>We need to multiply the value by <code spellcheck="false">objectsDistance</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">camera<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token operator">-</span> scrollY <span class="token operator">/</span> sizes<span class="token punctuation">.</span>height <span class="token operator">*</span> objectsDistance</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/17.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>To put it in a nutshell, if the user scrolls down one section, then the camera will move down to the next object.</p>
+<h3>Position object horizontally</h3>
+<p>Now is a good time to position the objects left and right to match the titles:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">mesh1<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">2</span>
+mesh2<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token operator">-</span> <span class="token number">2</span>
+mesh3<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">2</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/18.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<h3>Parallax</h3>
+<p>We call parallax the action of seeing one object through different observation points. This is done naturally by our eyes and it's how we feel the depth of things.</p>
+<p>To make our experience more immersive, we are going to apply this parallax effect by making the camera move horizontally and vertically according to the mouse movements. It'll create a natural interaction, and help the user feel the depth.</p>
+<h4>Cursor</h4>
+<p>First, we need to retrieve the cursor position.</p>
+<p>To do that, create a <code spellcheck="false">cursor</code> object with <code spellcheck="false">x</code> and <code spellcheck="false">y</code> properties:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Cursor
+*/</span>
+<span class="token keyword">const</span> cursor <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+cursor<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">0</span>
+cursor<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token number">0</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, listen to the <code spellcheck="false">mousemove</code> event on <code spellcheck="false">window</code> and update those values:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'mousemove'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">event</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+cursor<span class="token punctuation">.</span>x <span class="token operator">=</span> event<span class="token punctuation">.</span>clientX
+cursor<span class="token punctuation">.</span>y <span class="token operator">=</span> event<span class="token punctuation">.</span>clientY
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>cursor<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/19.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You should get the pixel positions of the cursor in the console.</p>
+<p>While we could use those values directly, it's always better to adapt them to the context.</p>
+<p>First, the amplitude depends on the size of the viewport and users with different screen resolutions will have different results. We can normalize the value (from <code spellcheck="false">0</code> to <code spellcheck="false">1</code>) by dividing them by the size of the viewport:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'mousemove'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">event</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+cursor<span class="token punctuation">.</span>x <span class="token operator">=</span> event<span class="token punctuation">.</span>clientX <span class="token operator">/</span> sizes<span class="token punctuation">.</span>width
+cursor<span class="token punctuation">.</span>y <span class="token operator">=</span> event<span class="token punctuation">.</span>clientY <span class="token operator">/</span> sizes<span class="token punctuation">.</span>height
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>cursor<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>While this is better already, we can do even more.</p>
+<p>We know that the camera will be able to go as much on the left as on the right. This is why, instead of a value going from <code spellcheck="false">0</code> to <code spellcheck="false">1</code> it's better to have a value going from <code spellcheck="false">-0.5</code> to <code spellcheck="false">0.5</code>.</p>
+<p>To do that, subtract <code spellcheck="false">0.5</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'mousemove'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">event</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+cursor<span class="token punctuation">.</span>x <span class="token operator">=</span> event<span class="token punctuation">.</span>clientX <span class="token operator">/</span> sizes<span class="token punctuation">.</span>width <span class="token operator">-</span> <span class="token number">0.5</span>
+cursor<span class="token punctuation">.</span>y <span class="token operator">=</span> event<span class="token punctuation">.</span>clientY <span class="token operator">/</span> sizes<span class="token punctuation">.</span>height <span class="token operator">-</span> <span class="token number">0.5</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>cursor<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/20.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>That's a clean value adapted to the context.</p>
+<p>Remove the <code spellcheck="false">console.log</code>.</p>
+<p>We can now use the cursor values in the <code spellcheck="false">tick</code> function. Create a <code spellcheck="false">parallaxX</code> and a <code spellcheck="false">parallaxY</code> variable and put the <code spellcheck="false">cursor.x</code> and <code spellcheck="false">cursor.y</code> in them:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Animate camera</span>
+camera<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token operator">-</span> scrollY <span class="token operator">/</span> sizes<span class="token punctuation">.</span>height <span class="token operator">*</span> objectsDistance
+
+<span class="token keyword">const</span> parallaxX <span class="token operator">=</span> cursor<span class="token punctuation">.</span>x
+<span class="token keyword">const</span> parallaxY <span class="token operator">=</span> cursor<span class="token punctuation">.</span>y
+camera<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> parallaxX
+camera<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> parallaxY
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Unfortunately, we have two issues. The <code spellcheck="false">x</code> and <code spellcheck="false">y</code> axes don't seem synchronized in terms of direction. And, the camera scroll doesn't work anymore.</p>
+<p>Let's fix the first issue. When we move the cursor to the left, the camera seems to go to the left. Same thing for the right. But when we move the cursor up, the camera seems to move down and the opposite when moving the cursor down.</p>
+<p>To fix that weird feeling, invert the <code spellcheck="false">cursor.y</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    <span class="token keyword">const</span> parallaxX <span class="token operator">=</span> cursor<span class="token punctuation">.</span>x
+<span class="token keyword">const</span> parallaxY <span class="token operator">=</span> <span class="token operator">-</span> cursor<span class="token punctuation">.</span>y
+camera<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> parallaxX
+camera<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> parallaxY</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/21.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>For the second issue, the problem is that we update the <code spellcheck="false">camera.position.y</code> twice and the second one will replace the first one.</p>
+<p>To fix that, we are going to put the camera in a <a target="_blank" href="https://threejs.org/docs/index.html?q=group#api/en/objects/Group">Group</a> and apply the parallax on the group and not the camera itself.</p>
+<p>Right before instantiating the <code spellcheck="false">camera</code>, create the <a target="_blank" href="https://threejs.org/docs/index.html?q=group#api/en/objects/Group">Group</a>, add it to the scene and add the <code spellcheck="false">camera</code> to the <a target="_blank" href="https://threejs.org/docs/index.html?q=group#api/en/objects/Group">Group</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Camera
+*/</span>
+<span class="token comment">// Group</span>
+<span class="token keyword">const</span> cameraGroup <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Group</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>cameraGroup<span class="token punctuation">)</span>
+
+<span class="token comment">// Base camera</span>
+<span class="token keyword">const</span> camera <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PerspectiveCamera</span><span class="token punctuation">(</span><span class="token number">35</span><span class="token punctuation">,</span> sizes<span class="token punctuation">.</span>width <span class="token operator">/</span> sizes<span class="token punctuation">.</span>height<span class="token punctuation">,</span> <span class="token number">0.1</span><span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">)</span>
+camera<span class="token punctuation">.</span>position<span class="token punctuation">.</span>z <span class="token operator">=</span> <span class="token number">6</span>
+cameraGroup<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>camera<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>This shouldn't change the result, but now, the camera is inside a group.</p>
+<p>In the <code spellcheck="false">tick</code> function, instead of applying the parallax on the camera, apply it on the <code spellcheck="false">cameraGroup</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Animate camera</span>
+camera<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token operator">-</span> scrollY <span class="token operator">/</span> sizes<span class="token punctuation">.</span>height <span class="token operator">*</span> objectsDistance
+
+<span class="token keyword">const</span> parallaxX <span class="token operator">=</span> cursor<span class="token punctuation">.</span>x
+<span class="token keyword">const</span> parallaxY <span class="token operator">=</span> <span class="token operator">-</span> cursor<span class="token punctuation">.</span>y
+
+cameraGroup<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> parallaxX
+cameraGroup<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> parallaxY
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/22.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The scroll animation and parallax animation are now mixed together nicely. But we can do even better.</p>
+<h4>Easing</h4>
+<p>The parallax animation is a good start, but it feels a bit too mechanic. Having such a linear animation is impossible in real life for a number of reasons: the camera has weight, there is friction with the air and surfaces, muscles can't make such a linear movement, etc. This is why the movement feels a bit wrong. We are going to add some "easing" (also called "smoothing" or "lerping") and we are going to use a well-known formula.</p>
+<p>The idea behind the formula is that, on each frame, instead of moving the camera straight to the target, we are going to move it (let's say) a 10th closer to the destination. Then, on the next frame, another 10th closer. Then, on the next frame, another 10th closer.</p>
+<p>On each frame, the camera will get a little closer to the destination. But, the closer it gets, the slower it moves because it's always a 10th of the actual position toward the target position.</p>
+<p>First, we need to change the <code spellcheck="false">=</code> to <code spellcheck="false">+=</code> because we are adding to the actual position:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    cameraGroup<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">+=</span> parallaxX
+cameraGroup<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">+=</span> parallaxY</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, we need to calculate the distance from the actual position to the destination:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    cameraGroup<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">+=</span> <span class="token punctuation">(</span>parallaxX <span class="token operator">-</span> cameraGroup<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x<span class="token punctuation">)</span>
+cameraGroup<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">+=</span> <span class="token punctuation">(</span>parallaxY <span class="token operator">-</span> cameraGroup<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Finally, we only want a 10th of that distance:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    cameraGroup<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">+=</span> <span class="token punctuation">(</span>parallaxX <span class="token operator">-</span> cameraGroup<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.1</span>
+cameraGroup<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">+=</span> <span class="token punctuation">(</span>parallaxY <span class="token operator">-</span> cameraGroup<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.1</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/23.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The animation feels a lot smoother, but there is still a problem that some of you might have noticed.</p>
+<p>If you test the experience on a high frequency screen, the <code spellcheck="false">tick</code> function will be called more often and the camera will move faster toward the target. While this is not a big issue, it's not accurate and it's preferable to have the same result across devices as much as possible.</p>
+<p>To fix that, we need to use the time spent between each frame.</p>
+<p>Right after instantiating the <a target="_blank" href="https://threejs.org/docs/index.html?q=clock#api/en/core/Clock">Clock</a>, create a <code spellcheck="false">previousTime</code> variable:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> clock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Clock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> previousTime <span class="token operator">=</span> <span class="token number">0</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>At the beginning of the <code spellcheck="false">tick</code> function, right after setting the <code spellcheck="false">elapsedTime</code>, calculate the <code spellcheck="false">deltaTime</code> by subtracting the <code spellcheck="false">previousTime</code> from the <code spellcheck="false">elapsedTime</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> elapsedTime <span class="token operator">=</span> clock<span class="token punctuation">.</span><span class="token function">getElapsedTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> deltaTime <span class="token operator">=</span> elapsedTime <span class="token operator">-</span> previousTime
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>And then, update the <code spellcheck="false">previousTime</code> to be used on the next frame:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> elapsedTime <span class="token operator">=</span> clock<span class="token punctuation">.</span><span class="token function">getElapsedTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> deltaTime <span class="token operator">=</span> elapsedTime <span class="token operator">-</span> previousTime
+previousTime <span class="token operator">=</span> elapsedTime
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>deltaTime<span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You now have the time spent between the current frame and the previous frame in seconds. For high frequency screens, the value will be smaller because less time was needed.</p>
+<p>We can now use that <code spellcheck="false">deltaTime</code> on the parallax, but, because the <code spellcheck="false">deltaTime</code> is in seconds, the value will be very small (around <code spellcheck="false">0.016</code> for most common screens running at 60fps). Consequently, the effect will be very slow.</p>
+<p>To fix that, we can change <code spellcheck="false">0.1</code> to something like <code spellcheck="false">5</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    cameraGroup<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">+=</span> <span class="token punctuation">(</span>parallaxX <span class="token operator">-</span> cameraGroup<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">5</span> <span class="token operator">*</span> deltaTime
+cameraGroup<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">+=</span> <span class="token punctuation">(</span>parallaxY <span class="token operator">-</span> cameraGroup<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">5</span> <span class="token operator">*</span> deltaTime</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/24.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>We now have a nice easing that will feel the same across different screen frequencies.</p>
+<p>Finally, now that we have the animation set properly, we can lower the amplitude of the effect:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    <span class="token keyword">const</span> parallaxX <span class="token operator">=</span> cursor<span class="token punctuation">.</span>x <span class="token operator">*</span> <span class="token number">0.5</span>
+<span class="token keyword">const</span> parallaxY <span class="token operator">=</span> <span class="token operator">-</span> cursor<span class="token punctuation">.</span>y <span class="token operator">*</span> <span class="token number">0.5</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h2>Particles</h2>
+<p>A good way to make the experience more immersive and to help the user feel the depth is to add particles.</p>
+<p>We are going to create very simple square particles and spread them around the scene.</p>
+<p>Because we need to position the particles ourselves, we are going to create a custom <a target="_blank" href="https://threejs.org/docs/index.html?q=bufferG#api/en/core/BufferGeometry">BufferGeometry</a> like we did in the <strong>Particles</strong> and <strong>Galaxy Generator</strong> lessons.</p>
+<p>Create a <code spellcheck="false">particlesCount</code> variable and a <code spellcheck="false">positions</code> variable using a <code spellcheck="false">Float32Array</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Particles
+*/</span>
+<span class="token comment">// Geometry</span>
+<span class="token keyword">const</span> particlesCount <span class="token operator">=</span> <span class="token number">200</span>
+<span class="token keyword">const</span> positions <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Float32Array</span><span class="token punctuation">(</span>particlesCount <span class="token operator">*</span> <span class="token number">3</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Create a loop and add random coordinates to the <code spellcheck="false">positions</code> array:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> particlesCount<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+positions<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+positions<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+positions<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We will change the positions later, but for now, let's keep things simple and make sure that our geometry is working.</p>
+<p>Instantiate the <a target="_blank" href="https://threejs.org/docs/index.html?q=bufferG#api/en/core/BufferGeometry">BufferGeometry</a> and set the <code spellcheck="false">position</code> attribute:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> particlesGeometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferGeometry</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+particlesGeometry<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'position'</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferAttribute</span><span class="token punctuation">(</span>positions<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Create the material using <a target="_blank" href="https://threejs.org/docs/index.html?q=PointsMaterial#api/en/materials/PointsMaterial">PointsMaterial</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Material</span>
+<span class="token keyword">const</span> particlesMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PointsMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+color<span class="token operator">:</span> parameters<span class="token punctuation">.</span>materialColor<span class="token punctuation">,</span>
+sizeAttenuation<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+size<span class="token operator">:</span> <span class="token number">0.03</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Create the particles using <a target="_blank" href="https://threejs.org/docs/index.html?q=points#api/en/objects/Points">Points</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Points</span>
+<span class="token keyword">const</span> particles <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Points</span><span class="token punctuation">(</span>particlesGeometry<span class="token punctuation">,</span> particlesMaterial<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>particles<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/21/25.png" src="./assets/lessons/21/25.png" width="1792" height="1120" alt="25.png" class="is-loaded"></span></p>
+<p>You should get a bunch of particles spread around in a cube.</p>
+<p>We went through this part fast because we already learned how to make particles in an earlier lesson. If you struggled, it is normal. It is still a bit hard, and easy to make mistakes.</p>
+<p>We can now position the particles on the three axes.</p>
+<p>For the <code spellcheck="false">x</code> (horizontal) and <code spellcheck="false">z</code> (depth), we can use random values that can be as much positive as they are negative:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> particlesCount<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+positions<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span>
+positions<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+positions<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/26.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>For the <code spellcheck="false">y</code> (vertical) it's a bit more tricky. We need to make the particles start high enough and then spread far enough below so that we reach the end with the scroll.</p>
+<p>To do that, we can use the <code spellcheck="false">objectsDistance</code> variable and multiply by the number of objects which is the <code spellcheck="false">length</code> of the <code spellcheck="false">sectionMeshes</code> array:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> particlesCount<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+positions<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span>
+positions<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> objectsDistance <span class="token operator">*</span> <span class="token number">0.5</span> <span class="token operator">-</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> objectsDistance <span class="token operator">*</span> sectionMeshes<span class="token punctuation">.</span>length
+positions<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/27.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Like for the objects material, we can update the color of the particles in the change event of the tweak:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui
+<span class="token punctuation">.</span><span class="token function">addColor</span><span class="token punctuation">(</span>parameters<span class="token punctuation">,</span> <span class="token string">'materialColor'</span><span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">onChange</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+material<span class="token punctuation">.</span>color<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>parameters<span class="token punctuation">.</span>materialColor<span class="token punctuation">)</span>
+particlesMaterial<span class="token punctuation">.</span>color<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>parameters<span class="token punctuation">.</span>materialColor<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>That's all for the particles, but you can obviously improve them as we did in the previous lessons with random sizes, random alpha. And, we can even animate them.</p>
+<h2>Triggered rotations</h2>
+<p>As a final feature and to make the exercise just a bit harder, we are going to make the objects do a little spin when we arrive at the corresponding section in addition to the permanent rotation.</p>
+<h3>Knowing when to trigger the animation</h3>
+<p>First, we need a way to know when we reach a section. There are plenty of ways of doing that and we could even use a library, but in our case, we can use the <code spellcheck="false">scrollY</code> value and do some math to find the current section.</p>
+<p>After creating the <code spellcheck="false">scrollY</code> variable, create a <code spellcheck="false">currentSection</code> variable and set it to <code spellcheck="false">0</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">let</span> scrollY <span class="token operator">=</span> window<span class="token punctuation">.</span>scrollY
+<span class="token keyword">let</span> currentSection <span class="token operator">=</span> <span class="token number">0</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>In the <code spellcheck="false">'scroll'</code> event callback function, calculate the current section by dividing the <code spellcheck="false">scrollY</code> by <code spellcheck="false">sizes.height</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'scroll'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+scrollY <span class="token operator">=</span> window<span class="token punctuation">.</span>scrollY
+
+<span class="token keyword">const</span> newSection <span class="token operator">=</span> scrollY <span class="token operator">/</span> sizes<span class="token punctuation">.</span>height
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>newSection<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/28.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>This works because each section is exactly one height of the viewport.</p>
+<p>To get the exact section instead of that float value, we can use <code spellcheck="false">Math.round()</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'scroll'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+scrollY <span class="token operator">=</span> window<span class="token punctuation">.</span>scrollY
+
+<span class="token keyword">const</span> newSection <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">round</span><span class="token punctuation">(</span>scrollY <span class="token operator">/</span> sizes<span class="token punctuation">.</span>height<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>newSection<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/29.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>We can now test if <code spellcheck="false">newSection</code> is different from <code spellcheck="false">currentSection</code>. If so, that means we changed the section and we can update the <code spellcheck="false">currentSection</code> in order to do our animation:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'scroll'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+scrollY <span class="token operator">=</span> window<span class="token punctuation">.</span>scrollY
+<span class="token keyword">const</span> newSection <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">round</span><span class="token punctuation">(</span>scrollY <span class="token operator">/</span> sizes<span class="token punctuation">.</span>height<span class="token punctuation">)</span>
+
+<span class="token keyword">if</span><span class="token punctuation">(</span>newSection <span class="token operator">!=</span> currentSection<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+currentSection <span class="token operator">=</span> newSection
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'changed'</span><span class="token punctuation">,</span> currentSection<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/30.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<h3>Animating the meshes</h3>
+<p>We can now animate the meshes and, to do that, we are going to use <a target="_blank" href="https://greensock.com/gsap/">GSAP</a>.</p>
+<p>Add GSAP to the dependencies by running <code spellcheck="false">npm install gsap@3.5.1</code> in the terminal. We are using a very specific version of GSAP  to make sure that the code is the same. If you feel like using the latest version, run <code spellcheck="false">npm install gsap</code> but you might have to use a different syntax.</p>
+<p>If you get vulnerability warnings, don't pay it any mind. It's not dangerous.</p>
+<p>Once the dependency is added, import GSAP at the start of the code:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> gsap <span class="token keyword">from</span> <span class="token string">'gsap'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, in the <code spellcheck="false">if</code> statement we did earlier, we can do the animation with <code spellcheck="false">gsap.to()</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'scroll'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token keyword">if</span><span class="token punctuation">(</span>newSection <span class="token operator">!=</span> currentSection<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+gsap<span class="token punctuation">.</span><span class="token function">to</span><span class="token punctuation">(</span>
+sectionMeshes<span class="token punctuation">[</span>currentSection<span class="token punctuation">]</span><span class="token punctuation">.</span>rotation<span class="token punctuation">,</span>
+<span class="token punctuation">{</span>
+    duration<span class="token operator">:</span> <span class="token number">1.5</span><span class="token punctuation">,</span>
+    ease<span class="token operator">:</span> <span class="token string">'power2.inOut'</span><span class="token punctuation">,</span>
+    x<span class="token operator">:</span> <span class="token string">'+=6'</span><span class="token punctuation">,</span>
+    y<span class="token operator">:</span> <span class="token string">'+=3'</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>While this code is valid, it will unfortunately not work. The reason is that, on each frame, we are already updating the <code spellcheck="false">rotation.x</code> and <code spellcheck="false">rotation.y</code> of each mesh with the <code spellcheck="false">elapsedTime</code>.</p>
+<p>To fix that, in the tick function, instead of setting a very specific rotation based on the <code spellcheck="false">elapsedTime</code>, we are going to add the <code spellcheck="false">deltaTime</code> to the current rotation:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">const</span> mesh <span class="token keyword">of</span> sectionMeshes<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>x <span class="token operator">+=</span> deltaTime <span class="token operator">*</span> <span class="token number">0.1</span>
+mesh<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>y <span class="token operator">+=</span> deltaTime <span class="token operator">*</span> <span class="token number">0.12</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/31.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>To add more randomness to the animation, especially for the cone, we can also animate the <code spellcheck="false">z</code> axis:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">        gsap<span class="token punctuation">.</span><span class="token function">to</span><span class="token punctuation">(</span>
+sectionMeshes<span class="token punctuation">[</span>currentSection<span class="token punctuation">]</span><span class="token punctuation">.</span>rotation<span class="token punctuation">,</span>
+<span class="token punctuation">{</span>
+    duration<span class="token operator">:</span> <span class="token number">1.5</span><span class="token punctuation">,</span>
+    ease<span class="token operator">:</span> <span class="token string">'power2.inOut'</span><span class="token punctuation">,</span>
+    x<span class="token operator">:</span> <span class="token string">'+=6'</span><span class="token punctuation">,</span>
+    y<span class="token operator">:</span> <span class="token string">'+=3'</span><span class="token punctuation">,</span>
+    z<span class="token operator">:</span> <span class="token string">'+=1.5'</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/21/32.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<h2>Go further</h2>
+<p>We kept things really simple, but you can go much further.</p>
+<ul>
+<li>Add more content to the HTML</li>
+<li>Animate other properties like the material</li>
+<li>Animate the HTML texts</li>
+<li>Improve the particles</li>
+<li>Add more tweaks to the Debug UI</li>
+<li>Test other colors</li>
+<li>Etc.</li>
+</ul>
+</section>
+</body>
+
+</html>

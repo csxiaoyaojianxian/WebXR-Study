@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<body>
+
+    <section class="text js-text">
+        <h2>Introduction</h2>
+<p>Our canvas currently has a fixed resolution of <code spellcheck="false">800x600</code>. You don't necessarily need your WebGL to fit the whole screen, but if you want an immersive experience, it might be better.</p>
+<p>First, we would like to have the canvas take all available space. Then, we need to make sure that it still fits if the user resizes their window. Finally, we need to give the user a way to experiment with the experience in fullscreen.</p>
+<h2>Setup</h2>
+<p>The starter contains what we finished within the previous lesson. We have our cube in the center, and we can drag and drop to move the camera.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/08/step-01.png" src="./assets/lessons/08/step-01.png" width="1792" height="1120" alt="./assets/lessons/08/step-01.png" class="is-loaded"></span></p>
+<h2>Fit in the viewport</h2>
+<p>To make the canvas fit perfectly in the viewport, instead of using fixed numbers in the <code spellcheck="false">sizes</code> variable, use the <code spellcheck="false">window.innerWidth</code> and <code spellcheck="false">window.innerHeight</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// ...</span>
+
+<span class="token comment">// Sizes</span>
+<span class="token keyword">const</span> sizes <span class="token operator">=</span> <span class="token punctuation">{</span>
+width<span class="token operator">:</span> window<span class="token punctuation">.</span>innerWidth<span class="token punctuation">,</span>
+height<span class="token operator">:</span> window<span class="token punctuation">.</span>innerHeight
+<span class="token punctuation">}</span>
+
+<span class="token comment">// ...</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/08/step-02.png" src="./assets/lessons/08/step-02.png" width="1792" height="1120" alt="./assets/lessons/08/step-02.png"></span></p>
+<p>You can see that the canvas now has the width and height of the viewport. Unfortunately, there is a white margin and a scroll bar (try to scroll if you don't see any scrollbar).</p>
+<p>The problem is that browsers all have default stylings like more significant titles, underlined links, space between paragraphs, and paddings on the page. There are many ways of fixing that, and it might depend on the rest of your website. If you have other content, try not to break any of those while doing this.</p>
+<p>We will keep things simple and fix the position of the canvas using CSS.</p>
+<p>Our template is already linked to a CSS file in <code spellcheck="false">src/style.css</code>. It might look strange if you are not used to Webpack, but the CSS file is directly imported from <code spellcheck="false">script.js</code> on the first line:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token string">'./style.css'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You can write standard CSS just like you're used to, and the page will automatically reload.</p>
+<p>A good thing to do first would be to remove any type of <code spellcheck="false">margin</code> or <code spellcheck="false">padding</code> on all elements by using a wildcard <code spellcheck="false">*</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-css"><code spellcheck="false" class=" language-css"><span class="token selector">*</span>
+<span class="token punctuation">{</span>
+<span class="token property">margin</span><span class="token punctuation">:</span> 0<span class="token punctuation">;</span>
+<span class="token property">padding</span><span class="token punctuation">:</span> 0<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>CSS</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, we can fix the canvas on the top left using its <code spellcheck="false">webgl</code> class to select it:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-css"><code spellcheck="false" class=" language-css"><span class="token selector">.webgl</span>
+<span class="token punctuation">{</span>
+<span class="token property">position</span><span class="token punctuation">:</span> fixed<span class="token punctuation">;</span>
+<span class="token property">top</span><span class="token punctuation">:</span> 0<span class="token punctuation">;</span>
+<span class="token property">left</span><span class="token punctuation">:</span> 0<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>CSS</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You don't need to specify <code spellcheck="false">width</code> or <code spellcheck="false">height</code> on the canvas because Three.js is already taking care of that when you call the <code spellcheck="false">renderer.setSize(...)</code> method.</p>
+<p>This is a good opportunity to fix a small problem on our canvas. Maybe you've noticed a blue outline on it when drag and dropping. This mostly happens on latest versions of Chrome. To fix that, we can simply add an <code spellcheck="false">outline: none;</code> on the <code spellcheck="false">.webgl</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token punctuation">.</span>webgl
+<span class="token punctuation">{</span>
+position<span class="token operator">:</span> fixed<span class="token punctuation">;</span>
+top<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">;</span>
+left<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">;</span>
+outline<span class="token operator">:</span> none<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>If you want to remove any type of scrolling even on touch screens, you can add an <code spellcheck="false">overflow: hidden</code> on both <code spellcheck="false">html</code> and <code spellcheck="false">body</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-css"><code spellcheck="false" class=" language-css"><span class="token selector">html,
+body</span>
+<span class="token punctuation">{</span>
+<span class="token property">overflow</span><span class="token punctuation">:</span> hidden<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>CSS</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/08/step-03.png" src="./assets/lessons/08/step-03.png" width="1792" height="1120" alt="./assets/lessons/08/step-03.png"></span></p>
+<p>You can now enjoy your WebGL in all its glory. Unfortunately, if you resize the window, the canvas won't follow.</p>
+<p>We need to deal with the resize.</p>
+<h2>Handle resize</h2>
+<p>To resize the canvas, we first need to know when the window is being resized. To do so, you can listen to the <code spellcheck="false">resize</code> event on window.</p>
+<p>Add the <code spellcheck="false">resize</code> listener right after the <code spellcheck="false">sizes</code> variable:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'resize'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'window has been resized'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Now that we trigger a function when the window is being resized, we need to update few things in our code.</p>
+<p>First, we must update the <code spellcheck="false">sizes</code> variable:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'resize'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// Update sizes</span>
+sizes<span class="token punctuation">.</span>width <span class="token operator">=</span> window<span class="token punctuation">.</span>innerWidth
+sizes<span class="token punctuation">.</span>height <span class="token operator">=</span> window<span class="token punctuation">.</span>innerHeight
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Secondly, we must update the <code spellcheck="false">camera</code> aspect ratio by changing its <code spellcheck="false">aspect</code> property: </p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'resize'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Update camera</span>
+camera<span class="token punctuation">.</span>aspect <span class="token operator">=</span> sizes<span class="token punctuation">.</span>width <span class="token operator">/</span> sizes<span class="token punctuation">.</span>height
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>When you change camera properties like <code spellcheck="false">aspect</code> you also need to update the projection matrix using <code spellcheck="false">camera.updateProjectionMatrix()</code>. We will talk about matrices later:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'resize'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+camera<span class="token punctuation">.</span><span class="token function">updateProjectionMatrix</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Finally, we must update the <code spellcheck="false">renderer</code>. Updating the renderer will automatically update the canvas width and height:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'resize'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Update renderer</span>
+renderer<span class="token punctuation">.</span><span class="token function">setSize</span><span class="token punctuation">(</span>sizes<span class="token punctuation">.</span>width<span class="token punctuation">,</span> sizes<span class="token punctuation">.</span>height<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>All together:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'resize'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// Update sizes</span>
+sizes<span class="token punctuation">.</span>width <span class="token operator">=</span> window<span class="token punctuation">.</span>innerWidth
+sizes<span class="token punctuation">.</span>height <span class="token operator">=</span> window<span class="token punctuation">.</span>innerHeight
+
+<span class="token comment">// Update camera</span>
+camera<span class="token punctuation">.</span>aspect <span class="token operator">=</span> sizes<span class="token punctuation">.</span>width <span class="token operator">/</span> sizes<span class="token punctuation">.</span>height
+camera<span class="token punctuation">.</span><span class="token function">updateProjectionMatrix</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Update renderer</span>
+renderer<span class="token punctuation">.</span><span class="token function">setSize</span><span class="token punctuation">(</span>sizes<span class="token punctuation">.</span>width<span class="token punctuation">,</span> sizes<span class="token punctuation">.</span>height<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/08/step-04.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>You can resize the window as you want, the canvas should cover the viewport without any scroll bar or overflow.</p>
+<h2>Handle pixel ratio</h2>
+<p>Some of you might see a kind of blurry render and artifacts shaped likes stairs on the edges (called aliasing), but not all of you. If you do, it's because you are testing on a screen with a pixel ratio greater than <code spellcheck="false">1</code>.</p>
+<p>The pixel ratio corresponds to how many physical pixels you have on the screen for one pixel unit on the software part.</p>
+<h4>Some history</h4>
+<p>A few years ago, all screens had a pixel ratio of <code spellcheck="false">1</code> and everything was just fine. But when you looked closely at your screen, you could see those pixels, and it was a limitation for how precise images and how thin fonts could be.</p>
+<p>The company that did the most about that was Apple. Apple saw an opportunity and started constructing screens with a pixel ratio of <code spellcheck="false">2</code> called retina. Now, a lot of constructors are doing it and you can see screens with even higher pixel ratios.</p>
+<p>While this is a good thing for the image quality, a pixel ratio of <code spellcheck="false">2</code> means 4 times more pixels to render. And a pixel ratio of <code spellcheck="false">3</code> means 9 times more pixels to render.</p>
+<p>And guess what? Highest pixel ratios are usually on the weakest devices —mobiles ones.</p>
+<p>There goes your frame rate.</p>
+<h4>Handle the pixel ratio</h4>
+<p>To get the screen pixel ratio you can use <code spellcheck="false">window.devicePixelRatio</code> , and to update the pixel ratio of your renderer, you simply need to call the <code spellcheck="false">renderer.setPixelRatio(...)</code></p>
+<p>You might be tempted to simply send the device pixel ratio to that method, but you'll end up with performance issues on high pixel ratio devices.</p>
+<p>Having a pixel ratio greater than <code spellcheck="false">2</code> is mostly marketing. Your eyes will see almost no difference between <code spellcheck="false">2</code> and <code spellcheck="false">3</code> but it will create performance issues and empty the battery faster. What you can do is limit the pixel ratio to <code spellcheck="false">2</code>. To do that, you can use <code spellcheck="false">Math.min()</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">renderer<span class="token punctuation">.</span><span class="token function">setPixelRatio</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span>window<span class="token punctuation">.</span>devicePixelRatio<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/08/step-05.png" src="./assets/lessons/08/step-05.png" width="1792" height="1120" alt="./assets/lessons/08/step-05.png"></span></p>
+<p>There are techniques to be notified when the pixel ratio changes, but it only concerns users having multiple screens with different pixel ratios and they usually resize their window when changing from a screen to another. That is why we will simply add this method to the <code spellcheck="false">resize</code> callback too:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'resize'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// Update sizes</span>
+sizes<span class="token punctuation">.</span>width <span class="token operator">=</span> window<span class="token punctuation">.</span>innerWidth
+sizes<span class="token punctuation">.</span>height <span class="token operator">=</span> window<span class="token punctuation">.</span>innerHeight
+
+<span class="token comment">// Update camera</span>
+camera<span class="token punctuation">.</span>aspect <span class="token operator">=</span> sizes<span class="token punctuation">.</span>width <span class="token operator">/</span> sizes<span class="token punctuation">.</span>height
+
+<span class="token comment">// Update renderer</span>
+renderer<span class="token punctuation">.</span><span class="token function">setSize</span><span class="token punctuation">(</span>sizes<span class="token punctuation">.</span>width<span class="token punctuation">,</span> sizes<span class="token punctuation">.</span>height<span class="token punctuation">)</span>
+renderer<span class="token punctuation">.</span><span class="token function">setPixelRatio</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span>window<span class="token punctuation">.</span>devicePixelRatio<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h2>Handle fullscreen</h2>
+<p>Now that we have the canvas taking all the available space with the right pixel ratio, it's time to add support to the fullscreen.</p>
+<p>First, we need to decide what action will trigger the fullscreen mode. It could be an HTML button, but instead, we're going to use a double click.</p>
+<p>When the double click happens, we will toggle the fullscreen —meaning that if the window is not in fullscreen, a double-click will enable fullscreen mode, and if the window is already in fullscreen, a double-click will exit fullscreen mode.</p>
+<p>First, we need to listen to the double click event, and we can do that with the <code spellcheck="false">dblclick</code> event:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'dblclick'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'double click'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>This event will work on most modern browsers except for Chrome Android: <a target="_blank" href="https://developer.mozilla.org/docs/Web/API/Element/dblclick_event">https://developer.mozilla.org/docs/Web/API/Element/dblclick_event</a></p>
+<p>Now that we have our event, we need 3 things:</p>
+<ul>
+<li>A way to know if it's already in fullscreen</li>
+<li>A method to go to the fullscreen mode</li>
+<li>A method to leave the fullscreen mode</li>
+</ul>
+<p>To know if we are already in fullscreen or not, we can use <code spellcheck="false">document.fullscreenElement</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'dblclick'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>document<span class="token punctuation">.</span>fullscreenElement<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'go fullscreen'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">else</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'leave fullscreen'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The method to request the fullscreen is associated with the element. It's because you can choose what will be in fullscreen. It can be the whole page, any DOM element or the <code spellcheck="false">&lt;canvas&gt;</code>.</p>
+<p>We will use the <code spellcheck="false">&lt;canvas&gt;</code> and call the <code spellcheck="false">requestFullscreen()</code> method on it:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'dblclick'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>document<span class="token punctuation">.</span>fullscreenElement<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+canvas<span class="token punctuation">.</span><span class="token function">requestFullscreen</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">else</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'leave fullscreen'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The method to leave the fullscreen mode is available directly on the <code spellcheck="false">document</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'dblclick'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>document<span class="token punctuation">.</span>fullscreenElement<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+canvas<span class="token punctuation">.</span><span class="token function">requestFullscreen</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">else</span>
+<span class="token punctuation">{</span>
+document<span class="token punctuation">.</span><span class="token function">exitFullscreen</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/08/step-06.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>You can test the result by double-clicking anywhere to toggle the fullscreen mode. Unfortunately, this won't work on Safari</p>
+<p>This browser is taking its time to support officially simple features like the fullscreen, and we need to use prefixed versions to make it work for <code spellcheck="false">document.fullscreenElement</code>, <code spellcheck="false">canvas.requestFullscreen</code>, and <code spellcheck="false">document.exitFullscreen</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'dblclick'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> fullscreenElement <span class="token operator">=</span> document<span class="token punctuation">.</span>fullscreenElement <span class="token operator">||</span> document<span class="token punctuation">.</span>webkitFullscreenElement
+
+<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>fullscreenElement<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>canvas<span class="token punctuation">.</span>requestFullscreen<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    canvas<span class="token punctuation">.</span><span class="token function">requestFullscreen</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span>canvas<span class="token punctuation">.</span>webkitRequestFullscreen<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    canvas<span class="token punctuation">.</span><span class="token function">webkitRequestFullscreen</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">else</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>document<span class="token punctuation">.</span>exitFullscreen<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    document<span class="token punctuation">.</span><span class="token function">exitFullscreen</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span>document<span class="token punctuation">.</span>webkitExitFullscreen<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    document<span class="token punctuation">.</span><span class="token function">webkitExitFullscreen</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Everything should work fine on all modern browsers.</p>
+    </section>
+</body>
+
+</html>

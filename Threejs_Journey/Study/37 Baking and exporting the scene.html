@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<section class="text js-text">
+    <h2>Introduction</h2>
+<p>We created a scene that looks good when doing a render, but our final goal is to export it to Three.js.</p>
+<p>We need to optimize it, but also to bake it. If you remember from the previous lesson, baking consists of saving the good-looking render result into a texture that we will then place on the geometry in Three.js. Because of that, we need to UV unwrap our scene.</p>
+<h2>Setup</h2>
+<p>You can start from the blender file you made in the previous lesson, or you can get the same file as is in that lesson by using the starter file.</p>
+<h2>Optimization</h2>
+<h3>Removing hidden faces</h3>
+<p>The first thing we need to do is remove all the hidden faces. That would mean faces directly on the floor like the bottom of the trunks. And, it would also mean faces against other faces like the back of the stair steps.</p>
+<p>In order to see the faces more clearly, we can switch between the <code spellcheck="false">Wireframe</code> and the <code spellcheck="false">Solid</code> shadings:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-1.png" src="./assets/lessons/37/step-1.png" width="1536" height="960" alt="step-1.png" class="is-loaded"></span></p>
+<h4>Trunks</h4>
+<p>We are going to start with the trunks.</p>
+<p>You can deactivate the collections you are not working on at the moment by unchecking them in the <code spellcheck="false">Outliner</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-2.png" src="./assets/lessons/37/step-2.png" width="1536" height="960" alt="step-2.png" class="is-loaded"></span></p>
+<p>To optimize the trunks and logs:</p>
+<ul>
+<li>Select all of them.</li>
+<li>Go into <code spellcheck="false">Edit Mode</code>.</li>
+<li>Switch to the <code spellcheck="false">face</code> selection.</li>
+<li>Select all the faces as shown below and delete them with <code spellcheck="false">X</code>.</li>
+</ul>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-3.png" src="./assets/lessons/37/step-3.png" width="1536" height="960" alt="step-3.png" class="is-loaded"></span></p>
+<p>You should get something like this:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-4.png" src="./assets/lessons/37/step-4.png" width="1536" height="960" alt="step-4.png" class="is-loaded"></span></p>
+<h4>Fences</h4>
+<p>Repeat the process with the fences:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-5.png" src="./assets/lessons/37/step-5.png" width="1536" height="960" alt="step-5.png" class="is-loaded"></span></p>
+<h4>Pole lights</h4>
+<p>Repeat the process with the pole lights. You only need to do one of the pole lights because they are linked duplicates.</p>
+<p>Don't forget to delete the bottom cap of the main beam and the caps of the rope:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-6.png" src="./assets/lessons/37/step-6.png" width="1536" height="960" alt="step-6.png" class="is-loaded"></span></p>
+<h4>Rocks</h4>
+<p>Repeat the process with the rocks:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-7.png" src="./assets/lessons/37/step-7.png" width="1536" height="960" alt="step-7.png" class="is-loaded"></span></p>
+<p>Though it isn't mandatory, if some rocks are overflowing into the ground, you can fix that with the <code spellcheck="false">bissect</code> tool we used in the previous lesson. Select all the faces in <code spellcheck="false">Edit Mode</code>, press <code spellcheck="false">F3</code> and search for <code spellcheck="false">bissect</code>. Then slice the overflowing parts of the rocks you want to cut out.</p>
+<h4>Portal</h4>
+<p>For the portal, most of the optimization concerns the stairs.</p>
+<p>You can start by resizing them so that they don't overlap too much:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-8.png" src="./assets/lessons/37/step-8.png" width="1536" height="960" alt="step-8.png" class="is-loaded"></span></p>
+<p>Then you can remove the bottom faces but also the hidden faces between the steps:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-9.png" src="./assets/lessons/37/step-9.png" width="1536" height="960" alt="step-9.png" class="is-loaded"></span></p>
+<p>If you did the previous lessons exactly as I said, and you now try to remove the faces of the bricks inside the stairs, you will see that you can't do it without editing all the bricks at the same time because they are linked duplicates.</p>
+<p>If you didn't use linked duplicates, you shouldn't have this problem, but we are going to make sure that none of the objects in the scene are linked duplicates anyway.</p>
+<h4>Unlink duplicates</h4>
+<p>We need to unlink the duplicates in order to fix the bricks, as well as for the next step, which will consist of unwrapping the geometries. If we were to keep the links, both pole lights would be unwrapped on the same coordinates. This would result in the baking being done twice in the same position of the texture.</p>
+<p>To unlink the duplicates, go into <code spellcheck="false">Object Mode</code> and select all objects with <code spellcheck="false">A</code>. Even if we are only concerned with the portal bricks and the pole lights, the action we are taking can be applied to the whole scene without consequences.</p>
+<p>While all the objects are selected, press <code spellcheck="false">F3</code> and search for <code spellcheck="false">make single</code>. Then choose <code spellcheck="false">Make Single User &gt; Object &amp; Data</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-10.png" src="./assets/lessons/37/step-10.png" width="1536" height="960" alt="step-10.png" class="is-loaded"></span></p>
+<p>All previously linked duplicates are now unlinked and we can edit the bricks that overlap the stairs without changing all the bricks.</p>
+<p>Remove the faces of the bricks inside the stairs:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-11.png" src="./assets/lessons/37/step-11.png" width="1536" height="960" alt="step-11.png" class="is-loaded"></span></p>
+<p>Check the whole scene and make sure that you are done with removing the hidden faces.</p>
+<p>Forgetting some isn't a big issue and you can still remove them later. But once we start unwrapping the geometries, removing faces at that time might have some consequences.</p>
+<h3>Fixing faces orientation</h3>
+<p>One issue we can't see has to do with the orientation of faces. All faces have a front and a back. While this isn't a problem when doing a render, it might create bugs during the baking process and some of the faces might become black. Those faces won't even be rendered in Three.js because, by default, back sides are hidden.</p>
+<p>As you might have guessed, this orientation is a matter of normals. When doing extrudes, insets, and other operations like that, we might have flipped the normals unintentionally.</p>
+<p>First, we need a way to see the faces orientation. While in <code spellcheck="false">Object Mode</code>, in the top right corner of the Blender <code spellcheck="false">Viewport 3D</code>, click on the following icon:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-12.png" src="./assets/lessons/37/step-12.png" width="86" height="56" alt="step-12.png" class="is-loaded"></span></p>
+<p>On the menu which should open, check <code spellcheck="false">Face Orientation</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-13.png" src="./assets/lessons/37/step-13.png" width="375" height="515" alt="step-13.png" class="is-loaded"></span></p>
+<p>You should now see blue faces when the orientation is good and red faces when the orientation is wrong:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-14.png" src="./assets/lessons/37/step-14.png" width="1536" height="960" alt="step-14.png" class="is-loaded"></span></p>
+<p>In this case only the pole lights are wrong, but you might have a very different result with your model.</p>
+<p>If everything is already blue, congratulations, you can skip this step.</p>
+<p>To fix the red faces:</p>
+<ul>
+<li>Select the object you want to fix.</li>
+<li>Go into <code spellcheck="false">Edit Mode</code>.</li>
+<li>Select the faces you want to flip.</li>
+<li>Press <code spellcheck="false">F3</code>, search for <code spellcheck="false">flip</code> and choose <code spellcheck="false">Mesh &gt; Normals &gt; Flip</code>.</li>
+</ul>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-15.png" src="./assets/lessons/37/step-15.png" width="1536" height="960" alt="step-15.png" class="is-loaded"></span></p>
+<p>Once the whole scene is blue, you can uncheck the <code spellcheck="false">Face Orientation</code> and continue:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-16.png" src="./assets/lessons/37/step-16.png" width="1536" height="960" alt="step-16.png" class="is-loaded"></span></p>
+<h3>Normalize scales</h3>
+<p>Another problem is with scaling. </p>
+<p>Some objects have been scaled in <code spellcheck="false">Edit Mode</code>, meaning that we are scaling the geometry and not the object itself. Some other objects have been scaled in <code spellcheck="false">Object Mode</code>, meaning that there is a transformation on the object but not on the geometry itself.</p>
+<p>Again, while doing renders, it's not really important. But it might create issues when doing the UV unwrapping.</p>
+<p>Later in the lesson, we are going to use automatic UV unwrapping and Blender will take into account the geometry size but not the object scale. This might result in some objects taking more space or not as much space as they should. For example, you might end up with the axe taking only half of the texture because the geometry is still huge even though we reduced the object scale.</p>
+<p>To fix that, we need to normalize all the scales.</p>
+<p>In <code spellcheck="false">Object Mode</code>, select all the objects with <code spellcheck="false">A</code> , press <code spellcheck="false">CTRL + A</code> to open the <code spellcheck="false">Apply</code> menu and choose <code spellcheck="false">Scale</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-17.png" src="./assets/lessons/37/step-17.png" width="1536" height="960" alt="step-17.png" class="is-loaded"></span></p>
+<p>You can't see a difference, but all of the object scales have been applied to their geometries instead. This way, all our objects now have a scale of <code spellcheck="false">1</code>.</p>
+<p>We are done with the optimization and we can start to UV unwrap our scene.</p>
+<p>Don't forget to save.</p>
+<h2>UV unwrapping</h2>
+<p>The idea is to unfold all the geometry composing our scene into a square. Later, this will enable us to bake the render into a texture that will follow the unwrapping we set.</p>
+<p>The scene:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/baked-render.png" src="./assets/lessons/37/baked-render.png" width="1920" height="1080" alt="./assets/lessons/37/baked-render.png" class="is-loaded"></span></p>
+<p>The unfold scene:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/baked.jpg" src="./assets/lessons/37/baked.jpg" width="2048" height="2048" alt="./assets/lessons/37/baked.jpg" class="is-loaded"></span></p>
+<p>There are multiple ways of unwrapping a geometry. We can use a "smart" automatic version that will do a pretty good job. Or, we can do a manual version to create a more optimized version, but at the price of more effort.</p>
+<p>We are going to do a mix of both techniques depending on the objects.</p>
+<p>First, we can change the bottom right area to <code spellcheck="false">UV Editor</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-18.png" src="./assets/lessons/37/step-18.png" width="3072" height="1920" alt="step-18.png" class="is-loaded"></span></p>
+<p>The <code spellcheck="false">UV Editor</code> displays a square that represents our unfold. We need to make everything fit inside that square. We could have used multiple textures, which would mean independent UV unwraps, but our scene isn't that complex or big.</p>
+<h3>Floor</h3>
+<p>Let's start by unwrapping the easiest element, the floor.</p>
+<ul>
+<li>Select the floor.</li>
+<li>Go into <code spellcheck="false">Edit Mode</code>.</li>
+<li>Select the whole geometry with <code spellcheck="false">A</code>.</li>
+</ul>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-19.png" src="./assets/lessons/37/step-19.png" width="3072" height="1920" alt="step-19.png" class="is-loaded"></span></p>
+<p>As you can see in the <code spellcheck="false">UV Editor</code>, the plane is already unwrapped and takes the whole UV. By default, Blender generates UV coordinates for most of the primitives. This is good, and we can simply move that square to a corner of the UV map.</p>
+<p>To edit the UV, the shortcuts are almost the same as editing an object. While hovering the <code spellcheck="false">UV Editor</code> area, press <code spellcheck="false">A</code> to select everything, <code spellcheck="false">S</code> to scale it and <code spellcheck="false">G</code> to move it:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-20.png" src="./assets/lessons/37/step-20.png" width="1536" height="960" alt="step-20.png" class="is-loaded"></span></p>
+<p>Don't spend too much time on placing it exactly. In the end, we will reorganize things.</p>
+<h3>Fences</h3>
+<p>Let's try a more difficult shape and unwrap the fences.</p>
+<ul>
+<li>Select one of the fences.</li>
+<li>Go into <code spellcheck="false">Edit Mode</code>.</li>
+<li>Select all the faces with <code spellcheck="false">A</code>.</li>
+</ul>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-21.png" src="./assets/lessons/37/step-21.png" width="1536" height="960" alt="step-21.png" class="is-loaded"></span></p>
+<p>As you can see, the geometry is already unwrapped, but the 4 boxes that compose our fence are stacked one above the other and in a cross shape that doesn't match the proportions of our geometry. This is the default UV unwrap of a cube. We need to unwrap it ourselves.</p>
+<p>We are going to focus on one of the poles of the fence first. To select a pole, click on one of the faces:</p>
+<p>Press <code spellcheck="false">CTRL + L</code> and all the other faces of the pole should now be selected (make sure that <code spellcheck="false">Seam</code> is active on the menu which should open in the bottom left of the area:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-23.png" src="./assets/lessons/37/step-23.png" width="3072" height="1920" alt="step-23.png" class="is-loaded"></span></p>
+<p>This technique is very useful to select what we call islands. An island is a group of faces that are connected together.</p>
+<p>To unwrap the pole, press <code spellcheck="false">U</code> and choose <code spellcheck="false">Unwrap</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-24.png" src="./assets/lessons/37/step-24.png" width="1536" height="960" alt="step-24.png" class="is-loaded"></span></p>
+<p>Unfortunately, this isn't a good unwrap:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-25.png" src="./assets/lessons/37/step-25.png" width="1536" height="960" alt="step-25.png" class="is-loaded"></span></p>
+<p>And this is because we didn't provide information on how to "cut" the geometry.</p>
+<p>If you try to unfold a cube without cutting some of the edges, you'll end up with a mess. Those cuts are called <code spellcheck="false">seams</code>.</p>
+<p>To create a seam, go into <code spellcheck="false">Edge</code> selection and select the edges you want to be cut when unwrapped:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-26.png" src="./assets/lessons/37/step-26.png" width="1536" height="960" alt="step-26.png" class="is-loaded"></span></p>
+<p>Press <code spellcheck="false">U</code> and choose <code spellcheck="false">Mark seam</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-27.png" src="./assets/lessons/37/step-27.png" width="3072" height="1920" alt="step-27.png" class="is-loaded"></span></p>
+<p>If you unselect everything, you'll see that those seams are now in red:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-28.png" src="./assets/lessons/37/step-28.png" width="289" height="392" alt="step-28.png" class="is-loaded"></span></p>
+<p>If your seams are fine, don't touch them, but be aware that you can remove them if you need to.  To do that (and don't, if you don't need to), select the concerned edge, press <code spellcheck="false">U</code> and choose <code spellcheck="false">Clear Seam</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-29.png" src="./assets/lessons/37/step-29.png" width="1536" height="960" alt="step-29.png" class="is-loaded"></span></p>
+<p>Finding where to cut the geometry can be very hard. You'll have to anticipate the result and try until it works. Just make sure that the faces aren't distorted.</p>
+<p>Select the whole pole again (select one part and press <code spellcheck="false">CTRL + L</code> to select the whole island), press <code spellcheck="false">U</code> and choose <code spellcheck="false">Unwrap</code> to unwrap it again:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-30.png" src="./assets/lessons/37/step-30.png" width="1536" height="960" alt="step-30.png" class="is-loaded"></span></p>
+<p>As you can see, this unwrap is much better.</p>
+<p>Let's do the same with the other pole. Select the same edges, press <code spellcheck="false">U</code> and choose <code spellcheck="false">Mark Seam</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-31.png" src="./assets/lessons/37/step-31.png" width="1536" height="960" alt="step-31.png" class="is-loaded"></span></p>
+<p>Then select the whole pole, press <code spellcheck="false">U</code> and choose <code spellcheck="false">Unwrap</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-32.png" src="./assets/lessons/37/step-32.png" width="1536" height="960" alt="step-32.png" class="is-loaded"></span></p>
+<p>You should get the same result. The unwraps of the two poles are overlapping but we will fix that later. For now, we should only focus on setting the seams right.</p>
+<p>Cut one of the planks the same way:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-33.png" src="./assets/lessons/37/step-33.png" width="3072" height="1920" alt="step-33.png" class="is-loaded"></span></p>
+<p>Unwrap it:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-34.png" src="./assets/lessons/37/step-34.png" width="1536" height="960" alt="step-34.png" class="is-loaded"></span></p>
+<p>And this time, instead of doing the same thing for the other plank, simply remove the bottom one, duplicate the top (already unwrapped) one and place it where the bottom one was:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-35.png" src="./assets/lessons/37/step-35.png" width="542" height="408" alt="step-35.png" class="is-loaded"></span></p>
+<p>This is just a way to gain some time.</p>
+<p>Now that all the different parts of the fence are well cut with seams, select all the geometry, press <code spellcheck="false">U</code> and do the unwrap again:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-36.png" src="./assets/lessons/37/step-36.png" width="1536" height="960" alt="step-36.png" class="is-loaded"></span></p>
+<p>The unwrap is looking great, unfortunately the island are way too close to each other. This will be an issue when we will bake because the baking will overflow a little. We need to move them apart.</p>
+<p>When you choose <code spellcheck="false">Unwrap</code>, a small menu appears on the bottom left of the area (if you lost that menu, unwrap again):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-37.png" src="./assets/lessons/37/step-37.png" width="404" height="210" alt="step-37.png" class="is-loaded"></span></p>
+<p>Here, you can change the <code spellcheck="false">Margin</code>. Increase it a little to something like <code spellcheck="false">0.15</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-37-2.png" src="./assets/lessons/37/step-37-2.png" width="1536" height="960" alt="step-37-2.png" class="is-loaded"></span></p>
+<p>As you can see, the islands are now slightly separated.</p>
+<p>Before moving those UV coordinates somewhere in the map, we need to handle the other fences.</p>
+<p>Instead of cutting and unwrapping all of the fences, we can simply remove the previous ones and duplicate the unwrapped one at its positions. Don't spend too much time positioning at the exact same position.</p>
+<p>In <code spellcheck="false">Object Mode</code>, duplicate the unwrapped fence with <code spellcheck="false">SHIFT + D</code> and replace the others.</p>
+<p>Now select all the fences, go in <code spellcheck="false">Edit Mode</code>, select all the faces and unwrap them again, but this time, all together.</p>
+<p>You should change the <code spellcheck="false">Margin</code> to something like <code spellcheck="false">0.065</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-38.png" src="./assets/lessons/37/step-38.png" width="1536" height="960" alt="step-38.png" class="is-loaded"></span></p>
+<p>(You might have noticed that there are more islands in the above screenshot. This is due to an error in which I duplicated one of the fences at the same place. Ignore this.)</p>
+<p>Put those unwraps in a corner of the UV map:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-39.png" src="./assets/lessons/37/step-39.png" width="1536" height="960" alt="step-39.png" class="is-loaded"></span></p>
+<p>Again, the exact position isn't important and we will reorganize everything later.</p>
+<h3>Separating the Emission material</h3>
+<p>We are going to repeat the whole process for the pole lights, but before doing so, we need to separate the objects that emit lights.</p>
+<p>We are doing this because we don't want to bake those objects. In the end, they are uniform colors and we are going to create materials within Three.js to give them those colors.</p>
+<p>We could have baked those objects, but it's a waste of space in the texture.</p>
+<p>Create a <code spellcheck="false">emissions</code> collection and put the two lamps and the portal (only the emission part) in it:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-40.png" src="./assets/lessons/37/step-40.png" width="1536" height="960" alt="step-40.png" class="is-loaded"></span></p>
+<p>Make this collection unselectable so that we don't select them while doing the baking:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-41.png" src="./assets/lessons/37/step-41.png" width="342" height="94" alt="step-41.png" class="is-loaded"></span></p>
+<h3>Pole lights</h3>
+<p>We can now unwrap the pole lights.</p>
+<p>As with the fences, start with only one and, once you are happy, duplicate it and put it in place of the other pole light.</p>
+<p>To help you focus on the object you want to unwrap, you can select it and press <code spellcheck="false">/</code> on the numpad. This will isolate it:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-42.png" src="./assets/lessons/37/step-42.png" width="1536" height="960" alt="step-42.png" class="is-loaded"></span></p>
+<p>If you want to leave that isolation, press <code spellcheck="false">/</code> again.</p>
+<p>You can try the unwrap on your own. Take your time, it's a long process. But with time, you'll be able to do it fast and efficiently.</p>
+<p>You'll probably get a different result than in the lesson and that's totally normal. There are so many different ways of unwrapping and we don't really know if we are doing mistakes yet. Just do your best and don't hesitate to create too many cuts.</p>
+<p>Here is how I did it:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-43.png" src="./assets/lessons/37/step-43.png" width="1536" height="960" alt="step-43.png" class="is-loaded"></span></p>
+<p>The lamp frame is especially hard to cut. Here, I decided to make only one cut that goes from the bottom up. This is not always a good idea because, as you can see, it creates some distortion once you unwrap it:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-44.png" src="./assets/lessons/37/step-44.png" width="1536" height="960" alt="step-44.png" class="is-loaded"></span></p>
+<p>But it's not that bad and at least we minimize the number of islands.</p>
+<p>The unwrap looks like this:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-45.png" src="./assets/lessons/37/step-45.png" width="1536" height="960" alt="step-45.png" class="is-loaded"></span></p>
+<p>Before reorganizing the islands, we can duplicate the pole in place of the other one and unwrap both of them together:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-46.png" src="./assets/lessons/37/step-46.png" width="1536" height="960" alt="step-46.png" class="is-loaded"></span></p>
+<p>Since the islands are curvy, Blender doesn't do a great job placing them. Optimize the placement a little bit and put them in another corner of the UV map. Always make sure to leave some space between them:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-47.png" src="./assets/lessons/37/step-47.png" width="1536" height="960" alt="step-47.png" class="is-loaded"></span></p>
+<h3>Portal</h3>
+<p>Apply the same process for the portal. Isolate each object, add the seams, test the result by unwrapping and once you're done with all the parts of the portal, select them all and unwrap everything.</p>
+<p>Here is the stair:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-48.png" src="./assets/lessons/37/step-48.png" width="1536" height="960" alt="step-48.png" class="is-loaded"></span></p>
+<p>Here are the bricks:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-49.png" src="./assets/lessons/37/step-49.png" width="1536" height="960" alt="step-49.png" class="is-loaded"></span></p>
+<p>And here is the whole portal:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-50.png" src="./assets/lessons/37/step-50.png" width="1536" height="960" alt="step-50.png" class="is-loaded"></span></p>
+<h3>Rocks</h3>
+<p>Do not worry, we are <strong>not</strong> going to cut them ourselves. Even if we did, it would have taken ages and we would have ended up with distorted unwraps. Instead, we are going to use an automatic "smart" unwrap.</p>
+<ul>
+<li>Select all the rocks.</li>
+<li>Go into <code spellcheck="false">Edit Mode</code>.</li>
+<li>Select all the faces.</li>
+<li>Press <code spellcheck="false">U</code> and choose <code spellcheck="false">Smart UV Project</code>.</li>
+</ul>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-51.png" src="./assets/lessons/37/step-51.png" width="1536" height="960" alt="step-51.png" class="is-loaded"></span></p>
+<p>Validate the window that should open (we get access to the same parameters right after):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-52.png" src="./assets/lessons/37/step-52.png" width="461" height="266" alt="step-52.png" class="is-loaded"></span></p>
+<p>And here is your automatic unwrap:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-53.png" src="./assets/lessons/37/step-53.png" width="1536" height="960" alt="step-53.png" class="is-loaded"></span></p>
+<p>Increase the Islands Margin to something like <code spellcheck="false">0.025</code> to make some space between the islands.</p>
+<p>Unfortunately, we already used all the corners of our map. For now, let's move the unwraps out of the map. This isn't a problem because, in the end, we will reorganize everything.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-54.png" src="./assets/lessons/37/step-54.png" width="1536" height="960" alt="step-54.png" class="is-loaded"></span></p>
+<p>As you can see, automatic unwraps are decent. We could have used this technique for the whole scene. But, doing it on our own let us optimize things a bit more by minimizing the number of islands and reducing the seams. It's also a good way to keep the different groups of islands separated. This might get handy if we decide to remove an object. We will get the full area available for more unwrapping.</p>
+<h3>Trunks, logs and axe</h3>
+<p>Cut the trunks. Don't forget to also add a cut for the ring all around each trunk.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-55.png" src="./assets/lessons/37/step-55.png" width="1536" height="960" alt="step-55.png" class="is-loaded"></span></p>
+<p>Cut the logs:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-56.png" src="./assets/lessons/37/step-56.png" width="1536" height="960" alt="step-56.png" class="is-loaded"></span></p>
+<p>Cut the axe:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-57.png" src="./assets/lessons/37/step-57.png" width="1536" height="960" alt="step-57.png" class="is-loaded"></span></p>
+<p>Unwrap them all (trunks, logs and axe) at once and place them somewhere outside of the UV map:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-58.png" src="./assets/lessons/37/step-58.png" width="1536" height="960" alt="step-58.png" class="is-loaded"></span></p>
+<h3>Reorganizing</h3>
+<p>That's it, we've unwrapped the whole scene.</p>
+<p>Currently, however, the groups of islands are spread all around the UV map and even outside of it.</p>
+<p>Select all the unwrap objects (not the emissions objects). Then, go into <code spellcheck="false">Edit Mode</code> and select all the faces to get a preview of the current UV unwrap:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-59.png" src="./assets/lessons/37/step-59.png" width="1536" height="960" alt="step-59.png" class="is-loaded"></span></p>
+<p>If you don't have this or if you have overlapping unwraps, try to figure out which object is the problem and fix it. You might also have forgotten some objects.</p>
+<p>Before trying to make everything fit inside the UV map, we need to make sure that the proportions are the same between the different groups. We don't want an object to take a smaller or bigger space than it really needs.</p>
+<p>Use the following icon on the top right part of the <code spellcheck="false">UV Editor</code> (if you can't see it, enlarge the area):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-60.png" src="./assets/lessons/37/step-60.png" width="90" height="64" alt="step-60.png" class="is-loaded"></span></p>
+<p>In the menu that should open, check <code spellcheck="false">Display Stretch</code> and change it to <code spellcheck="false">Area</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-61.png" src="./assets/lessons/37/step-61.png" width="338" height="128" alt="step-61.png" class="is-loaded"></span></p>
+<p>For some older versions of Blender, this option might be located in a different place. If you have a <code spellcheck="false">Display</code> button on the top right corner, open it and you should find a <code spellcheck="false">stretch</code> or <code spellcheck="false">stretching</code> checkbox. If you don't have any of those, open the sidebar with <code spellcheck="false">N</code> (if not already open) and go to the <code spellcheck="false">view</code> tab to find the checkbox.</p>
+<p>You'll now know if the area taken by an island is bigger or smaller than the others by using the colors:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-62.png" src="./assets/lessons/37/step-62.png" width="1536" height="960" alt="step-62.png" class="is-loaded"></span></p>
+<p>Scale the different parts until everything has a similar color. The color might be different from mine.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-63.png" src="./assets/lessons/37/step-63.png" width="1536" height="960" alt="step-63.png" class="is-loaded"></span></p>
+<p>It's now time to make everything fit in the UV map. One very important step here is to listen to the Tetris music theme at the same time.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-64.png" src="./assets/lessons/37/step-64.png" width="1536" height="960" alt="step-64.png" class="is-loaded"></span></p>
+<p>Few tips:</p>
+<ul>
+<li>Start by placing the groups in a rough square shape without looking at the UV map limits. Then resize the whole thing to make it fit in the UV map.</li>
+<li>Keep some space between the islands.</li>
+<li>You can scale some islands up to have a better quality for them in the final texture. It's good practice to do that for big surface or surfaces that the camera can see from up close. In our case, we can make the floor a little bit bigger.</li>
+<li>If you have some room left, keep it. It might become useful if you forgot an object or if you want to add one.</li>
+<li>The groups don't have to fit in perfect rectangles. Usually, I use one group with a lot of small islands like the rocks to fill the holes.</li>
+</ul>
+<p>Once you're happy with the result, you can deactivate the <code spellcheck="false">Display Stretch</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-65.png" src="./assets/lessons/37/step-65.png" width="393" height="128" alt="step-65.png" class="is-loaded"></span></p>
+<h2>Baking</h2>
+<p>Now that our scene is nicely unwrapped, we can start to bake it. </p>
+<h3>Creating the texture</h3>
+<p>First we need to create a texture in Blender and we can use the <code spellcheck="false">UV Editor</code> area to manage that image.</p>
+<p>Leave the <code spellcheck="false">Edit Mode</code>. On the top of the area, you should have a <code spellcheck="false">+ New</code> button:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-66.png" src="./assets/lessons/37/step-66.png" width="276" height="153" alt="step-66.png" class="is-loaded"></span></p>
+<p>Click on it to open the <code spellcheck="false">New Image</code> menu:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-67.png" src="./assets/lessons/37/step-67.png" width="436" height="325" alt="step-67.png" class="is-loaded"></span></p>
+<p>Use the following parameters:</p>
+<h4>Name</h4>
+<p>Use <code spellcheck="false">baked</code>.</p>
+<p>It could be anything, but we are going to have only one texture and it's going to contain the "baked" texture.</p>
+<h4>Width and Height</h4>
+<p>Use <code spellcheck="false">4096</code>.</p>
+<p>We use a power of 2 size because this texture will be used in Three.js. <code spellcheck="false">4096</code> is a lot but we want a good quality. <code spellcheck="false">8192</code> textures might not work for every browser.</p>
+<h4>Color</h4>
+<p>Use a white color.</p>
+<p>This isn't that important but, in Three.js, when looking at the model from specific angles, the mip mapping might let that color appear on edges of the geometry. A white tint will look like a reflection and users won't notice it.</p>
+<h4>Alpha</h4>
+<p>Unchecked.</p>
+<p>We don't need alpha in our texture.</p>
+<h4>Generated Type</h4>
+<p>Use <code spellcheck="false">Blank</code>.</p>
+<p>We want the initial texture to be the color we chose right above. The other options create grids that can be used to see how the texture looks on the geometry, but we don't need that.</p>
+<h4>32-bit Float</h4>
+<p>Checked.</p>
+<p>This is a very important part that we will explain a bit later.</p>
+<h4>Tiled</h4>
+<p>Unchecked.</p>
+<p>We don't need the texture to repeat itself.</p>
+<p>Here is the final setup:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-68.png" src="./assets/lessons/37/step-68.png" width="374" height="289" alt="step-68.png" class="is-loaded"></span></p>
+<p>Validate it and the background of your UV map should now use that image. Zoom out if you can't see the edges of your map:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-69.png" src="./assets/lessons/37/step-69.png" width="1536" height="960" alt="step-69.png" class="is-loaded"></span></p>
+<p>Be aware, that you can show any texture as the background of the <code spellcheck="false">UV Editor</code>. The goal here is to help you see both the UV Mapping and the texture at the same time.</p>
+<h3>Saving the texture</h3>
+<p>Before baking anything in the texture, we are going to save it somewhere. This is actually not mandatory and textures can live inside the Blender file without being available as a separate file.</p>
+<p>You might think that we have to save it in a file because we want to use it later in WebGL, but this texture is actually not the texture we are going to use.</p>
+<p>If you remember, we chose to check <code spellcheck="false">32-bit float</code>. This made the texture data much more precise than a classic texture. In a way, we made an HDR texture. The problem with HDR textures is that they are way too heavy.</p>
+<p>The question is, why do we need this HDR texture? We will answer that question later. For now, we are baking our scene inside a HDR texture in order to keep all the data.</p>
+<p>Still, for the purpose of this lesson, we want to save the image in a separate file. On the top of the <code spellcheck="false">UV Editor</code> area go into <code spellcheck="false">Image &gt; Save As</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-70.png" src="./assets/lessons/37/step-70.png" width="301" height="437" alt="step-70.png" class="is-loaded"></span></p>
+<p>A saving window should open. Choose <code spellcheck="false">Radiance HDR</code> as the <code spellcheck="false">File Format</code> and change the name to <code spellcheck="false">baked.hdr</code>. Make sure to save in the same folder as your <code spellcheck="false">.blend</code> file:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-71.png" src="./assets/lessons/37/step-71.png" width="724" height="492" alt="step-71.png" class="is-loaded"></span></p>
+<p>We chose <code spellcheck="false">Radiance HDR</code> as the <code spellcheck="false">File Format</code> but some other formats can support high precision textures like <code spellcheck="false">OpenEXR</code> However, the file is going to be huge. </p>
+<p>If you open the right menu of the <code spellcheck="false">UV Editor</code> (press <code spellcheck="false">N</code> while hovering the area) in the <code spellcheck="false">Image</code> tab, you should see that the texture is now the <code spellcheck="false">baked.hdr</code> file in the same folder:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-72.png" src="./assets/lessons/37/step-72.png" width="354" height="297" alt="step-72.png" class="is-loaded"></span></p>
+<p>If you want to share your <code spellcheck="false">.blend</code> file or move it in another folder, you'll have to keep the <code spellcheck="false">baked.hdr</code> file with it.</p>
+<h3>Preparing the materials</h3>
+<p>We are almost ready to bake. Because we can have multiple textures in our project, we need a way to tell Blender that the texture we created is the one in which each object has to be baked. This information has to be provided on each material.</p>
+<p>We can start with the floor.</p>
+<p>Select the floor.</p>
+<p>To define in which texture the material should be baked, we need to use the <code spellcheck="false">Shader Editor</code> . Take one of the areas (or create a new one) on your layout and change it to <code spellcheck="false">Shader Editor</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-73.png" src="./assets/lessons/37/step-73.png" width="291" height="327" alt="step-73.png" class="is-loaded"></span></p>
+<p>This will be a <code spellcheck="false">Shader Editor</code> for the <code spellcheck="false">grass</code> material and it uses nodes. We won't go into details about nodes because we only need to create one and then make it active.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-74.png" src="./assets/lessons/37/step-74.png" width="1536" height="960" alt="step-74.png" class="is-loaded"></span></p>
+<p>If you can't see these two nodes, make sure <code spellcheck="false">Use Nodes</code> on the top part of the area is checked:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-75.png" src="./assets/lessons/37/step-75.png" width="147" height="71" alt="step-75.png" class="is-loaded"></span></p>
+<p>Also make sure that you selected the floor and that the <code spellcheck="false">grass</code> material is applied to it.</p>
+<p>To create a new node, press <code spellcheck="false">SHIFT + A</code> while hovering the <code spellcheck="false">Shader Editor</code> area:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-76.png" src="./assets/lessons/37/step-76.png" width="305" height="360" alt="step-76.png" class="is-loaded"></span></p>
+<p>Here, you can navigate to <code spellcheck="false">Texture &gt; Image Texture</code></p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-77.png" src="./assets/lessons/37/step-77.png" width="454" height="504" alt="step-77.png" class="is-loaded"></span></p>
+<p>This is an <code spellcheck="false">Image Texture</code> node:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-78.png" src="./assets/lessons/37/step-78.png" width="351" height="302" alt="step-78.png" class="is-loaded"></span></p>
+<p>Click on the drop-down image icon and choose our <code spellcheck="false">baked</code> texture:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-79.png" src="./assets/lessons/37/step-79.png" width="289" height="270" alt="step-79.png" class="is-loaded"></span></p>
+<p>And that's it. Our material now knows it's supposed to bake itself inside the <code spellcheck="false">baked</code> texture. We don't need to link that node to another node. We just need it to be here.</p>
+<p>Make sure that this texture node is selected (it should have a white outline).</p>
+<p>If you have multiple texture nodes in your shader, the active one will be the one used for baking.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-80.png" src="./assets/lessons/37/step-80.png" width="353" height="336" alt="step-80.png" class="is-loaded"></span></p>
+<p>Also, we leave the <code spellcheck="false">Color Space</code> as linear. This might sound strange because we learned that sRGB enables better color management, but don't forget that this is still an HDR texture and we are not going to use it directly in the WebGL.</p>
+<h3>Baking the floor</h3>
+<p>It's finally time to do our first bake.</p>
+<p>While the floor is still selected, in the <code spellcheck="false">Properties</code> area, go to the <code spellcheck="false">Render Properties</code> tab and then in the <code spellcheck="false">Bake</code> section: </p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-81.png" src="./assets/lessons/37/step-81.png" width="360" height="186" alt="step-81.png" class="is-loaded"></span></p>
+<p>If you can't see this section, you are probably using <code spellcheck="false">Eevee</code>. Change the <code spellcheck="false">Render Engine</code> to <code spellcheck="false">Cycles</code>.</p>
+<p>The <code spellcheck="false">Bake</code> section should look like this:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-82.png" src="./assets/lessons/37/step-82.png" width="306" height="258" alt="step-82.png" class="is-loaded"></span></p>
+<p>The <code spellcheck="false">Bake</code> button will start the baking process and the parameters below let us tweak it.</p>
+<p>The <code spellcheck="false">Bake Type</code> menu lets us choose what we want to bake. For example, this is where we could have created an <code spellcheck="false">Ambient Occlusion</code> texture. Leave it on <code spellcheck="false">Combined</code> in order to bake everything.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-83.png" src="./assets/lessons/37/step-83.png" width="257" height="334" alt="step-83.png" class="is-loaded"></span></p>
+<p>The <code spellcheck="false">Margin</code> property lets us control how much the baking will overflow from the area it is supposed to fill. We can keep <code spellcheck="false">16 px</code> for now. If we see that the baked islands are overlapping on their neighbors, we can reduce the margin.</p>
+<p>The <code spellcheck="false">Clear Image</code> property will erase the current image in the texture each time we do a bake. Because we are not going to do all the baking at once, uncheck it.</p>
+<p>Before we can bake, we have to choose a <code spellcheck="false">Sampling</code> quality. Scroll up to the <code spellcheck="false">Sampling</code> section and choose <code spellcheck="false">256</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-84.png" src="./assets/lessons/37/step-84.png" width="309" height="102" alt="step-84.png" class="is-loaded"></span></p>
+<p>This might sound low, but we will fix the visual noise later.</p>
+<p>Make sure you selected only the floor. Also, make sure the Texture node is active. Now, hit the <code spellcheck="false">Bake</code> button and wait.</p>
+<p>You can see the progress at the bottom of Blender:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-85.png" src="./assets/lessons/37/step-85.png" width="225" height="53" alt="step-85.png" class="is-loaded"></span></p>
+<p>The floor is the biggest and longest part to render, but if you want to accelerate the process, you can change the <code spellcheck="false">Sampling</code> to <code spellcheck="false">128</code> and it should look good enough.</p>
+<p>Here is your floor baked onto the texture:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-86.png" src="./assets/lessons/37/step-86.png" width="3072" height="1920" alt="step-86.png" class="is-loaded"></span></p>
+<p>If the baking has ended, but you can't see the result in the texture, it might be a Blender bug. Do not worry, the process probably worked alright. Save the image with <code spellcheck="false">ALT + S</code>  while hovering the <code spellcheck="false">UV Editor</code> area. Then, click on the refresh button you can find in the menu on the right of that same area (press <code spellcheck="false">N</code> to toggle the menu):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-87.png" src="./assets/lessons/37/step-87.png" width="133" height="93" alt="step-87.png" class="is-loaded"></span></p>
+<p>Even if the baking worked, now is a good time to save the image. Since the image is a separate file in Blender, you have to save the image independently. If you try to leave Blender with an unsaved image, do not worry, Blender will alert you.</p>
+<p>To save the image, while hovering in the <code spellcheck="false">UV Editor</code> area, press <code spellcheck="false">ALT + S</code>.</p>
+<h3>Baking the other objects</h3>
+<p>We can now repeat the process for the other objects. Let's start with the fences.</p>
+<p>Select the fences:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-88.png" src="./assets/lessons/37/step-88.png" width="3072" height="1920" alt="step-88.png" class="is-loaded"></span></p>
+<p>Add the same <code spellcheck="false">Image Texture</code> node and change it to the <code spellcheck="false">baked</code> texture. Also make sure that the node is active:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-88%201.png" src="./assets/lessons/37/step-88%201.png" width="1536" height="960" alt="step-88.png" class="is-loaded"></span></p>
+<p>Click the <code spellcheck="false">Bake</code> button and wait:</p>
+<p>You can continue like this with all the objects in the scene.</p>
+<p>If you try to bake the trunks, the axe handle or the logs, you'll see that the texture is already set in the <code spellcheck="false">Shader Editor</code> nodes. It's because they are sharing the same material.</p>
+<p>You can try to bake multiple objects at once, as long as the texture node is set for all concerned materials.  </p>
+<p>Here is the final baked texture:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-90.png" src="./assets/lessons/37/step-90.png" width="1536" height="960" alt="step-90.png" class="is-loaded"></span></p>
+<p>Don't forget to save both the <code spellcheck="false">.blend</code> file and the image.</p>
+<h3>Troubleshooting</h3>
+<p>If you see some parts overlapping, select the object, go into <code spellcheck="false">Edit Mode</code>, select all the faces and start moving the UV mapping to separate the islands a little. Then do the baking process of those parts again.</p>
+<p>If some islands look unusually black, you might have flipped their normals accidentally. You need to locate them and flip them back.</p>
+<ul>
+<li>Display the normal orientation like we did previously.</li>
+<li>Locate the problematic ones (they should be red).</li>
+<li>Select the object and go into <code spellcheck="false">Edit Mode</code>.</li>
+<li>Select the red faces.</li>
+<li>Press <code spellcheck="false">F3</code>, search for <code spellcheck="false">flip</code> and choose <code spellcheck="false">Mesh &gt; Normals &gt; Flip</code>.</li>
+</ul>
+<p>You can bake them on top of the previous bake.</p>
+<h2>Exporting the image</h2>
+<h3>The color issue</h3>
+<p>As you can see, the colors are all burned out. If you compare to the render, the colors will have less contrast and look like this:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/baked-render%201.png" src="./assets/lessons/37/baked-render%201.png" width="1920" height="1080" alt="./assets/lessons/37/baked-render%201.png" class="is-loaded"></span></p>
+<p>It's as if they are being toned in the render and that's exactly the case. When you do a render in Blender, a color manager named <strong>Filmic</strong> is used.</p>
+<p>You can find it at the bottom of the <code spellcheck="false">Render Properties</code> tab in the <code spellcheck="false">Color Management</code> section:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-91.png" src="./assets/lessons/37/step-91.png" width="344" height="228" alt="step-91.png" class="is-loaded"></span></p>
+<p>If you want to test a render without Filmic, change the <code spellcheck="false">View Transform</code> to <code spellcheck="false">Standard</code> and do a render with <code spellcheck="false">F12</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/baked-render-no-filmic.png" src="./assets/lessons/37/baked-render-no-filmic.png" width="1920" height="1080" alt="baked-render-no-filmic.png" class="is-loaded"></span></p>
+<p>As you can see, we have the same ugly colors with high contrast.</p>
+<p>This tells us that, when baking in Blender, we are losing Filmic.</p>
+<h3>The noise issue</h3>
+<p>Another problem is the visual noise. When you do a render and if you have checked the <code spellcheck="false">denoise</code> parameter, you can see a smooth render without noise.</p>
+<p>When baking, the noise is back:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-92.png" src="./assets/lessons/37/step-92.png" width="590" height="596" alt="step-92.png" class="is-loaded"></span></p>
+<p>As with Filmic, Blender seems to ignore the denoise parameter.</p>
+<h3>The image type issue</h3>
+<p>Finally, we want to export a compressed image that we can use in Three.js. We want it to be light and because we don't need transparency, we can use JPEG. Also, we want to apply the sRGB encoding to improve the color quality.</p>
+<p>But currently, all we have is our fancy HDR image.</p>
+<h3>The solution</h3>
+<p>All of these problems can be fixed with the Blender <strong>Compositor</strong>.</p>
+<p>The Compositor can be accessed within an area. Change one of the current areas (or create a new one) and choose <code spellcheck="false">Compositor</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-93.png" src="./assets/lessons/37/step-93.png" width="278" height="176" alt="step-93.png" class="is-loaded"></span></p>
+<p>The compositor uses nodes and, by default, your should have a <code spellcheck="false">Render Layers</code> node and a <code spellcheck="false">Composite</code> node:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-94.png" src="./assets/lessons/37/step-94.png" width="835" height="671" alt="step-94.png" class="is-loaded"></span></p>
+<p>To tell Blender to use those nodes when rendering, make sure to check the <code spellcheck="false">Use Nodes</code> on top of the <code spellcheck="false">Compositor</code> area:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-95.png" src="./assets/lessons/37/step-95.png" width="164" height="87" alt="step-95.png" class="is-loaded"></span></p>
+<p>The idea, here, is to create some nodes that will take our texture, apply a denoise on it and then apply Filmic. Then we output that texture to the render by sending it to the <code spellcheck="false">Composite</code> node.</p>
+<p>Start by creating an <code spellcheck="false">Image</code> node with <code spellcheck="false">SHIFT + A</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-96.png" src="./assets/lessons/37/step-96.png" width="504" height="393" alt="step-96.png" class="is-loaded"></span></p>
+<p>Change the image to our <code spellcheck="false">baked</code>, using the dropdown menu:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-97.png" src="./assets/lessons/37/step-97.png" width="400" height="503" alt="step-97.png" class="is-loaded"></span></p>
+<p>Normally, you should see your texture in the node preview, but this feature sometimes has bugs. Save everything and reopen it if you want to see the preview:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-98.png" src="./assets/lessons/37/step-98.png" width="385" height="582" alt="step-98.png" class="is-loaded"></span></p>
+<p>Now create a <code spellcheck="false">Denoise</code> node to the right of the <code spellcheck="false">Image</code> node:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-99.png" src="./assets/lessons/37/step-99.png" width="487" height="523" alt="step-99.png" class="is-loaded"></span></p>
+<p>Keep the default parameters:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-100.png" src="./assets/lessons/37/step-100.png" width="281" height="244" alt="step-100.png" class="is-loaded"></span></p>
+<p>Link the <code spellcheck="false">Image</code> output of the <code spellcheck="false">Image</code> node to the <code spellcheck="false">Image</code> input of the <code spellcheck="false">Denoise</code> node:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-101.png" src="./assets/lessons/37/step-101.png" width="620" height="488" alt="step-101.png" class="is-loaded"></span></p>
+<p>Link this <code spellcheck="false">Denoise</code> output to the <code spellcheck="false">Composite</code> input:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-102.png" src="./assets/lessons/37/step-102.png" width="957" height="788" alt="step-102.png" class="is-loaded"></span></p>
+<p>But where is Filmic? you might ask.</p>
+<p>Filmic will automatically be applied as long as you have set it in the parameters of the render:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-103.png" src="./assets/lessons/37/step-103.png" width="359" height="139" alt="step-103.png" class="is-loaded"></span></p>
+<p>Doing the compositing is like doing a render. But we don't want to render the scene, we want to render our image through the nodes we created. To deactivate the default render of the scene, select the <code spellcheck="false">Render Layers</code> and press <code spellcheck="false">M</code> to "mute" it.</p>
+<p>It should appear gray:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-104.png" src="./assets/lessons/37/step-104.png" width="1030" height="796" alt="step-104.png" class="is-loaded"></span></p>
+<p>If you want to do a classic render again, you'll have to mute the two nodes we've made, unmute the <code spellcheck="false">Render Layers</code> and link this last one to the Composite.</p>
+<p>We also need to change the resolution of the render so it matches the texture resolution.</p>
+<p>Go into the <code spellcheck="false">Output Properties</code> and change the resolution to <code spellcheck="false">4096x4096</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-105.png" src="./assets/lessons/37/step-105.png" width="365" height="119" alt="step-105.png" class="is-loaded"></span></p>
+<p>Finally, render with <code spellcheck="false">F12</code>.</p>
+<p>This operation shouldn't take too long and you should see a beautiful render with the right colors and no noise on it:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/baked%201.jpg" src="./assets/lessons/37/baked%201.jpg" width="2048" height="2048" alt="./assets/lessons/37/baked%201.jpg" class="is-loaded"></span></p>
+<p>With the render window open and while hovering it, press <code spellcheck="false">ALT + S</code> to save it.</p>
+<p>Change the <code spellcheck="false">File Format</code> to <code spellcheck="false">JPEG</code>, lower the quality a little (<code spellcheck="false">75%</code> should be enough) and name it <code spellcheck="false">baked.jpg</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-106.png" src="./assets/lessons/37/step-106.png" width="980" height="502" alt="step-106.png" class="is-loaded"></span></p>
+<p>Save it where you want. We are going to use it later in Three.js.</p>
+<h2>Exporting the model</h2>
+<p>We need to apply some modifications to the model in order to optimize it a bit more. But we are not going to do that now because we want to witness the issues when importing it into Three.js. This will help us understand better why we are doing these optimizations.</p>
+<p>For now, let's simply export the whole scene.</p>
+<p>Make all the collections selectable but not the <code spellcheck="false">others</code> collection (even the <code spellcheck="false">emissions</code> collection):</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-107.png" src="./assets/lessons/37/step-107.png" width="365" height="272" alt="step-107.png" class="is-loaded"></span></p>
+<p>In <code spellcheck="false">Object Mode</code>, select everything with <code spellcheck="false">A</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-108.png" src="./assets/lessons/37/step-108.png" width="1536" height="960" alt="step-108.png" class="is-loaded"></span></p>
+<p>Now export as <code spellcheck="false">glTF 2.0</code>:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-109.png" src="./assets/lessons/37/step-109.png" width="557" height="551" alt="step-109.png" class="is-loaded"></span></p>
+<p>Here are the exporting parameters:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/37/step-110.png" src="./assets/lessons/37/step-110.png" width="368" height="815" alt="step-110.png" class="is-loaded"></span></p>
+<p>Some more information:</p>
+<ul>
+<li>Check <code spellcheck="false">Remember Export Settings</code>, so you don't have to set those settings every time you want to export.</li>
+<li>Use <code spellcheck="false">.glb</code> because it's lighter, though it won't make a huge difference.</li>
+<li>Export only the <code spellcheck="false">Selected Objects</code>. We don't want to export the camera and the light.</li>
+<li>Check  <code spellcheck="false">+Y Up</code> because the <code spellcheck="false">Y</code> axis is going up on Three.js.</li>
+<li>In the geometry, we only need the <code spellcheck="false">UVs</code>. Remember that we just want to place the baked texture on it.</li>
+<li>Activate the <code spellcheck="false">Compression</code>. We are going to use Draco.</li>
+<li>Deactivate everything related to the <code spellcheck="false">Animation</code> because we have none.</li>
+</ul>
+<p>Name your file <code spellcheck="false">portal.glb</code> and put it with your <code spellcheck="false">baked.jpg</code> file.</p>
+<p>Be careful, some versions of Blender like <code spellcheck="false">2.90.0</code> have a bug when you try to use the compression. Simply uncheck the <code spellcheck="false">Compression</code>. The file is small and we don't really need Draco anyway.</p>
+<p>We now have both the <code spellcheck="false">baked.jpg</code> file and the <code spellcheck="false">portal.glb</code> files. In the next lesson, we are going to import them into Three.js as well as optimize the model a bit more.</p>
+</section>
+</body>
+
+</html>

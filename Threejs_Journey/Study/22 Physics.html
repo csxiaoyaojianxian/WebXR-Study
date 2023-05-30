@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<section class="text js-text">
+    <h2>Introduction</h2>
+<p>Physics can be one of the coolest features you can add to a WebGL experience. People enjoy playing with objects, see them collide, collapse, fall and bounce like in my portfolio: <a target="_blank" href="https://bruno-simon.com/">https://bruno-simon.com/</a></p>
+<p>There are many ways of adding physics to your project, and it depends on what you want to achieve. You can create your own physics with some mathematics and solutions like <a target="_blank" href="https://threejs.org/docs/index.html#api/en/core/Raycaster">Raycaster</a>, but if you wish to get realistic physics with tension, friction, bouncing, constraints, pivots, etc. and all that in 3D space, you better use a library.</p>
+<h2>Theory</h2>
+<p>The idea is simple. We are going to create a physics world. This physics world is purely theoretical, and we cannot see it. But in this world, things fall, collide, rub, slide, etc.</p>
+<p>When we create a Three.js mesh, we will also create a version of that mesh inside the physics world. If we make a Box in Three.js, we also create a box in the physics world.</p>
+<p>Then, on each frame, before rendering anything, we tell the physics world to update itself; we take the coordinates (position and rotation) of the physics objects and apply them to the corresponding Three.js mesh.</p>
+<p>And that's all. What is most difficult is to organize our code in a decent structure. That is a part where paths separate. Each developer will have its habits, and it also depends on what you want to do and how complex the physics can become.</p>
+<p>To begin with, we will simply create spheres and boxes.</p>
+<h2>Libraries</h2>
+<p>There are multiple available libraries. First, you must decide if you need a 3D library or a 2D library. While you might think it has to be a 3D library because Three.js is all about 3D, you might be wrong. 2D libraries are usually much more performant, and if you can sum up your experience physics up to 2D collisions, you better use a 2D library.</p>
+<p>One example is if you want to create a pool game. The balls can collide and bounce on the walls, but you can project everything on a 2D plane. You can design balls as circles in the physics world, and the walls are simple rectangles. Indeed, you won't be able to do tricks hitting the bottom of the ball so that it can jump over the other balls.</p>
+<p>An excellent example of a project done like this is <a target="_blank" href="http://letsplay.ouigo.com/">Ouigo Let's play</a> by <a target="_blank" href="https://www.merci-michel.com/">Merci Michel</a>. They used a 2D physics library because every collision and animation can be represented in a 2D space.</p>
+<p>For 3D physics, there are three main libraries:</p>
+<ul>
+<li>Ammo.js
+<ul>
+<li>Website: <a target="_blank" href="http://schteppe.github.io/ammo.js-demos/">http://schteppe.github.io/ammo.js-demos/</a></li>
+<li>Git repository: <a target="_blank" href="https://github.com/kripken/ammo.js/">https://github.com/kripken/ammo.js/</a></li>
+<li>Documentation: No documentation</li>
+<li>Direct JavaScript port of Bullet (a physics engine written in C++)</li>
+<li>A little heavy</li>
+<li>Still updated by a community</li>
+</ul></li>
+<li>Cannon.js
+<ul>
+<li>Website: <a target="_blank" href="https://schteppe.github.io/cannon.js/">https://schteppe.github.io/cannon.js/</a></li>
+<li>Git repository: <a target="_blank" href="https://github.com/schteppe/cannon.js">https://github.com/schteppe/cannon.js</a></li>
+<li>Documentation: <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/">http://schteppe.github.io/cannon.js/docs/</a></li>
+<li>Lighter than Ammo.js</li>
+<li>More comfortable to implement than Ammo.js</li>
+<li>Mostly maintained by one developer</li>
+<li>Hasn't been updated for many years</li>
+<li>There is a maintained fork</li>
+</ul></li>
+<li>Oimo.js
+<ul>
+<li>Website: <a target="_blank" href="https://lo-th.github.io/Oimo.js/">https://lo-th.github.io/Oimo.js/</a></li>
+<li>Git repository: <a target="_blank" href="https://github.com/lo-th/Oimo.js">https://github.com/lo-th/Oimo.js</a></li>
+<li>Documentation: <a target="_blank" href="http://lo-th.github.io/Oimo.js/docs.html#world">http://lo-th.github.io/Oimo.js/docs.html</a></li>
+<li>Lighter than Ammo.js</li>
+<li>Easier to implement than Ammo.js</li>
+<li>Mostly maintained by one developer</li>
+<li>Hasn't been updated for 2 years</li>
+</ul></li>
+</ul>
+<p>For 2D physics, there are many libraries, but here's the most popular:</p>
+<ul>
+<li>Matter.js
+<ul>
+<li>Website: <a target="_blank" href="https://brm.io/matter-js/">https://brm.io/matter-js/</a></li>
+<li>Git repository: <a target="_blank" href="https://github.com/liabru/matter-js">https://github.com/liabru/matter-js</a></li>
+<li>Documentation: <a target="_blank" href="https://brm.io/matter-js/docs/">https://brm.io/matter-js/docs/</a></li>
+<li>Mostly maintained by one developer</li>
+<li>Still kind of updated</li>
+</ul></li>
+<li>P2.js
+<ul>
+<li>Website: <a target="_blank" href="https://schteppe.github.io/p2.js/">https://schteppe.github.io/p2.js/</a></li>
+<li>Git repository: <a target="_blank" href="https://github.com/schteppe/p2.js">https://github.com/schteppe/p2.js</a></li>
+<li>Documentation: <a target="_blank" href="http://schteppe.github.io/p2.js/docs/">http://schteppe.github.io/p2.js/docs/</a></li>
+<li>Mostly maintained by one developer (Same as Cannon.js)</li>
+<li>Hasn't been update for 2 years</li>
+</ul></li>
+<li>Planck.js
+<ul>
+<li>Website: <a target="_blank" href="https://piqnt.com/planck.js/">https://piqnt.com/planck.js/</a></li>
+<li>Git repository: <a target="_blank" href="https://github.com/shakiba/planck.js">https://github.com/shakiba/planck.js</a></li>
+<li>Documentation: <a target="_blank" href="https://github.com/shakiba/planck.js/tree/master/docs">https://github.com/shakiba/planck.js/tree/master/docs</a></li>
+<li>Mostly maintained by one developer</li>
+<li>Still updated nowadays</li>
+</ul></li>
+<li>Box2D.js
+<ul>
+<li>Website: <a target="_blank" href="http://kripken.github.io/box2d.js/demo/webgl/box2d.html">http://kripken.github.io/box2d.js/demo/webgl/box2d.html</a></li>
+<li>Git repository: <a target="_blank" href="https://github.com/kripken/box2d.js/">https://github.com/kripken/box2d.js/</a></li>
+<li>Documentation: No documentation</li>
+<li>Mostly maintained by one developer (same as Ammo.js)</li>
+<li>Still updated nowadays</li>
+</ul></li>
+</ul>
+<p>We won't use a 2D library in this lesson, but the 2D library code would be very similar to a 3D library code. The main difference is the axes you have to update.</p>
+<p>There are already solutions that try to combine Three.js with libraries like <a target="_blank" href="https://chandlerprall.github.io/Physijs/">Physijs</a>. Still, we won't use any of those solutions to get a better learning experience and better understand what's going on.</p>
+<p>While Ammo.js is the most used library and particularly with Three.js, as you can see in <a target="_blank" href="https://threejs.org/examples/?q=ammo#physics_ammo_break">the examples</a>, we will go for Cannon.js. The library is more comfortable to implement in our project and easier to use.</p>
+<h2>Import Cannon.js</h2>
+<p>To add Cannon.js to our project, we first need to add the dependency.</p>
+<p>In your terminal, on the project folder, run this command <code spellcheck="false">npm install --save cannon</code>.</p>
+<p>We can now import Cannon.js in our JavaScript with a classic <code spellcheck="false">import</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token constant">CANNON</span> <span class="token keyword">from</span> <span class="token string">'cannon'</span> </code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Everything we need is available in the <code spellcheck="false">CANNON</code> variable.</p>
+<h2>Setup</h2>
+<p>Our starter is composed of one sphere on a plane, and shadows are already enabled for aesthetic reasons.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/22/step-01.png" src="./assets/lessons/22/step-01.png" width="1792" height="1120" alt="./assets/lessons/22/step-01.png" class="is-loaded"></span></p>
+<h2>Base</h2>
+<h3>World</h3>
+<p>First, we need to create a Cannon.js <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/World.html">World</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Physics
+*/</span>
+<span class="token keyword">const</span> world <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>World</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We could make a WebGL experience in space where there is no gravity, but let's keep our feet on Earth and add gravity. You can change this value with the <code spellcheck="false">gravity</code> property, which is a Cannon.js <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Vec3.html">Vec3</a>.</p>
+<p>Cannon.js <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Vec3.html">Vec3</a> is just like Three.js <a target="_blank" href="https://threejs.org/docs/#api/en/math/Vector3">Vector3</a>. It has <code spellcheck="false">x</code>, <code spellcheck="false">y</code>, and <code spellcheck="false">z</code> properties, but also a <code spellcheck="false">set(...)</code> method:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">world<span class="token punctuation">.</span>gravity<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token operator">-</span> <span class="token number">9.82</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We used <code spellcheck="false">- 9.82</code> as the value because it's the gravity constant on earth, but you can use any other value if you want things to fall slower or if your scene happens on Mars.</p>
+<h3>Object</h3>
+<p>Because we already have a sphere in our scene, let's create a sphere inside our Cannon.js <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/World.html">World</a>.</p>
+<p>To do that, we must create a <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a>. Bodies are simply objects that will fall and collide with other bodies.</p>
+<p>Before we can create a <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a>, we must decide on a shape. There are many available primitive shapes like <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Box.html">Box</a>, <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Cylinder.html">Cylinder</a>, <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Plane.html">Plane</a>, etc. We will go for a <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Sphere.html">Sphere</a> with the same radius as our Three.js sphere:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> sphereShape <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Sphere</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then we can create our <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> and specify a mass and a position:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> sphereBody <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Body</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+mass<span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+position<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Vec3</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+shape<span class="token operator">:</span> sphereShape
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Finally, we can add the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> to the world with <code spellcheck="false">addBody(...)</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">world<span class="token punctuation">.</span><span class="token function">addBody</span><span class="token punctuation">(</span>sphereBody<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Nothing is happening because we still need to update our Cannon.js world and update our Three.js sphere accordingly.</p>
+<h3>Update the Cannon.js world and the Three.js scene</h3>
+<p>To update our <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/World.html">World</a>, we must use the <code spellcheck="false">step(...)</code>. The code behind this method is hard to understand, and we won't explain it in this lesson, but you can find more about it in <a target="_blank" href="https://gafferongames.com/post/fix_your_timestep/">this article</a>.</p>
+<p>For it to work, you must provide a fixed time step, how much time passed since the last step, and how much iterations the world can apply to catch up with a potential delay.</p>
+<p>We won't explain what is a time step, but because we want our experience to run at 60fps, we are going to use <code spellcheck="false">1 / 60</code>. Don't worry, the experience will work at the same speed on devices with higher and lower frame rates.</p>
+<p>It's up to you for the number of iterations, but it's not that important if the experience is running smoothly. Let's use <code spellcheck="false">3</code>.</p>
+<p>For the delta time, it's a little harder. We need to calculate how much time has passed since the last frame. Do not use the <code spellcheck="false">getDelta()</code> method from the <a target="_blank" href="https://threejs.org/docs/#api/en/core/Clock">Clock</a> class. You won't get the intended result, and you'll mess up with the class's internal logic.</p>
+<p>To get the right delta time, we need to subtract the <code spellcheck="false">elapsedTime</code> from the previous frame to the current <code spellcheck="false">elapsedTime</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> clock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Clock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> oldElapsedTime <span class="token operator">=</span> <span class="token number">0</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> elapsedTime <span class="token operator">=</span> clock<span class="token punctuation">.</span><span class="token function">getElapsedTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> deltaTime <span class="token operator">=</span> elapsedTime <span class="token operator">-</span> oldElapsedTime
+oldElapsedTime <span class="token operator">=</span> elapsedTime
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can finally update our world:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Update physics</span>
+world<span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">1</span> <span class="token operator">/</span> <span class="token number">60</span><span class="token punctuation">,</span> deltaTime<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Still, nothing seems to be moving. But our <code spellcheck="false">sphereBody</code> is falling, and you can see that by logging its position after updating the world:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    world<span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">1</span> <span class="token operator">/</span> <span class="token number">60</span><span class="token punctuation">,</span> deltaTime<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>sphereBody<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>What we need to do now is update our Three.js <code spellcheck="false">sphere</code> by using the <code spellcheck="false">sphereBody</code> coordinates. There are two ways of doing it. You can either update each <code spellcheck="false">position</code> property separately:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    sphere<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> sphereBody<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x
+sphere<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> sphereBody<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y
+sphere<span class="token punctuation">.</span>position<span class="token punctuation">.</span>z <span class="token operator">=</span> sphereBody<span class="token punctuation">.</span>position<span class="token punctuation">.</span>z</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Or you can copy all the properties as one with the <code spellcheck="false">copy(...)</code> method:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    sphere<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">copy</span><span class="token punctuation">(</span>sphereBody<span class="token punctuation">.</span>position<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p><code spellcheck="false">copy(...)</code> is available in many classes such as <a target="_blank" href="https://threejs.org/docs/#api/en/math/Vector2">Vector2</a>, <a target="_blank" href="https://threejs.org/docs/#api/en/math/Vector3">Vector3</a>, <a target="_blank" href="https://threejs.org/docs/#api/en/math/Euler">Euler</a>, <a target="_blank" href="https://threejs.org/docs/#api/en/math/Quaternion">Quaternion</a>, and even classes like <a target="_blank" href="https://threejs.org/docs/#api/en/materials/Material">Material</a>, <a target="_blank" href="https://threejs.org/docs/#api/en/core/Object3D">Object3D</a>, <a target="_blank" href="https://threejs.org/docs/#api/en/core/Geometry">Geometry</a>, etc.</p>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-02.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You should eventually see your sphere falling. The problem is that our sphere seems to fall through the floor. It's because that floor exists in the Three.js scene but not in the Cannon.js world.</p>
+<p>We can simply add a new <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> using a <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Plane.html">Plane</a> shape, but we don't want our floor to be affected by gravity and fall. In other words, we want our floor to be static. To make a <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> static, set its <code spellcheck="false">mass</code> to <code spellcheck="false">0</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> floorShape <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Plane</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> floorBody <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Body</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+floorBody<span class="token punctuation">.</span>mass <span class="token operator">=</span> <span class="token number">0</span>
+floorBody<span class="token punctuation">.</span><span class="token function">addShape</span><span class="token punctuation">(</span>floorShape<span class="token punctuation">)</span>
+world<span class="token punctuation">.</span><span class="token function">addBody</span><span class="token punctuation">(</span>floorBody<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-03.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>As you can see, we did things quite differently this time. We created a <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> with no parameter, and we set those parameters after. The result is the same, and the only reason we did this is for the lesson's sake. One interesting thing is that you can create a <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> composed of multiple <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Shape.html">Shapes</a>. It can be useful for complex but solid objects.</p>
+<p>You should see the sphere jumping in a direction (probably toward the camera). Not the intended result. The reason is that our plane is facing the camera by default. We need to rotate it just like we rotated the floor in Three.js.</p>
+<p>Rotation with Cannon.js is a little harder than with Three.js because you have to use <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Quaternion.html">Quaternion</a>. There are multiple ways of rotating the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a>, but it has to be with its <code spellcheck="false">quaternion</code> property. We are going to use the <code spellcheck="false">setFromAxisAngle(...)</code>.</p>
+<p>The first parameter is an axis. You can imagine it like a spike going through the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a>. The second parameter is the angle. It's how much you are rotating the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> around that spike.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">floorBody<span class="token punctuation">.</span>quaternion<span class="token punctuation">.</span><span class="token function">setFromAxisAngle</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Vec3</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">0.5</span><span class="token punctuation">)</span> </code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-04.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>We set the axis like if it was a spike going through the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> on the negative <code spellcheck="false">x</code> axis (to the left relatively to the camera) and we set the Angle to <code spellcheck="false">Math.PI * 0.5</code> (a quarter of a circle).</p>
+<p>You should now see the sphere falling and then stopping on the floor.</p>
+<p>We don't need to update the Three.js floor with the Cannon.js floor because this object is not moving.</p>
+<h2>Contact material</h2>
+<p>As you can see, the ball doesn't bounce much. That is the default behavior, and we can change that with <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Material.html">Material</a> (Not the Material from Three.js) and <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/ContactMaterial.html">ContactMaterial</a>.</p>
+<p>A <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Material.html">Material</a> is just a reference. You can give it a name and associate it with a <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a>. The idea is to create a <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Material.html">Material</a> for each type of material you have in your scene.</p>
+<p>Suppose everything in your world is made out of plastic. In that case, you only have to create one material and name it <code spellcheck="false">'default'</code> or <code spellcheck="false">'plastic'</code>. If you have multiple types of materials in your scene, let's say one material for the floor and one for the ball. Then, you should create various <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Material.html">Material</a> and give them names like <code spellcheck="false">'concrete'</code> and <code spellcheck="false">'plastic'</code>.</p>
+<p>You could have called them <code spellcheck="false">'ground'</code> and <code spellcheck="false">'ball'</code>. Still, if you want to use the same materials for walls and other objects like cubes, it could be inconvenient to use a material named <code spellcheck="false">'ground'</code>.</p>
+<p>Before you create the sphere and the floor, create these two <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Material.html">Material</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> concreteMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Material</span><span class="token punctuation">(</span><span class="token string">'concrete'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> plasticMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Material</span><span class="token punctuation">(</span><span class="token string">'plastic'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Now that we have our <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Material.html">Material</a>, we must create a <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/ContactMaterial.html">ContactMaterial</a>. It is the combination of the two <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Material.html">Materials</a> and contains properties for when objects collide.</p>
+<p>The first two parameters are the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Material.html">Materials</a>. The third parameter is an object <code spellcheck="false">{}</code> that contains two important properties: the <code spellcheck="false">friction</code> coefficient (how much does it rub) and the <code spellcheck="false">restitution</code> coefficient (how much does it bounce)—both have default values of <code spellcheck="false">0.3</code>.</p>
+<p>Once created, add the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/ContactMaterial.html">ContactMaterial</a> to the world with the <code spellcheck="false">addContactMaterial(...)</code> method:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> concretePlasticContactMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>ContactMaterial</span><span class="token punctuation">(</span>
+concreteMaterial<span class="token punctuation">,</span>
+plasticMaterial<span class="token punctuation">,</span>
+<span class="token punctuation">{</span>
+friction<span class="token operator">:</span> <span class="token number">0.1</span><span class="token punctuation">,</span>
+restitution<span class="token operator">:</span> <span class="token number">0.7</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span>
+world<span class="token punctuation">.</span><span class="token function">addContactMaterial</span><span class="token punctuation">(</span>concretePlasticContactMaterial<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>There isn't much friction between concrete and plastic, but if you let a plastic ball fall on a concrete floor, you'll see it bounce quite a lot.</p>
+<p>We can now use our <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Material.html">Material</a> on the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a>. You can pass the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Material.html">Material</a> directly when instancing the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> or after with the <code spellcheck="false">material</code> property. Let's do both for the sake of learning:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> sphereBody <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Body</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+material<span class="token operator">:</span> plasticMaterial
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> floorBody <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Body</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+floorBody<span class="token punctuation">.</span>material <span class="token operator">=</span> concreteMaterial</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-05.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You should see the ball bounce many times before stopping. We cannot see the <code spellcheck="false">friction</code> in action because our ball falls perfectly straight on our floor and spend most of its time in the air.</p>
+<p>Having different <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Material.html">Materials</a> and creating a <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/ContactMaterial.html">ContactMaterial</a> for each combination can prove to be puzzling. To simplify everything, let's replace our two <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Material.html">Materials</a> by a default one and use it on every <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Bodies</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> defaultMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Material</span><span class="token punctuation">(</span><span class="token string">'default'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> defaultContactMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>ContactMaterial</span><span class="token punctuation">(</span>
+defaultMaterial<span class="token punctuation">,</span>
+defaultMaterial<span class="token punctuation">,</span>
+<span class="token punctuation">{</span>
+friction<span class="token operator">:</span> <span class="token number">0.1</span><span class="token punctuation">,</span>
+restitution<span class="token operator">:</span> <span class="token number">0.7</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span>
+world<span class="token punctuation">.</span><span class="token function">addContactMaterial</span><span class="token punctuation">(</span>defaultContactMaterial<span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> sphereBody <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Body</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+material<span class="token operator">:</span> defaultMaterial
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+
+floorBody<span class="token punctuation">.</span>material <span class="token operator">=</span> defaultMaterial</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-06.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>We get the same result.</p>
+<p>We can go even further by setting our material as the default one of our <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/World.html">World</a>. To do that, simply assign the <code spellcheck="false">defaultContactMaterial</code> to the <code spellcheck="false">world</code>'s <code spellcheck="false">defaultContactMaterial</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">world<span class="token punctuation">.</span>defaultContactMaterial <span class="token operator">=</span> defaultContactMaterial</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can now remove or comment the material assignation of the <code spellcheck="false">sphereBody</code> and <code spellcheck="false">floorBody</code>.</p>
+<h2>Apply forces</h2>
+<p>There are many ways to apply forces to a <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a>:</p>
+<ul>
+<li><a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html#method_applyForce">applyForce</a> to apply a force to the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> from a specified point in space (not necessarily on the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a>'s surface) like the wind that pushes everything a little all the time, a small but sudden push on a domino or a greater sudden force to make an angry bird jump toward the enemy castle.</li>
+<li><a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html#method_applyImpulse">applyImpulse</a> is like <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html#method_applyForce">applyForce</a> but instead of adding to the force that will result in velocity changes, it applies directly to the velocity.</li>
+<li><a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html#method_applyLocalForce">applyLocalForce</a> is the same as <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html#method_applyForce">applyForce</a> but the coordinates are local to the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> (meaning that <code spellcheck="false">0, 0, 0</code> would be the center of the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a>).</li>
+<li><a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html#method_applyLocalImpulse">applyLocalImpulse</a> is the same as <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html#method_applyImpulse">applyImpulse</a> but the coordinates are local to the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a>.</li>
+</ul>
+<p>Because using "force" methods will result in velocity changes, let's not use "impulse" methods</p>
+<p>Let's use <code spellcheck="false">applyLocalForce(...)</code> to apply a small impulse on our <code spellcheck="false">sphereBody</code> at the start:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">sphereBody<span class="token punctuation">.</span><span class="token function">applyLocalForce</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Vec3</span><span class="token punctuation">(</span><span class="token number">150</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Vec3</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-07.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You can see the ball bounce to the right and roll.</p>
+<p>Now let's use the <code spellcheck="false">applyForce(...)</code> to apply some wind. Because the wind is permanent, we should apply this force to each frame before updating the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/World.html">World</a>. To correctly apply this force, the point should be the <code spellcheck="false">sphereBody.position</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Update physics</span>
+sphereBody<span class="token punctuation">.</span><span class="token function">applyForce</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Vec3</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span> sphereBody<span class="token punctuation">.</span>position<span class="token punctuation">)</span>
+
+world<span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">1</span> <span class="token operator">/</span> <span class="token number">60</span><span class="token punctuation">,</span> deltaTime<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-08.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<h2>Handle multiple objects</h2>
+<p>Handling one or two objects is easy, but managing dozens of objects can be a mess. We need to automate things a little.</p>
+<p>First, remove or comment the <code spellcheck="false">sphere</code>, the <code spellcheck="false">sphereShape</code> and the <code spellcheck="false">sphereBody</code>.</p>
+<h3>Automate with functions</h3>
+<p>To start with, let's improve how we create spheres with a function that will add both the Three.js and the Cannon.js versions.</p>
+<p>As parameters of this function, we will only pass the <code spellcheck="false">radius</code> and the <code spellcheck="false">position</code>, but feel free to add other parameters such as <code spellcheck="false">mass</code>, <code spellcheck="false">material</code>, <code spellcheck="false">subdivisions</code>, etc.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Utils
+*/</span>
+<span class="token keyword">const</span> <span class="token function-variable function">createSphere</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">radius<span class="token punctuation">,</span> position</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Now we can create the Three.js <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">createSphere</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">radius<span class="token punctuation">,</span> position</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// Three.js mesh</span>
+<span class="token keyword">const</span> mesh <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>SphereGeometry</span><span class="token punctuation">(</span>radius<span class="token punctuation">,</span> <span class="token number">20</span><span class="token punctuation">,</span> <span class="token number">20</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshStandardMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+metalness<span class="token operator">:</span> <span class="token number">0.3</span><span class="token punctuation">,</span>
+roughness<span class="token operator">:</span> <span class="token number">0.4</span><span class="token punctuation">,</span>
+envMap<span class="token operator">:</span> environmentMapTexture<span class="token punctuation">,</span>
+envMapIntensity<span class="token operator">:</span> <span class="token number">0.5</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span>
+mesh<span class="token punctuation">.</span>castShadow <span class="token operator">=</span> <span class="token boolean">true</span>
+mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">copy</span><span class="token punctuation">(</span>position<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh<span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>And the Cannon.js <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">createSphere</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">radius<span class="token punctuation">,</span> position</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Cannon.js body</span>
+<span class="token keyword">const</span> shape <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Sphere</span><span class="token punctuation">(</span>radius<span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> body <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Body</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+mass<span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+position<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Vec3</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+shape<span class="token operator">:</span> shape<span class="token punctuation">,</span>
+material<span class="token operator">:</span> defaultMaterial
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+body<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">copy</span><span class="token punctuation">(</span>position<span class="token punctuation">)</span>
+world<span class="token punctuation">.</span><span class="token function">addBody</span><span class="token punctuation">(</span>body<span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can remove the previously created sphere and call the <code spellcheck="false">createSphere(...)</code> (after creating the Cannon.js world and the Three.js scene). Don't forget to remove the sphere update in the <code spellcheck="false">tick()</code> function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token function">createSphere</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> x<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> y<span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span> z<span class="token operator">:</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-09.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>As you can see, the position doesn't have to be a Three.js <a target="_blank" href="https://threejs.org/docs/#api/en/math/Vector3">Vector3</a> or a Cannon.js <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Vec3.html">Vec3</a> and we can simply use an object with <code spellcheck="false">x</code>, <code spellcheck="false">y</code> and <code spellcheck="false">z</code> properties (luckily for us).</p>
+<p>You should see the sphere floating above the floor, but unfortunately, it's not moving anymore. And this is perfectly normal because we removed the code that was taking the Cannon.js <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> <code spellcheck="false">position</code> to apply it to the Three.js <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a> <code spellcheck="false">position</code>.</p>
+<h3>Use an array of objects</h3>
+<p>To handle this part, we will create an array of all objects that need to be updated. Then we'll add the newly created <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a> and <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> inside an object to that array:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> objectsToUpdate <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">createSphere</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">radius<span class="token punctuation">,</span> position</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Save in objects to update</span>
+objectsToUpdate<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+mesh<span class="token operator">:</span> mesh<span class="token punctuation">,</span>
+body<span class="token operator">:</span> body
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You can write this last part like this (no need to specify the property when the variable name is the same in JavaScript):</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    objectsToUpdate<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">{</span> mesh<span class="token punctuation">,</span> body <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can now loop on that array inside the <code spellcheck="false">tick()</code> function (right after updating the world) and copy each <code spellcheck="false">body.position</code> to the <code spellcheck="false">mesh.position</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+world<span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">1</span> <span class="token operator">/</span> <span class="token number">60</span><span class="token punctuation">,</span> deltaTime<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">const</span> object <span class="token keyword">of</span> objectsToUpdate<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+object<span class="token punctuation">.</span>mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">copy</span><span class="token punctuation">(</span>object<span class="token punctuation">.</span>body<span class="token punctuation">.</span>position<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-10.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The sphere should start falling again.</p>
+<h3>Add to Dat.GUI</h3>
+<p>Let's have fun and add a <code spellcheck="false">createSphere</code> button to our Dat.GUI. The problem is that the first parameter when using the <code spellcheck="false">gui.add(...)</code> method, should be an object, and the second parameter should be a property name. Unfortunately, our <code spellcheck="false">createSphere</code> method is not in an object, and also need to passe parameters to it. This kind of situation can happen regularly. A not so bad solution would be to create an object which only purpose would be to have those lost functions as properties:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> gui <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">dat<span class="token punctuation">.</span>GUI</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> debugObject <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>And then add functions to it when needed (after creating the <code spellcheck="false">createSphere</code> function):</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">debugObject<span class="token punctuation">.</span><span class="token function-variable function">createSphere</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token function">createSphere</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> x<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> y<span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span> z<span class="token operator">:</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Finally, we can add this new <code spellcheck="false">createSphere</code> property to Dat.GUI:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">,</span> <span class="token string">'createSphere'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-11.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>If you click on the newly created <code spellcheck="false">createSphere</code> button, you should see spheres staking one on each other. That is due to the sphere popping on the exact same position. Let's add some randomness:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">debugObject<span class="token punctuation">.</span><span class="token function-variable function">createSphere</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token function">createSphere</span><span class="token punctuation">(</span>
+Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">0.5</span><span class="token punctuation">,</span>
+<span class="token punctuation">{</span>
+x<span class="token operator">:</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">3</span><span class="token punctuation">,</span>
+y<span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span>
+z<span class="token operator">:</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">3</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-12.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>It's raining spheres!</p>
+<p>Try not to burn your computer; this code needs optimization.</p>
+<h3>Optimize</h3>
+<p>Because the geometry and the material of the Three.js <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a> are the same, we should get them out of the <code spellcheck="false">createSphere</code> function. The problem is that we are using the <code spellcheck="false">radius</code> to create our geometry. An easy solution would be to fix the radius of the <a target="_blank" href="https://threejs.org/docs/#api/en/geometries/SphereGeometry">SphereGeometry</a> to <code spellcheck="false">1</code> and then scale the <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> sphereGeometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>SphereGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">20</span><span class="token punctuation">,</span> <span class="token number">20</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> sphereMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshStandardMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+metalness<span class="token operator">:</span> <span class="token number">0.3</span><span class="token punctuation">,</span>
+roughness<span class="token operator">:</span> <span class="token number">0.4</span><span class="token punctuation">,</span>
+envMap<span class="token operator">:</span> environmentMapTexture<span class="token punctuation">,</span>
+envMapIntensity<span class="token operator">:</span> <span class="token number">0.5</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> <span class="token function-variable function">createSphere</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">radius<span class="token punctuation">,</span> position</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// Three.js mesh</span>
+<span class="token keyword">const</span> mesh <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>sphereGeometry<span class="token punctuation">,</span> sphereMaterial<span class="token punctuation">)</span>
+mesh<span class="token punctuation">.</span>castShadow <span class="token operator">=</span> <span class="token boolean">true</span>
+mesh<span class="token punctuation">.</span>scale<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>radius<span class="token punctuation">,</span> radius<span class="token punctuation">,</span> radius<span class="token punctuation">)</span>
+mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">copy</span><span class="token punctuation">(</span>position<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh<span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You should get the same result.</p>
+<h2>Add boxes</h2>
+<p>Now that our spheres are working well, let's do the same process but for the boxes.</p>
+<p>To create a box, we must use a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/geometries/BoxGeometry">BoxGeometry</a> and a <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Box.html">Box</a> shape. Be careful; the parameters aren't the same. A <a target="_blank" href="https://threejs.org/docs/index.html#api/en/geometries/BoxGeometry">BoxGeometry</a> needs a <code spellcheck="false">width</code>, a <code spellcheck="false">height</code>, and a <code spellcheck="false">depth</code>. In the meantime, a <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Box.html">Box</a> shape needs a <code spellcheck="false">halfExtents</code>. It is represented by a <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Vec3.html">Vec3</a> corresponding to a segment that starts at the center of the box and joining one of that box corners:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Create box</span>
+<span class="token keyword">const</span> boxGeometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BoxGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> boxMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshStandardMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+metalness<span class="token operator">:</span> <span class="token number">0.3</span><span class="token punctuation">,</span>
+roughness<span class="token operator">:</span> <span class="token number">0.4</span><span class="token punctuation">,</span>
+envMap<span class="token operator">:</span> environmentMapTexture<span class="token punctuation">,</span>
+envMapIntensity<span class="token operator">:</span> <span class="token number">0.5</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> <span class="token function-variable function">createBox</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">width<span class="token punctuation">,</span> height<span class="token punctuation">,</span> depth<span class="token punctuation">,</span> position</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// Three.js mesh</span>
+<span class="token keyword">const</span> mesh <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>boxGeometry<span class="token punctuation">,</span> boxMaterial<span class="token punctuation">)</span>
+mesh<span class="token punctuation">.</span>scale<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>width<span class="token punctuation">,</span> height<span class="token punctuation">,</span> depth<span class="token punctuation">)</span>
+mesh<span class="token punctuation">.</span>castShadow <span class="token operator">=</span> <span class="token boolean">true</span>
+mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">copy</span><span class="token punctuation">(</span>position<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>mesh<span class="token punctuation">)</span>
+
+<span class="token comment">// Cannon.js body</span>
+<span class="token keyword">const</span> shape <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Box</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Vec3</span><span class="token punctuation">(</span>width <span class="token operator">*</span> <span class="token number">0.5</span><span class="token punctuation">,</span> height <span class="token operator">*</span> <span class="token number">0.5</span><span class="token punctuation">,</span> depth <span class="token operator">*</span> <span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> body <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Body</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+mass<span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+position<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>Vec3</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+shape<span class="token operator">:</span> shape<span class="token punctuation">,</span>
+material<span class="token operator">:</span> defaultMaterial
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+body<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">copy</span><span class="token punctuation">(</span>position<span class="token punctuation">)</span>
+world<span class="token punctuation">.</span><span class="token function">addBody</span><span class="token punctuation">(</span>body<span class="token punctuation">)</span>
+
+<span class="token comment">// Save in objects</span>
+objectsToUpdate<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">{</span> mesh<span class="token punctuation">,</span> body <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">createBox</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1.5</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> x<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> y<span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span> z<span class="token operator">:</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+debugObject<span class="token punctuation">.</span><span class="token function-variable function">createBox</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token function">createBox</span><span class="token punctuation">(</span>
+Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">{</span>
+x<span class="token operator">:</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">3</span><span class="token punctuation">,</span>
+y<span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span>
+z<span class="token operator">:</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">3</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">,</span> <span class="token string">'createBox'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-13.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Don't forget to remove the first <code spellcheck="false">createSphere(...)</code> call, or you'll have both the sphere and the box created in the same position simultaneously, which might get messy.</p>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-14.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You should see a box falling and suddenly going through the floor. If you click on the <code spellcheck="false">createBox</code> button of Dat.GUI, it should get even more acute.</p>
+<p>We forgot one significant thing: our meshes are not rotating. What's happening here is that the box bounce on the floor and fall on its side. But all we can see is the box standing straight and going through the floor because the Three.js <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a> isn't rotating like the Cannon.js <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> is.</p>
+<p>We didn't see the problem before because we were using spheres and they looked the same wether we rotate them or not. </p>
+<p>We can fix this by copying the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> <code spellcheck="false">quaternion</code> to the <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a> <code spellcheck="false">quaternion</code> just like we did with the <code spellcheck="false">position</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">const</span> object <span class="token keyword">of</span> objectsToUpdate<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+object<span class="token punctuation">.</span>mesh<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">copy</span><span class="token punctuation">(</span>object<span class="token punctuation">.</span>body<span class="token punctuation">.</span>position<span class="token punctuation">)</span>
+object<span class="token punctuation">.</span>mesh<span class="token punctuation">.</span>quaternion<span class="token punctuation">.</span><span class="token function">copy</span><span class="token punctuation">(</span>object<span class="token punctuation">.</span>body<span class="token punctuation">.</span>quaternion<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-15.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The boxes should fall adequately now. You can create spheres and boxes as you want. As always, try not to burn your computer.</p>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-16.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<h2>Performance</h2>
+<h3>Broadphase</h3>
+<p>When testing the collisions between objects, a naive approach is testing every <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> against every other <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a>. While this is easy to do, it's costly in terms of performance.</p>
+<p>That is where broadphase comes up. The broadphase is doing a rough sorting of the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Bodies</a> before testing them. Imagine having two piles of boxes far from each other. Why would you test the boxes from one pile against the boxes in the other pile? They are too far to be colliding.</p>
+<p>There are 3 broadphase algorithms available in Cannon.js:</p>
+<ul>
+<li><a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/NaiveBroadphase.html">NaiveBroadphase</a>: Tests every <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Bodies</a> against every other <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Bodies</a></li>
+<li><a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/GridBroadphase.html">GridBroadphase</a>: Quadrilles the world and only tests <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Bodies</a> against other <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Bodies</a> in the same grid box or the neighbors' grid boxes.</li>
+<li><a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/SAPBroadphase.html">SAPBroadphase</a> (Sweep and prune broadphase): Tests <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Bodies</a> on arbitrary axes during multiples steps.</li>
+</ul>
+<p>The default broadphase is <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/NaiveBroadphase.html">NaiveBroadphase</a>, and I recommend you to switch to <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/SAPBroadphase.html">SAPBroadphase</a>. Using this broadphase can eventually generate bugs where a collision doesn't occur, but it's rare, and it involves doing things like moving <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Bodies</a> very fast.</p>
+<p>To switch to <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/SAPBroadphase.html">SAPBroadphase</a>, simply instantiate it in the <code spellcheck="false">world.broadphase</code> property and also use this same world as parameter:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">world<span class="token punctuation">.</span>broadphase <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CANNON<span class="token punctuation">.</span>SAPBroadphase</span><span class="token punctuation">(</span>world<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h3>Sleep</h3>
+<p>Even if we use an improved broadphase algorithm, all the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> are tested, even those not moving anymore. We can use a feature called sleep.</p>
+<p>When the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> speed gets incredibly slow (at a point where you can't see it moving), the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> can fall asleep and won't be tested unless a sufficient force is applied to it by code or if another <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> hits it.</p>
+<p>To activate this feature, simply set the <code spellcheck="false">allowSleep</code> property to <code spellcheck="false">true</code> on the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/World.html">World</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">world<span class="token punctuation">.</span>allowSleep <span class="token operator">=</span> <span class="token boolean">true</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You can also control how likely it is for the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> to fall asleep with the <code spellcheck="false">sleepSpeedLimit</code> and <code spellcheck="false">sleepTimeLimit</code> properties but we won't change those.</p>
+<h2>Events</h2>
+<p>You can listen to events on the <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a>. That can be useful if you want to do things like play a sound when objects collide or if you want to know if a projectile has touched an enemy.</p>
+<p>You can listen to events on <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Body</a> such as <code spellcheck="false">'colide'</code>, <code spellcheck="false">'sleep'</code> or <code spellcheck="false">'wakeup'</code>.</p>
+<p>Let's play a hit sound when our spheres and boxes collide with anything. First, create that sound in native JavaScript and create a function that should play the sound.</p>
+<p>Some browsers like Chrome prevent sounds from playing unless the user has interacted with the page like clicking anywhere, so don't worry if you don't hear the first sounds.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Sounds
+*/</span>
+<span class="token keyword">const</span> hitSound <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Audio</span><span class="token punctuation">(</span><span class="token string">'/sounds/hit.mp3'</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">playHitSound</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+hitSound<span class="token punctuation">.</span><span class="token function">play</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>A little far-fetched to just play a sound, but we will add more to that function later.</p>
+<p>Now, let's listen to the <code spellcheck="false">'collide'</code> event on our <a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">Bodies</a>. We will only focus on the <code spellcheck="false">createBox</code> function and add it to the <code spellcheck="false">createSphere</code> function once we are done.</p>
+<p>Now, listen to the collide event and use the <code spellcheck="false">playHitSound</code> function as the callback:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">createBox</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">width<span class="token punctuation">,</span> height<span class="token punctuation">,</span> depth<span class="token punctuation">,</span> position</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+body<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'collide'</span><span class="token punctuation">,</span> playHitSound<span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-17.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You should hear the hit sound when the cube touches the ground or when cubes collide. Don't forget to click on the page before the box hits the floor if you are using Chrome because Chrome refuse to play sounds if no user interaction occurred yet. </p>
+<p>The sound seems pretty good. Unluckily, things get truly odd when we add multiples boxes.</p>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-18.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The first problem is that when we call <code spellcheck="false">hitSound.play()</code> while the sound is playing, nothing happens because it is already playing. We can fix that by resetting the sound to <code spellcheck="false">0</code> with the <code spellcheck="false">currentTime</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">playHitSound</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+hitSound<span class="token punctuation">.</span>currentTime <span class="token operator">=</span> <span class="token number">0</span>
+hitSound<span class="token punctuation">.</span><span class="token function">play</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-19.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>While this is better at the start, we hear too many hit sounds even when a cube slightly touches another. We need to know how strong the impact was and not play anything if it wasn't strong enough.</p>
+<p>To get the impact strength, we first need to get information about the collision. We can do that by adding a parameter to the <code spellcheck="false">'collide'</code> callback (which is our <code spellcheck="false">playHitSound</code> function):</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">playHitSound</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">collision</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>collision<span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The <code spellcheck="false">collision</code> variable now contains a lot of information. The impact strength can be found by calling the <code spellcheck="false">getImpactVelocityAlongNormal()</code> method on the <code spellcheck="false">contact</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">playHitSound</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">collision</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>collision<span class="token punctuation">.</span>contact<span class="token punctuation">.</span><span class="token function">getImpactVelocityAlongNormal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>If you look at the logs, you should see a number. The stronger the impact, the higher the number.</p>
+<p>We test that value and only play the sound if the <code spellcheck="false">impactStrength</code> is strong enough:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">playHitSound</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">collision</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> impactStrength <span class="token operator">=</span> collision<span class="token punctuation">.</span>contact<span class="token punctuation">.</span><span class="token function">getImpactVelocityAlongNormal</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">if</span><span class="token punctuation">(</span>impactStrength <span class="token operator">&gt;</span> <span class="token number">1.5</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+hitSound<span class="token punctuation">.</span>currentTime <span class="token operator">=</span> <span class="token number">0</span>
+hitSound<span class="token punctuation">.</span><span class="token function">play</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-20.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>For even more realism, we can add some randomness to the sound volume:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">playHitSound</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">collision</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> impactStrength <span class="token operator">=</span> collision<span class="token punctuation">.</span>contact<span class="token punctuation">.</span><span class="token function">getImpactVelocityAlongNormal</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">if</span><span class="token punctuation">(</span>impactStrength <span class="token operator">&gt;</span> <span class="token number">1.5</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+hitSound<span class="token punctuation">.</span>volume <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+hitSound<span class="token punctuation">.</span>currentTime <span class="token operator">=</span> <span class="token number">0</span>
+hitSound<span class="token punctuation">.</span><span class="token function">play</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-21.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>If we wanted to go even further, we could have multiple slightly different hit sounds. And to prevent having too many sounds playing simultaneously, we could add a very short delay where the sound cannot play again after being played once.</p>
+<p>We won't do those in this lesson, but feel free to try stuff.</p>
+<p>Let's copy the code we used in the <code spellcheck="false">createBox</code> function to the <code spellcheck="false">createSphere</code> function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">createSphere</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">radius<span class="token punctuation">,</span> position</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+body<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'collide'</span><span class="token punctuation">,</span> playHitSound<span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-22.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The sounds should be working for the spheres too.</p>
+<h2>Remove things</h2>
+<p>Let's add a <code spellcheck="false">reset</code> button.</p>
+<p>Create a <code spellcheck="false">reset</code> function and add it to your Dat.GUI as we did for <code spellcheck="false">createBox</code> and <code spellcheck="false">createSphere</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Reset</span>
+debugObject<span class="token punctuation">.</span><span class="token function-variable function">reset</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'reset'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">,</span> <span class="token string">'reset'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Now, let's loop on every object inside our <code spellcheck="false">objectsToUpdate</code> array. Then remove both the <code spellcheck="false">object.body</code> from the <code spellcheck="false">world</code> and the <code spellcheck="false">object.mesh</code> from the <code spellcheck="false">scene</code>. Also, don't forget to remove the <code spellcheck="false">eventListener</code> like you would have done in native JavaScript:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">debugObject<span class="token punctuation">.</span><span class="token function-variable function">reset</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">const</span> object <span class="token keyword">of</span> objectsToUpdate<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// Remove body</span>
+object<span class="token punctuation">.</span>body<span class="token punctuation">.</span><span class="token function">removeEventListener</span><span class="token punctuation">(</span><span class="token string">'collide'</span><span class="token punctuation">,</span> playHitSound<span class="token punctuation">)</span>
+world<span class="token punctuation">.</span><span class="token function">removeBody</span><span class="token punctuation">(</span>object<span class="token punctuation">.</span>body<span class="token punctuation">)</span>
+
+<span class="token comment">// Remove mesh</span>
+scene<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>object<span class="token punctuation">.</span>mesh<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/22/step-23.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>And that's it. You can click on the <code spellcheck="false">reset</code> button to remove everything.</p>
+<h2>Go further with Cannon.js</h2>
+<p>While we covered the basics and you can already do a lot of things, here are some areas of improvement.</p>
+<h3>Constraints</h3>
+<p>Constraints, as the name suggests, enable constraints between two bodies. We won't cover those in this lesson, but here's the list of constraints:</p>
+<ul>
+<li><a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/HingeConstraint.html">HingeConstraint</a>: acts like a door hinge.</li>
+<li><a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/DistanceConstraint.html">DistanceConstraint</a>: forces the bodies to keep a distance between each other.</li>
+<li><a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/LockConstraint.html">LockConstraint</a>: merges the bodies like if they were one piece.</li>
+<li><a target="_blank" href="http://schteppe.github.io/cannon.js/docs/classes/PointToPointConstraint.html">PointToPointConstraint</a>: glues the bodies to a specific point.</li>
+</ul>
+<h3>Classes, methods, properties and events</h3>
+<p>There are many classes, and each one with different methods, properties, and events. Try to browse through all of them at least once just to know that they exist. It might save you some time in your future projects.</p>
+<h3>Examples</h3>
+<p>The documentation isn't perfect. It would help if you spent some time in the <a target="_blank" href="https://schteppe.github.io/cannon.js/">demos</a> and research to find out how to do things. Many people probably had the issues you might encounter. Don't hesitate to rely on the community.</p>
+<h3>Workers</h3>
+<p>Running the physics simulation takes time. The component of your computer doing the work is the CPU. When you run Three.js, Cannon.js, your code logic, etc. everything is done by the same thread in your CPU. That thread can quickly overload if there is too much to do (like too many objects in the physics simulation), resulting in a frame rate drop.</p>
+<p>The right solution is to use workers. Workers let you put a part of your code in a different thread to spread the load. You can then send and receive data from that code. It can result in a considerable performance improvement.</p>
+<p>The problem is that the code has to be distinctly separated. You can find a good and simple example <a target="_blank" href="https://schteppe.github.io/cannon.js/examples/worker.html">here</a> in the page source code. </p>
+<h3>Cannon-es</h3>
+<p>As we said earlier, Cannon.js hasn't been updated for years. Fortunately, some guys forked the repository and started working on updates. Thanks to them, we have access to a better and maintained version of Cannon.js:</p>
+<ul>
+<li>Git repository: <a target="_blank" href="https://github.com/pmndrs/cannon-es">https://github.com/pmndrs/cannon-es</a></li>
+<li>NPM page: <a target="_blank" href="https://www.npmjs.com/package/cannon-es">https://www.npmjs.com/package/cannon-es</a></li>
+</ul>
+<p>To use this version instead of the original, open the terminal in the project folder (or shut down the server), remove the previous cannon.js dependency with <code spellcheck="false">npm uninstall --save cannon</code>, install the new version with <code spellcheck="false">npm install --save cannon-es@0.15.1</code>, and change the way you import Cannon.js in the code:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> <span class="token constant">CANNON</span> <span class="token keyword">from</span> <span class="token string">'cannon-es'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Everything should be working just like before. You can check out the changes on the <a target="_blank" href="https://github.com/react-spring/cannon-es">Git repository page</a>.</p>
+<h2>Ammo.js</h2>
+<p>We used Cannon.js because the library is easy to implement and understand. One of its biggest competitors is Ammo.js. While it's harder to use and to implement in your project, here are some features that might be of interest to you:</p>
+<ul>
+<li>It's a portage of Bullet, a well known and well-oiled physics engine written in C++.</li>
+<li>It has WebAssembly (wasm) support. WebAssembly is a low-level language supported by most recent browsers. Because it's a low level, it has better performance.</li>
+<li>It's more popular, and you can find more examples of Three.js.</li>
+<li>It supports more features.</li>
+</ul>
+<p>If you need the best performance or have particular features in your project, you probably should go for Ammo.js instead of Cannon.js.</p>
+<h2>Physijs</h2>
+<p>Physijs ease the implementation of physics in a Three.js project. It uses Ammo.js and supports workers natively.</p>
+<ul>
+<li>Website: <a target="_blank" href="https://chandlerprall.github.io/Physijs/">https://chandlerprall.github.io/Physijs/</a></li>
+<li>Git repository: <a target="_blank" href="https://github.com/chandlerprall/Physijs">https://github.com/chandlerprall/Physijs</a></li>
+<li>Documentation: <a target="_blank" href="https://github.com/chandlerprall/Physijs/wiki">https://github.com/chandlerprall/Physijs/wiki</a></li>
+</ul>
+<p>Instead of creating the Three.js object and the physics object, you create both simultaneously:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">box <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Physijs<span class="token punctuation">.</span>BoxMesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>CubeGeometry</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> color<span class="token operator">:</span> <span class="token number">0x888888</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>box<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Physijs will take care of the rest.</p>
+<p>While it's fascinating, especially for beginners, things get complicated when you try to do something not supported by the library. Finding where a bug comes from can also be a hassle.</p>
+<p>Like for Ammo.js, take your time and think about what is the best solution for your project.</p>
+</section>
+</body>
+
+</html>

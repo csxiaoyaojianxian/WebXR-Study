@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<body>
+
+    <section class="text js-text">
+        <h2>Introduction</h2>
+<p>Materials are used to put a color on each visible pixel of the geometries.</p>
+<p>The algorithms that decide on the color of each pixel are written in programs called shaders. Writing shaders is one of the most challenging parts of WebGL and Three.js, but don't worry; Three.js has many built-in materials with pre-made shaders.</p>
+<p>We will discover how to create our own shaders in a future lesson. For now, let's use Three.js materials.</p>
+<h2>Setup</h2>
+<p>The starter doesn't contain any object. This is an excellent occasion to revise the basics of creating <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Meshes</a>.</p>
+<h2>Prepare our scene</h2>
+<p>To test the materials, we should prepare a lovely scene and load some textures.</p>
+<p>Create 3 <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Meshes</a> composed of 3 different geometries (a sphere, a plane, and a torus) and use the same <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a> on all of the 3. Yes, you can use one material on multiple meshes. Move the sphere on the left and the torus on the right to separate them.</p>
+<p>The <code spellcheck="false">add(...)</code> method support adding multiple objects at once:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Objects
+*/</span>
+<span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> sphere <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>SphereGeometry</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">16</span><span class="token punctuation">,</span> <span class="token number">16</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+material
+<span class="token punctuation">)</span>
+sphere<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token operator">-</span> <span class="token number">1.5</span>
+
+<span class="token keyword">const</span> plane <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PlaneGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+material
+<span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> torus <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>TorusGeometry</span><span class="token punctuation">(</span><span class="token number">0.3</span><span class="token punctuation">,</span> <span class="token number">0.2</span><span class="token punctuation">,</span> <span class="token number">16</span><span class="token punctuation">,</span> <span class="token number">32</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+material
+<span class="token punctuation">)</span>
+torus<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">1.5</span>
+
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>sphere<span class="token punctuation">,</span> plane<span class="token punctuation">,</span> torus<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-01.png" src="./assets/lessons/12/step-01.png" width="1792" height="1120" alt="./assets/lessons/12/step-01.png" class="is-loaded"></span></p>
+<p>We can now rotate our objects on our <code spellcheck="false">tick</code> function as we did on the Animation lesson:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Animate
+*/</span>
+<span class="token keyword">const</span> clock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Clock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> elapsedTime <span class="token operator">=</span> clock<span class="token punctuation">.</span><span class="token function">getElapsedTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Update objects</span>
+sphere<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token number">0.1</span> <span class="token operator">*</span> elapsedTime
+plane<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token number">0.1</span> <span class="token operator">*</span> elapsedTime
+torus<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token number">0.1</span> <span class="token operator">*</span> elapsedTime
+
+sphere<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">0.15</span> <span class="token operator">*</span> elapsedTime
+plane<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">0.15</span> <span class="token operator">*</span> elapsedTime
+torus<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">0.15</span> <span class="token operator">*</span> elapsedTime
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">tick</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/12/step-02.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>You should see your 3 objects spinning slowly.</p>
+<p>The materials we are going to discover are using textures in many different ways. Let's load some textures using the <a target="_blank" href="https://threejs.org/docs/#api/en/loaders/TextureLoader">TextureLoader</a> as we did on the Textures lesson.</p>
+<p>All the texture images are located in the <code spellcheck="false">/static/textures/</code> folder. For now, we will load all the door textures located in the <code spellcheck="false">/static/textures/door/</code> folder, the first matcap texture located in the <code spellcheck="false">/static/textures/matcaps/</code> folder and the first gradient texture located in the <code spellcheck="false">/static/textures/gradients/</code> folder.</p>
+<p>Make sure to do that before instantiating the <code spellcheck="false">material</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Textures
+*/</span>
+<span class="token keyword">const</span> textureLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>TextureLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> doorColorTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/door/color.jpg'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> doorAlphaTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/door/alpha.jpg'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> doorAmbientOcclusionTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/door/ambientOcclusion.jpg'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> doorHeightTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/door/height.jpg'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> doorNormalTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/door/normal.jpg'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> doorMetalnessTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/door/metalness.jpg'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> doorRoughnessTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/door/roughness.jpg'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> matcapTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/matcaps/1.png'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> gradientTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/gradients/3.jpg'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>To ensure that all the textures are well loaded, you can use them on your material with the <code spellcheck="false">map</code> property, as we saw in the Textures lesson.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> map<span class="token operator">:</span> doorColorTexture <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-03.png" src="./assets/lessons/12/step-03.png" width="1792" height="1120" alt="./assets/lessons/12/step-03.png" class="is-loaded"></span></p>
+<p>Until now, we only used the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a>, which applies a uniform color or a texture on our geometry.</p>
+<p>If you search for "material" on the <a target="_blank" href="https://threejs.org/docs/">Three.js documentation</a>, you'll see that there are many classes we can use. Let's try them.</p>
+<h2>MeshBasicMaterial</h2>
+<p><a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a> is probably the most "basic" material... But there are multiple properties that we haven't cover yet.</p>
+<p>You can set most of those properties while instancing the material in the object we send as a parameter, but you can also change those properties on the instance directly:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+map<span class="token operator">:</span> doorColorTexture
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Equals</span>
+<span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+material<span class="token punctuation">.</span>map <span class="token operator">=</span> doorColorTexture</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We will use the second method, but feel free to do as you like.</p>
+<ul>
+<li>
+<p>The <code spellcheck="false">map</code> property will apply a texture on the surface of the geometry:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>map <span class="token operator">=</span> doorColorTexture</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+</li>
+<li>
+<p>The <code spellcheck="false">color</code> property will apply a uniform color on the surface of the geometry. When you are changing the <code spellcheck="false">color</code> property directly, you must instantiate a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/math/Color">Color</a> class. You can use many different formats:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>color <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span><span class="token string">'#ff0000'</span><span class="token punctuation">)</span>
+material<span class="token punctuation">.</span>color <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span><span class="token string">'#f00'</span><span class="token punctuation">)</span>
+material<span class="token punctuation">.</span>color <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span><span class="token string">'red'</span><span class="token punctuation">)</span>
+material<span class="token punctuation">.</span>color <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span><span class="token string">'rgb(255, 0, 0)'</span><span class="token punctuation">)</span>
+material<span class="token punctuation">.</span>color <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span><span class="token number">0xff0000</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-04.png" src="./assets/lessons/12/step-04.png" width="1792" height="1120" alt="./assets/lessons/12/step-04.png" class="is-loaded"></span></p>
+<p>Combining <code spellcheck="false">color</code> and <code spellcheck="false">map</code> will tint the texture with the color:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>map <span class="token operator">=</span> doorColorTexture
+material<span class="token punctuation">.</span>color <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span><span class="token string">'#ff0000'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-05.png" src="./assets/lessons/12/step-05.png" width="1792" height="1120" alt="./assets/lessons/12/step-05.png" class="is-loaded"></span></p>
+</li>
+<li>
+<p>The <code spellcheck="false">wireframe</code> property will show the triangles that compose your geometry with a thin line of 1px regardless of the distance of the camera:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>wireframe <span class="token operator">=</span> <span class="token boolean">true</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-06.png" src="./assets/lessons/12/step-06.png" width="1792" height="1120" alt="./assets/lessons/12/step-06.png" class="is-loaded"></span></p>
+</li>
+<li>
+<p>The <code spellcheck="false">opacity</code> property controls the transparency but, to work, you should set the <code spellcheck="false">transparent</code> property to <code spellcheck="false">true</code> to inform Three.js that this material now supports transparency:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>transparent <span class="token operator">=</span> <span class="token boolean">true</span>
+material<span class="token punctuation">.</span>opacity <span class="token operator">=</span> <span class="token number">0.5</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-07.png" src="./assets/lessons/12/step-07.png" width="1792" height="1120" alt="./assets/lessons/12/step-07.png" class="is-loaded"></span></p>
+</li>
+<li>
+<p>Now that the transparency is working, we can use the <code spellcheck="false">alphaMap</code> property to control the transparency with a texture:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>transparent <span class="token operator">=</span> <span class="token boolean">true</span>
+material<span class="token punctuation">.</span>alphaMap <span class="token operator">=</span> doorAlphaTexture</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-08.png" src="./assets/lessons/12/step-08.png" width="1792" height="1120" alt="./assets/lessons/12/step-08.png" class="is-loaded"></span></p>
+</li>
+<li>
+<p>The <code spellcheck="false">side</code> property lets you decide which side of a face is visible. By default, the front side is visible (<code spellcheck="false">THREE.FrontSide</code>), but you can show the backside instead (<code spellcheck="false">THREE.BackSide</code>) or both (<code spellcheck="false">THREE.DoubleSide</code>):</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>side <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>DoubleSide</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/12/step-09.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>You should see both the front and the back of the plane.</p>
+<p>Try to avoid using <code spellcheck="false">THREE.DoubleSide</code> because rendering both sides means having twice more triangles to render.</p>
+</li>
+</ul>
+<p>Some of these properties like <code spellcheck="false">wireframe</code> or <code spellcheck="false">opacity</code> can be used with other types of materials. We won't repeat those every time.</p>
+<h2>MeshNormalMaterial</h2>
+<p>The <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshNormalMaterial">MeshNormalMaterial</a> displays a nice purple, blueish, greenish color that looks like the normal texture we saw in the Textures lessons. That is no coincidence because both are related to what we call normals:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshNormalMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-10.png" src="./assets/lessons/12/step-10.png" width="1792" height="1120" alt="./assets/lessons/12/step-10.png" class="is-loaded"></span></p>
+<p>Normals are information encoded in each vertex that contains the direction of the outside of the face. If you displayed those normals as arrows, you would get straight lines comings out of each vertex that composes your geometry.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/normals.png" src="./assets/lessons/12/normals.png" width="1920" height="1080" alt="./assets/lessons/12/normals.png" class="is-loaded"></span></p>
+<p>You can use Normals for many things like calculating how to illuminate the face or how the environment should reflect or refract on the geometries' surface.</p>
+<p>When using the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshNormalMaterial">MeshNormalMaterial</a>, the color will just display the normal relative's orientation to the camera. If you rotate around the sphere, you'll see that the color is always the same, regardless of which part of the sphere you're looking at.</p>
+<p>While you can use some of the properties we discovered with the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a> like <code spellcheck="false">wireframe</code>, <code spellcheck="false">transparent</code>, <code spellcheck="false">opacity</code> and <code spellcheck="false">side</code>, there is also a new property that you can use, which is called <code spellcheck="false">flatShading</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>flatShading <span class="token operator">=</span> <span class="token boolean">true</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-11.png" src="./assets/lessons/12/step-11.png" width="1792" height="1120" alt="./assets/lessons/12/step-11.png" class="is-loaded"></span></p>
+<p><code spellcheck="false">flatShading</code> will flatten the faces, meaning that the normals won't be interpolated between the vertices.</p>
+<p><a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshNormalMaterial">MeshNormalMaterial</a> can be useful to debug the normals, but it also looks great, and you can use it as it is just like ilithya did on her portfolio <a target="_blank" href="https://www.ilithya.rocks">https://www.ilithya.rocks</a>.</p>
+<h2>MeshMatcapMaterial</h2>
+<p><a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshMatcapMaterial">MeshMatcapMaterial</a> is a fantastic material because of how great it can look while being very performant.</p>
+<p>For it to work, the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshMatcapMaterial">MeshMatcapMaterial</a> needs a reference texture that looks like a sphere.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/1.jpg" src="./assets/lessons/12/1.jpg" width="128" height="128" alt="./assets/lessons/12/1.jpg" class="is-loaded"></span></p>
+<p>The material will then pick colors on the texture according to the normal orientation relative to the camera.</p>
+<p>To set that reference matcap texture, use the <code spellcheck="false">matcap</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshMatcapMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+material<span class="token punctuation">.</span>matcap <span class="token operator">=</span> matcapTexture</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-12.png" src="./assets/lessons/12/step-12.png" width="1792" height="1120" alt="./assets/lessons/12/step-12.png" class="is-loaded"></span></p>
+<p>The meshes will appear illuminated, but it's just a texture that looks like it.</p>
+<p>The only problem is that the illusion is the same regardless of the camera orientation. Also, you cannot update the lights because there are none.</p>
+<p>Try different textures available on the <code spellcheck="false">/static/textures/matcaps/</code> folder (just one of the lines below):</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> matcapTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/matcaps/2.png'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> matcapTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/matcaps/3.png'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> matcapTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/matcaps/4.png'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> matcapTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/matcaps/5.png'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> matcapTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/matcaps/6.png'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> matcapTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/matcaps/7.png'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> matcapTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/matcaps/8.png'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-13.png" src="./assets/lessons/12/step-13.png" width="1792" height="1120" alt="./assets/lessons/12/step-13.png" class="is-loaded"></span></p>
+<p>Regarding where to find matcaps textures, you can do a simple search on the web like any type of textures. Make sure you have the right to use the texture if it's not for personal usage. There is also this vast list of matcaps: <a target="_blank" href="https://github.com/nidorx/matcaps">https://github.com/nidorx/matcaps</a></p>
+<p>You can also create your own matcaps using a 3D software by rendering a sphere in front of the camera in a square image. Finally, you can try to make a matcap in 2D software like Photoshop.</p>
+<h2>MeshDepthMaterial</h2>
+<p>The <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshDepthMaterial">MeshDepthMaterial</a> will simply color the geometry in white if it's close to the camera's <code spellcheck="false">near</code> value and in black if it's close to the <code spellcheck="false">far</code> value of the camera:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshDepthMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/12/step-14.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>You can use this material for special effects where you need to know how far the pixel is from the camera. We will use it in a future lesson.</p>
+<h2>Adding a few lights</h2>
+<p>The following materials need lights to be seen. Let's add two simple lights to our scene.</p>
+<p>Create an <a target="_blank" href="https://threejs.org/docs/index.html#api/en/lights/AmbientLight">AmbientLight</a> and add it to the scene:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Lights
+*/</span>
+<span class="token keyword">const</span> ambientLight <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>AmbientLight</span><span class="token punctuation">(</span><span class="token number">0xffffff</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>ambientLight<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Create a <a target="_blank" href="https://threejs.org/docs/#api/en/lights/PointLight">PointLight</a> and add it to the scene:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> pointLight <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PointLight</span><span class="token punctuation">(</span><span class="token number">0xffffff</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">)</span>
+pointLight<span class="token punctuation">.</span>position<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">2</span>
+pointLight<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token number">3</span>
+pointLight<span class="token punctuation">.</span>position<span class="token punctuation">.</span>z <span class="token operator">=</span> <span class="token number">4</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>pointLight<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We will see more about lights, how they work and how to tweak them in a future lesson.</p>
+<h2>MeshLambertMaterial</h2>
+<p>The <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshLambertMaterial">MeshLambertMaterial</a> is the first material reacting to light that we are going to use:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshLambertMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-15.png" src="./assets/lessons/12/step-15.png" width="1792" height="1120" alt="./assets/lessons/12/step-15.png" class="is-loaded"></span></p>
+<p>Things are getting realistic, as you can see. While the illumination isn't very convincing, it's a good start.</p>
+<p><a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshLambertMaterial">MeshLambertMaterial</a> supports the same properties as the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshBasicMaterial">MeshBasicMaterial</a> but also some properties related to lights. We will see those properties later in the lesson with more adequate materials.</p>
+<p>The <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshLambertMaterial">MeshLambertMaterial</a> is the most performant material that uses lights. Unfortunately, the parameters aren't convenient, and you can see strange patterns on the geometry if you look closely at rounded geometries like the sphere.</p>
+<h2>MeshPhongMaterial</h2>
+<p>The <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshPhongMaterial">MeshPhongMaterial</a> is very similar to the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshLambertMaterial">MeshLambertMaterial</a>, but the strange patterns are less visible, and you can also see the light reflection on the surface of the geometry:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshPhongMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-16.png" src="./assets/lessons/12/step-16.png" width="1792" height="1120" alt="./assets/lessons/12/step-16.png" class="is-loaded"></span></p>
+<p><a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshPhongMaterial">MeshPhongMaterial</a> is less performant than <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshLambertMaterial">MeshLambertMaterial</a>. However, it doesn't really matter at this level.</p>
+<p>You can control the light reflection with the <code spellcheck="false">shininess</code> property. The higher the value, the shinier the surface. You can also change the color of the reflection by using the <code spellcheck="false">specular</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>shininess <span class="token operator">=</span> <span class="token number">100</span>
+material<span class="token punctuation">.</span>specular <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span><span class="token number">0x1188ff</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-17.png" src="./assets/lessons/12/step-17.png" width="1792" height="1120" alt="./assets/lessons/12/step-17.png" class="is-loaded"></span></p>
+<p>The light reflection will have a blue-ish color.</p>
+<h2>MeshToonMaterial</h2>
+<p>The <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshToonMaterial">MeshToonMaterial</a> is similar to the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshLambertMaterial">MeshLambertMaterial</a> in terms of properties but with a cartoonish style:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshToonMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-18.png" src="./assets/lessons/12/step-18.png" width="1792" height="1120" alt="./assets/lessons/12/step-18.png" class="is-loaded"></span></p>
+<p>By default, you only get a two parts coloration (one for the shadow and one for the light). To add more steps to the coloration, you can use the <code spellcheck="false">gradientMap</code> property and use the <code spellcheck="false">gradientTexture</code> we loaded at the start of the lesson:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>gradientMap <span class="token operator">=</span> gradientTexture</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-19.png" src="./assets/lessons/12/step-19.png" width="1792" height="1120" alt="./assets/lessons/12/step-19.png" class="is-loaded"></span></p>
+<p>If you test this, you'll see that the cartoon effect doesn't work anymore. That is because the gradient texture we used is tiny, and the pixels of that texture are blended. Yes, it's a matter of <code spellcheck="false">minFilter</code>, <code spellcheck="false">magFilter</code>, and <code spellcheck="false">mipmapping</code> like we saw in the Textures lesson.</p>
+<p>To fix this, we can simply change the <code spellcheck="false">minFilter</code> and <code spellcheck="false">magFilter</code> to <code spellcheck="false">THREE.NearestFilter</code>.</p>
+<p>Using <code spellcheck="false">THREE.NearestFilter</code> means that we are not using the mip mapping, we can deactivate it with <code spellcheck="false">gradientTexture.generateMipmaps = false</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gradientTexture<span class="token punctuation">.</span>minFilter <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>NearestFilter
+gradientTexture<span class="token punctuation">.</span>magFilter <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>NearestFilter
+gradientTexture<span class="token punctuation">.</span>generateMipmaps <span class="token operator">=</span> <span class="token boolean">false</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-20.png" src="./assets/lessons/12/step-20.png" width="1792" height="1120" alt="./assets/lessons/12/step-20.png" class="is-loaded"></span></p>
+<p>You should now see the cartoon effect with an intermediate step.</p>
+<p>You can try with even more steps by using the image located in <code spellcheck="false">/static/textures/gradients.5.jpg</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> gradientTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/gradients/5.jpg'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-21.png" src="./assets/lessons/12/step-21.png" width="1792" height="1120" alt="./assets/lessons/12/step-21.png" class="is-loaded"></span></p>
+<h2>MeshStandardMaterial</h2>
+<p>The <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshStandardMaterial">MeshStandardMaterial</a> uses physically based rendering principles. Yes, we are talking about the PBR we saw in the Textures lesson. Like the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshLambertMaterial">MeshLambertMaterial</a> and the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshPhongMaterial">MeshPhongMaterial</a>, it supports lights but with a more realistic algorithm and better parameters like roughness and metalness.</p>
+<p>It's called "standard" because the PBR is becoming a standard in many software, engines, and libraries. The idea is to have a realistic result with realistic parameters, and you should have a very similar result regardless of the technology you are using:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshStandardMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-22.png" src="./assets/lessons/12/step-22.png" width="1792" height="1120" alt="./assets/lessons/12/step-22.png" class="is-loaded"></span></p>
+<p>You can change the <code spellcheck="false">roughness</code> and the <code spellcheck="false">metalness</code> properties directly:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>metalness <span class="token operator">=</span> <span class="token number">0.45</span>
+material<span class="token punctuation">.</span>roughness <span class="token operator">=</span> <span class="token number">0.65</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-23.png" src="./assets/lessons/12/step-23.png" width="1792" height="1120" alt="./assets/lessons/12/step-23.png" class="is-loaded"></span></p>
+<h3>Add a debug UI</h3>
+<p>While this isn't required, now would be an excellent time to add a debug UI. That will be very useful to test the different properties.</p>
+<p>First, we must add the <a target="_blank" href="https://www.npmjs.com/package/dat.gui">Dat.GUI</a> dependency to our project. In the terminal, on the project folder (where the server should be currently running), use the following command:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-bash"><code spellcheck="false" class=" language-bash">npm install --save dat.gui</code></pre><div class="toolbar"><div class="toolbar-item"><span>Bash</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, on top of your code, import <code spellcheck="false">dat.gui</code> (don't forget to re-launch the server with <code spellcheck="false">npm run dev</code> if you stopped it):</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> dat <span class="token keyword">from</span> <span class="token string">'dat.gui'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You can now create an instance of it:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Debug
+*/</span>
+<span class="token keyword">const</span> gui <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">dat<span class="token punctuation">.</span>GUI</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>And add the tweaks (after creating the material):</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>material<span class="token punctuation">,</span> <span class="token string">'metalness'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.0001</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>material<span class="token punctuation">,</span> <span class="token string">'roughness'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.0001</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/12/step-24.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>And that's it. You can now change the <code spellcheck="false">metalness</code> and the <code spellcheck="false">roughness</code> as you like.</p>
+<p>Let's continue with the other properties of the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshStandardMaterial">MeshStandardMaterial</a>.</p>
+<p>The <code spellcheck="false">map</code> property allows you to apply a simple texture. You can use <code spellcheck="false">doorColorTexture</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>map <span class="token operator">=</span> doorColorTexture</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-25.png" src="./assets/lessons/12/step-25.png" width="1792" height="1120" alt="./assets/lessons/12/step-25.png" class="is-loaded"></span></p>
+<p>The <code spellcheck="false">aoMap</code> property (literally "ambient occlusion map") will add shadows where the texture is dark. For it to work, you must add what we call a second set of UV (the coordinates that help position the textures on the geometries).</p>
+<p>We can simply add new attributes like we did on the Geometries lesson and use the default <code spellcheck="false">uv</code> attribute. In more simple terms, we duplicated the <code spellcheck="false">uv</code> attribute.</p>
+<p>Call this new attribute <code spellcheck="false">uv2</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">sphere<span class="token punctuation">.</span>geometry<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'uv2'</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferAttribute</span><span class="token punctuation">(</span>sphere<span class="token punctuation">.</span>geometry<span class="token punctuation">.</span>attributes<span class="token punctuation">.</span>uv<span class="token punctuation">.</span>array<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+plane<span class="token punctuation">.</span>geometry<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'uv2'</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferAttribute</span><span class="token punctuation">(</span>plane<span class="token punctuation">.</span>geometry<span class="token punctuation">.</span>attributes<span class="token punctuation">.</span>uv<span class="token punctuation">.</span>array<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+torus<span class="token punctuation">.</span>geometry<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'uv2'</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferAttribute</span><span class="token punctuation">(</span>torus<span class="token punctuation">.</span>geometry<span class="token punctuation">.</span>attributes<span class="token punctuation">.</span>uv<span class="token punctuation">.</span>array<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You can now add the <code spellcheck="false">aoMap</code> using the <code spellcheck="false">doorAmbientOcclusionTexture</code> texture and control the intensity using the <code spellcheck="false">aoMapIntensity</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>aoMap <span class="token operator">=</span> doorAmbientOcclusionTexture
+material<span class="token punctuation">.</span>aoMapIntensity <span class="token operator">=</span> <span class="token number">1</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-26.png" src="./assets/lessons/12/step-26.png" width="1792" height="1120" alt="./assets/lessons/12/step-26.png" class="is-loaded"></span></p>
+<p>The crevices should look darker, which creates contrast and adds dimension.</p>
+<p>The <code spellcheck="false">displacementMap</code> property will move the vertices to create true relief:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>displacementMap <span class="token operator">=</span> doorHeightTexture</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-27.png" src="./assets/lessons/12/step-27.png" width="1792" height="1120" alt="./assets/lessons/12/step-27.png" class="is-loaded"></span></p>
+<p>It should look terrible. That is due to the lack of vertices on our geometries (we need more subdivisions) and the displacement being way too strong:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>displacementScale <span class="token operator">=</span> <span class="token number">0.05</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>SphereGeometry</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">64</span><span class="token punctuation">,</span> <span class="token number">64</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PlaneGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>TorusGeometry</span><span class="token punctuation">(</span><span class="token number">0.3</span><span class="token punctuation">,</span> <span class="token number">0.2</span><span class="token punctuation">,</span> <span class="token number">64</span><span class="token punctuation">,</span> <span class="token number">128</span><span class="token punctuation">)</span><span class="token punctuation">,</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-28.png" src="./assets/lessons/12/step-28.png" width="1792" height="1120" alt="./assets/lessons/12/step-28.png" class="is-loaded"></span></p>
+<p>Instead of specifying uniform <code spellcheck="false">metalness</code> and <code spellcheck="false">roughness</code> for the whole geometry, we can use <code spellcheck="false">metalnessMap</code> and <code spellcheck="false">roughnessMap</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>metalnessMap <span class="token operator">=</span> doorMetalnessTexture
+material<span class="token punctuation">.</span>roughnessMap <span class="token operator">=</span> doorRoughnessTexture</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-29.png" src="./assets/lessons/12/step-29.png" width="1792" height="1120" alt="./assets/lessons/12/step-29.png" class="is-loaded"></span></p>
+<p>The reflection looks weird because the <code spellcheck="false">metalness</code> and <code spellcheck="false">roughness</code> properties still affect each map respectively. We should comment them or use their original values:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>metalness <span class="token operator">=</span> <span class="token number">0</span>
+material<span class="token punctuation">.</span>roughness <span class="token operator">=</span> <span class="token number">1</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-30.png" src="./assets/lessons/12/step-30.png" width="1792" height="1120" alt="./assets/lessons/12/step-30.png" class="is-loaded"></span></p>
+<p>The <code spellcheck="false">normalMap</code> will fake the normal orientation and add details on the surface regardless of the subdivision:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>normalMap <span class="token operator">=</span> doorNormalTexture</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-31.png" src="./assets/lessons/12/step-31.png" width="1792" height="1120" alt="./assets/lessons/12/step-31.png" class="is-loaded"></span></p>
+<p>You can change the normal intensity with the <code spellcheck="false">normalScale</code> property. Be careful, it's a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/math/Vector2">Vector2</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>normalScale<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>And finally, you can control the alpha using the <code spellcheck="false">alphaMap</code> property. Don't forget to set the <code spellcheck="false">transparent</code> property to <code spellcheck="false">true</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>transparent <span class="token operator">=</span> <span class="token boolean">true</span>
+material<span class="token punctuation">.</span>alphaMap <span class="token operator">=</span> doorAlphaTexture</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-32.png" src="./assets/lessons/12/step-32.png" width="1792" height="1120" alt="./assets/lessons/12/step-32.png" class="is-loaded"></span></p>
+<p>Here's a beautiful door. Feel free to tweak the properties and try stuff.</p>
+<h2>MeshPhysicalMaterial</h2>
+<p>The <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshPhysicalMaterial">MeshPhysicalMaterial</a> is the same as the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/MeshStandardMaterial">MeshStandardMaterial</a> but with support of a clear coat effect. You can control that clear coat's properties and even use a texture as in this <a target="_blank" href="https://threejs.org/examples/#webgl_materials_physical_clearcoat">Three.js example</a>, but we won't try this one here.</p>
+<h2>PointsMaterial</h2>
+<p>You can use <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/PointsMaterial">PointsMaterial</a> with particles. We will see more about that in a dedicated lesson.</p>
+<h2>ShaderMaterial and RawShaderMaterial</h2>
+<p><a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial">ShaderMaterial</a> and <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/RawShaderMaterial">RawShaderMaterial</a> can both be used to create your own materials but we will see more about that in a dedicated lesson.</p>
+<h2>Environment map</h2>
+<p>The environment map is like an image of what's surrounding the scene. You can use it to add reflection or refraction to your objects. It can also be used as lighting information.</p>
+<p>We haven't covered it yet, but you can use it with many of the materials we saw.</p>
+<p>First, let's setup a very simple <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshStandardMaterial">MeshStandardMaterial</a> with the debug UI as we did earlier:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshStandardMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+material<span class="token punctuation">.</span>metalness <span class="token operator">=</span> <span class="token number">0.7</span>
+material<span class="token punctuation">.</span>roughness <span class="token operator">=</span> <span class="token number">0.2</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>material<span class="token punctuation">,</span> <span class="token string">'metalness'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.0001</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>material<span class="token punctuation">,</span> <span class="token string">'roughness'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.0001</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-33.png" src="./assets/lessons/12/step-33.png" width="1792" height="1120" alt="./assets/lessons/12/step-33.png" class="is-loaded"></span></p>
+<p>To add the environment map to our material, we must use the <code spellcheck="false">envMap</code> property. Three.js only supports cube environment maps. Cube environment maps are 6 images with each one corresponding to a side of the environment.</p>
+<p>You can find multiple environment maps in the <code spellcheck="false">/static/textures/environmentMap/</code> folder.</p>
+<p>To load a cube texture, you must use the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/loaders/CubeTextureLoader">CubeTextureLoader</a> instead of the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/loaders/TextureLoader">TextureLoader</a>.</p>
+<p>Instantiate the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/loaders/CubeTextureLoader">CubeTextureLoader</a> before instantiating the <code spellcheck="false">material</code> and call its <code spellcheck="false">load(...)</code> method but use an array of paths instead of one path:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> cubeTextureLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>CubeTextureLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> environmentMapTexture <span class="token operator">=</span> cubeTextureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+<span class="token string">'/textures/environmentMaps/0/px.jpg'</span><span class="token punctuation">,</span>
+<span class="token string">'/textures/environmentMaps/0/nx.jpg'</span><span class="token punctuation">,</span>
+<span class="token string">'/textures/environmentMaps/0/py.jpg'</span><span class="token punctuation">,</span>
+<span class="token string">'/textures/environmentMaps/0/ny.jpg'</span><span class="token punctuation">,</span>
+<span class="token string">'/textures/environmentMaps/0/pz.jpg'</span><span class="token punctuation">,</span>
+<span class="token string">'/textures/environmentMaps/0/nz.jpg'</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You can now use the <code spellcheck="false">environmentMapTexture</code> in the <code spellcheck="false">envMap</code> property of your material:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">material<span class="token punctuation">.</span>envMap <span class="token operator">=</span> environmentMapTexture</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/12/step-34.png" src="./assets/lessons/12/step-34.png" width="1792" height="1120" alt="./assets/lessons/12/step-34.png" class="is-loaded"></span></p>
+<p>You should see the environment reflect on the surface of the geometry. Try to tweak the <code spellcheck="false">metalness</code> and <code spellcheck="false">roughness</code> for different results.</p>
+<p>You can also test the other environment maps in the <code spellcheck="false">/static/textures/environmentMap/</code> folder.</p>
+<h3>Where to find environment maps</h3>
+<p>To find cool environment maps, you can always do a simple search on the web and make sure you have the right to use the environment map if it's not for personal usage.</p>
+<p>One of the best sources is <a target="_blank" href="https://hdrihaven.com/">HDRIHaven</a>. This website has hundreds of awesome HDRIs. HDRI stands for <strong>High Dynamic Range Imaging</strong>. They are composed of one image (not a cube map) and contain more data than a simple image, thus improving lighting information for a more realistic result. <a target="_blank" href="https://hdrihaven.com/">HDRIHaven</a> images are free and under <a target="_blank" href="https://hdrihaven.com/p/license.php">CC0 license</a>, which means that you can do anything you want with them without having to credit the authors. But if you appreciate their work, you can thank them by subscribing to <a target="_blank" href="https://www.patreon.com/hdrihaven/overview">their Patreon</a>.</p>
+<p>But we have a problem. As we said, Three.js only supports cube maps. To convert an HDRI to a cube map, you can use this online tool: <a target="_blank" href="https://matheowis.github.io/HDRI-to-CubeMap/">https://matheowis.github.io/HDRI-to-CubeMap/</a></p>
+<p>Upload an HDRI, rotate it as you please, and download a cubemap version composed of 6 images. The default format is <code spellcheck="false">.png</code>, and you'll have to convert them to <code spellcheck="false">.jpg</code> if you want.</p>
+    </section>
+</body>
+
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<section class="text js-text">
+    <h2>Introduction</h2>
+<p>When we imported our hamburger in the previous lesson, the colors were off. To put it in a nutshell: many things participate in a wrong looking model.</p>
+<p>Sometimes, we want a very realistic render. Maybe it's because we want to showcase a real-life product on our website. Or perhaps we are 3D artists, and we want to show off our work with the best possible result. Anyway, we need a render as real as possible.</p>
+<p>In this lesson, we will learn many techniques to improve our model looks once rendered in Three.js. Be careful though, some of those techniques can have a performance impact, and some techniques depend on your model. You'll have to adapt according to the situation.</p>
+<h2>Setup</h2>
+<p>We could use our hamburger, but it's better to try a more realistic model with textures, normal maps, etc. We will use the <a target="_blank" href="https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/FlightHelmet">Flight Helmet</a> from the <a target="_blank" href="https://github.com/KhronosGroup/glTF-Sample-Models">GLTF Sample Models repository</a>. You can find the model in the <code spellcheck="false">/static/models/</code> folder.</p>
+<p>This lesson is also the perfect opportunity to revise what we already learned. That is why there isn't much code in the starter. We will have to instantiate the loaders, the lights, the shadows, etc., all by ourselves.</p>
+<p>We will also use Dat.GUI to tweak as many parameters as possible. That is required if we want to create the perfect environment.</p>
+<p>For now, all we have in our scene is a white sphere and an instance of Dat.GUI.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-01.png" src="./assets/lessons/25/step-01.png" width="1792" height="1120" alt="./assets/lessons/25/step-01.png" class="is-loaded"></span></p>
+<p>This sphere is just a placeholder to make sure that the starter is working, but we can use it to set up the lights. Change the material of <code spellcheck="false">testSphere</code> to <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshStandardMaterial">MeshStandardMaterial</a> to see the lights we are about to add:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> testSphere <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>SphereGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">32</span><span class="token punctuation">,</span> <span class="token number">32</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshStandardMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>As you can see, everything has gone black.</p>
+<h2>Lights</h2>
+<p>We are going to use only one <a target="_blank" href="https://threejs.org/docs/index.html#api/en/lights/DirectionalLight">DirectionalLight</a>. But how can we have a realistic render with only one light? The environment map will do most of the heavy leverage and simulate light bounce. We could get rid of any light, but the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/lights/DirectionalLight">DirectionalLight</a> is important if we want to have more control over the lighting but also to create shadows:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> directionalLight <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>DirectionalLight</span><span class="token punctuation">(</span><span class="token string">'#ffffff'</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+directionalLight<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">0.25</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token operator">-</span> <span class="token number">2.25</span><span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>directionalLight<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-02.png" src="./assets/lessons/25/step-02.png" width="1792" height="1120" alt="./assets/lessons/25/step-02.png" class="is-loaded"></span></p>
+<p>Let's add some parameters to our Dat.GUI:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>directionalLight<span class="token punctuation">,</span> <span class="token string">'intensity'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'lightIntensity'</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>directionalLight<span class="token punctuation">.</span>position<span class="token punctuation">,</span> <span class="token string">'x'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'lightX'</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>directionalLight<span class="token punctuation">.</span>position<span class="token punctuation">,</span> <span class="token string">'y'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'lightY'</span><span class="token punctuation">)</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>directionalLight<span class="token punctuation">.</span>position<span class="token punctuation">,</span> <span class="token string">'z'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'lightZ'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-03.png" src="./assets/lessons/25/step-03.png" width="1792" height="1120" alt="./assets/lessons/25/step-03.png" class="is-loaded"></span></p>
+<p>We can now control the <code spellcheck="false">position</code> and <code spellcheck="false">intensity</code>.</p>
+<p>Default Three.js light intensity values aren't realistic. They are based on an arbitrary scale unit and don't reflect real-world values. You could say it doesn't matter, but it's better to base our scene on realistic and standard values. It might be more comfortable to reproduce real-life conditions that way.</p>
+<p>To change Three.js lights for more realistic values, switch the <code spellcheck="false">physicallyCorrectLights</code> property of the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer">WebGLRenderer</a> instance (the <code spellcheck="false">renderer</code>) to <code spellcheck="false">true</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">renderer<span class="token punctuation">.</span>physicallyCorrectLights <span class="token operator">=</span> <span class="token boolean">true</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-04.png" src="./assets/lessons/25/step-04.png" width="1792" height="1120" alt="./assets/lessons/25/step-04.png" class="is-loaded"></span></p>
+<p>Our light appears dimmed. Let's increase its intensity to <code spellcheck="false">3</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> directionalLight <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>DirectionalLight</span><span class="token punctuation">(</span><span class="token string">'#ffffff'</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-05.png" src="./assets/lessons/25/step-05.png" width="1792" height="1120" alt="./assets/lessons/25/step-05.png" class="is-loaded"></span></p>
+<h2>Model</h2>
+<p>Let's load our model instead of that test sphere.</p>
+<p>First, instantiate the <a target="_blank" href="https://threejs.org/docs/index.html#examples/en/loaders/GLTFLoader">GLTFLoader</a>. We will regroup the different loaders together. There is no particular reason for that but to regroup things together:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> <span class="token punctuation">{</span> GLTFLoader <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'three/examples/jsm/loaders/GLTFLoader.js'</span>
+
+<span class="token comment">// ...</span>
+
+<span class="token comment">/**
+* Loaders
+*/</span>
+<span class="token keyword">const</span> gltfLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">GLTFLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We don't need the <a target="_blank" href="https://threejs.org/docs/index.html#examples/en/loaders/DRACOLoader">DRACOLoader</a> because the model isn't compressed. But if you load a Draco compressed model, instantiate the <a target="_blank" href="https://threejs.org/docs/index.html#examples/en/loaders/DRACOLoader">DRACOLoader</a> as we did in a previous lesson.</p>
+<p>We can now load our model located in <code spellcheck="false">/static/models/FlightHelmet/glTF/FlightHelmet.gltf</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Models
+*/</span>
+gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/FlightHelmet/glTF/FlightHelmet.gltf'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'success'</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>gltf<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>As always, go slow, make sure that the model is well loaded with no error, and study the imported result.</p>
+<p>Because it's a complex model, we will simply add the <code spellcheck="false">gltf.scene</code> group to our own scene:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/FlightHelmet/glTF/FlightHelmet.gltf'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-06.png" src="./assets/lessons/25/step-06.png" width="1792" height="1120" alt="./assets/lessons/25/step-06.png" class="is-loaded"></span></p>
+<p>If you can't see it but don't get any error, Remove your <code spellcheck="false">testSphere</code> and zoom a little. The explanation is simple: the loaded model is too small.</p>
+<p>Increase its scale, move it down a little, and rotate it so it fits our camera view better: </p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/FlightHelmet/glTF/FlightHelmet.gltf'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>scale<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span>
+gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token operator">-</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span>
+gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>y <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">0.5</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-07.png" src="./assets/lessons/25/step-07.png" width="1792" height="1120" alt="./assets/lessons/25/step-07.png" class="is-loaded"></span></p>
+<p>Let's also add a tweak to rotate the whole model in our Dat.GUI:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/FlightHelmet/glTF/FlightHelmet.gltf'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>rotation<span class="token punctuation">,</span> <span class="token string">'y'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token operator">-</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token constant">PI</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">name</span><span class="token punctuation">(</span><span class="token string">'rotation'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-08.png" src="./assets/lessons/25/step-08.png" width="1792" height="1120" alt="./assets/lessons/25/step-08.png" class="is-loaded"></span></p>
+<h2>Environment map</h2>
+<p>We can't see much of our model because we have only one weak <a target="_blank" href="https://threejs.org/docs/index.html#api/en/lights/DirectionalLight">DirectionalLight</a>. As we said previously, the lighting will be taken care of by the environment map.</p>
+<p>We already talked about the environment map in the Materials lesson. An environment map is like a photo of the surrounding. It can be a 360 photo or 6 photos that, once put together, compose a cube.</p>
+<p>We will use the environment map both for the background and to illuminate our model.</p>
+<h3>Load the environment map</h3>
+<p>First, let's load our environment map. There are multiple textures located in the <code spellcheck="false">/static/textures/environmentMaps/</code> folder. We are going to use the first one.</p>
+<p>Because these textures are composed of 6 images (a cube), we have to use a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/loaders/CubeTextureLoader">CubeTextureLoader</a>.</p>
+<p>Add the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/loaders/CubeTextureLoader">CubeTextureLoader</a> to our loaders:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> cubeTextureLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>CubeTextureLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Now we can load the textures. The order is <code spellcheck="false">positive x</code>, <code spellcheck="false">negative x</code>, <code spellcheck="false">positive y</code>, <code spellcheck="false">negative y</code>, <code spellcheck="false">positive z</code>, and <code spellcheck="false">negative z</code>.</p>
+<p>Add it after creating the <code spellcheck="false">scene</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Environment map
+*/</span>
+<span class="token keyword">const</span> environmentMap <span class="token operator">=</span> cubeTextureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+<span class="token string">'/textures/environmentMaps/0/px.jpg'</span><span class="token punctuation">,</span>
+<span class="token string">'/textures/environmentMaps/0/nx.jpg'</span><span class="token punctuation">,</span>
+<span class="token string">'/textures/environmentMaps/0/py.jpg'</span><span class="token punctuation">,</span>
+<span class="token string">'/textures/environmentMaps/0/ny.jpg'</span><span class="token punctuation">,</span>
+<span class="token string">'/textures/environmentMaps/0/pz.jpg'</span><span class="token punctuation">,</span>
+<span class="token string">'/textures/environmentMaps/0/nz.jpg'</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Nothing should have change because we are loading the environment map but we don't use it yet.</p>
+<p>Check the logs for potential errors.</p>
+<h3>Apply the environment map to the background</h3>
+<p>To add the environment map in our scene's background, we could create a massive cube around the scene, set its face to be visible on the inside, and apply its texture. It should work and looks ok, but instead, let's use a feature included in Three.js.</p>
+<p>To apply an environmentMap on a scene, use the cube texture on the  <a target="_blank" href="https://threejs.org/docs/index.html#api/en/scenes/Scene.background">Scene</a>'s <code spellcheck="false">background</code> property. Make sure to do this after creating the <code spellcheck="false">environmentMap</code> and the <code spellcheck="false">scene</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">scene<span class="token punctuation">.</span>background <span class="token operator">=</span> environmentMap</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-09.png" src="./assets/lessons/25/step-09.png" width="1792" height="1120" alt="./assets/lessons/25/step-09.png" class="is-loaded"></span></p>
+<p>And that's all. You should see the environment map in the background.</p>
+<h3>Apply the environment map to the model</h3>
+<p>One essential feature to get a realistic render is to use our environment map to lighten our model.</p>
+<p>We have already covered how to apply an environment map to a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshStandardMaterial.envMap">MeshStandardMaterial</a> with the <code spellcheck="false">envMap</code> property. The problem is that our model is composed of many <a target="_blank" href="https://threejs.org/docs/index.html#api/en/objects/Mesh">Meshes</a>. What we can do is use the <code spellcheck="false">traverse(...)</code> method available on every <a target="_blank" href="https://threejs.org/docs/index.html#api/en/core/Object3D">Object3D</a> —and classes that inherit from it like <a target="_blank" href="https://threejs.org/docs/index.html#api/en/objects/Group">Group</a> and <a target="_blank" href="https://threejs.org/docs/index.html#api/en/objects/Mesh">Mesh</a>.</p>
+<p>Instead of doing it in the success callback function, we will create a <code spellcheck="false">updateAllMaterials</code> function that will get handy later. Create this function before the environment map:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Update all materials
+*/</span>
+<span class="token keyword">const</span> <span class="token function-variable function">updateAllMaterials</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+scene<span class="token punctuation">.</span><span class="token function">traverse</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>child<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Now call it when the model is loaded and added to the scene:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/FlightHelmet/glTF/FlightHelmet.gltf'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token function">updateAllMaterials</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You should see all the children and grand children in the logs.</p>
+<p>Instead of logging the children, we want to apply the environment map to each material that should have it.</p>
+<p>It would make no sense to apply the environment map to the lights, the camera, the group, etc. We only want to apply the environment map to the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/objects/Mesh">Meshes</a> that have a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/materials/MeshStandardMaterial">MeshStandardMaterial</a>.</p>
+<p>What we can do is test if the <code spellcheck="false">child</code> is an instance of <code spellcheck="false">THREE.Mesh</code> and if its material is an instance of <code spellcheck="false">THREE.MeshStandardMaterial</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">updateAllMaterials</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+scene<span class="token punctuation">.</span><span class="token function">traverse</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>child <span class="token keyword">instanceof</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span> <span class="token operator">&amp;&amp;</span> child<span class="token punctuation">.</span>material <span class="token keyword">instanceof</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshStandardMaterial</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>child<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We now only log the children that support environment maps. Let's change their <code spellcheck="false">envMap</code> property in the <code spellcheck="false">material</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">updateAllMaterials</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+scene<span class="token punctuation">.</span><span class="token function">traverse</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>child <span class="token keyword">instanceof</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span> <span class="token operator">&amp;&amp;</span> child<span class="token punctuation">.</span>material <span class="token keyword">instanceof</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshStandardMaterial</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+child<span class="token punctuation">.</span>material<span class="token punctuation">.</span>envMap <span class="token operator">=</span> environmentMap
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-10.png" src="./assets/lessons/25/step-10.png" width="1792" height="1120" alt="./assets/lessons/25/step-10.png" class="is-loaded"></span></p>
+<p>Can't see much of a difference? Increase the <code spellcheck="false">envMapIntensity</code> to <code spellcheck="false">2.5</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">updateAllMaterials</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+scene<span class="token punctuation">.</span><span class="token function">traverse</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>child <span class="token keyword">instanceof</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span> <span class="token operator">&amp;&amp;</span> child<span class="token punctuation">.</span>material <span class="token keyword">instanceof</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshStandardMaterial</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+child<span class="token punctuation">.</span>material<span class="token punctuation">.</span>envMap <span class="token operator">=</span> environmentMap
+child<span class="token punctuation">.</span>material<span class="token punctuation">.</span>envMapIntensity <span class="token operator">=</span> <span class="token number">2.5</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-11.png" src="./assets/lessons/25/step-11.png" width="1792" height="1120" alt="./assets/lessons/25/step-11.png" class="is-loaded"></span></p>
+<p>That's better. We get a nice and realistic lighting.</p>
+<p>For more control, let's add the <code spellcheck="false">envMapIntensity</code> property to our Dat.GUI. The problem is that we need only one property to tweak, and, when changed, this value should be applied to all children materials.</p>
+<p>We can, however, use the <code spellcheck="false">debugObject</code> technique as we did in a previous lesson. Right after instantiating Dat.GUI, create a <code spellcheck="false">debugObject</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> gui <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">dat<span class="token punctuation">.</span>GUI</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> debugObject <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, in the environment map code section, add an <code spellcheck="false">envMapIntensity</code> property to that object as well as to your Dat.GUI:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">debugObject<span class="token punctuation">.</span>envMapIntensity <span class="token operator">=</span> <span class="token number">1</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">,</span> <span class="token string">'envMapIntensity'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span> </code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/25/step-12.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>We now have the <code spellcheck="false">envMapIntensity</code> tweak, but changing the value isn't updating the scene and its children. We should now call the <code spellcheck="false">updateAllMaterials</code> function when the tweak value changes and use the <code spellcheck="false">debugObject.envMapIntensity</code> value in the <code spellcheck="false">updateAllMaterials</code> function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">updateAllMaterials</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+child<span class="token punctuation">.</span>material<span class="token punctuation">.</span>envMapIntensity <span class="token operator">=</span> debugObject<span class="token punctuation">.</span>envMapIntensity
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// ...</span>
+
+debugObject<span class="token punctuation">.</span>envMapIntensity <span class="token operator">=</span> <span class="token number">2.5</span>
+gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>debugObject<span class="token punctuation">,</span> <span class="token string">'envMapIntensity'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">onChange</span><span class="token punctuation">(</span>updateAllMaterials<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/25/step-13.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>We can now change all <a target="_blank" href="https://threejs.org/docs/index.html#api/en/objects/Mesh">Meshes</a> environment map intensity with only one tweak directly in our debug interface.</p>
+<h3>Apply the environment map as default</h3>
+<p>There is an easier way of applying the environment map to all objects. We can update the <code spellcheck="false">environment</code> property of the <code spellcheck="false">scene</code> just like we changed the <code spellcheck="false">background</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl">scene<span class="token punctuation">.</span>environment <span class="token operator">=</span> environmentMap</code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-14.png" src="./assets/lessons/25/step-14.png" width="1792" height="1120" alt="./assets/lessons/25/step-14.png" class="is-loaded"></span></p>
+<p>Unluckily, we cannot change the environment map intensity of each material directly from the scene, so we still need our <code spellcheck="false">updateAllMaterials</code> function, but it's a perfectly viable solution.</p>
+<h2>Renderer</h2>
+<p>Things are getting more and more realistic, but we still feel that it's all fake. We need to work on the colors, and this is a matter of <a target="_blank" href="https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer">WebGLRenderer</a> properties.</p>
+<h3>Output encoding</h3>
+<p>Without going too much into details, the <code spellcheck="false">outputEncoding</code> property controls the output render encoding. By default, the value of <code spellcheck="false">outputEncoding</code> is <code spellcheck="false">THREE.LinearEncoding</code>, which looks ok, but not realistic.</p>
+<p>The recommended value for the <code spellcheck="false">outputEncoding</code> is <code spellcheck="false">THREE.sRGBEncoding</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">renderer<span class="token punctuation">.</span>outputEncoding <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>sRGBEncoding</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-15.png" src="./assets/lessons/25/step-15.png" width="1792" height="1120" alt="./assets/lessons/25/step-15.png" class="is-loaded"></span></p>
+<p>You should see much brighter textures that will also impact the environment map.</p>
+<p>Another possible value is <code spellcheck="false">THREE.GammaEncoding</code>. This encoding has the advantage of letting you play on a value called <code spellcheck="false">gammaFactor</code> that would act a little like the brightness, but we won't use this one in the lesson.</p>
+<p>The Gamma Encoding is a way of storing colors while optimizing how bright and dark values are stored according to human eye sensitivity. When we use the <code spellcheck="false">sRGBEncoding</code>, it's like using the <code spellcheck="false">GammaEncoding</code> with a default gamma factor of <code spellcheck="false">2.2</code>, which is the common value.</p>
+<p>You can find out more about this topic here</p>
+<ul>
+<li><a target="_blank" href="https://www.donmccurdy.com/2020/06/17/color-management-in-threejs/">https://www.donmccurdy.com/2020/06/17/color-management-in-threejs/</a></li>
+<li><a target="_blank" href="https://medium.com/game-dev-daily/the-srgb-learning-curve-773b7f68cf7a">https://medium.com/game-dev-daily/the-srgb-learning-curve-773b7f68cf7a</a></li>
+</ul>
+<p>While some might think that <code spellcheck="false">GammaEncoding</code> is better than <code spellcheck="false">sRGBEncoding</code> because we can control the gamma factor for a darker or brighter scene, this physically doesn't seem right, and we will see how to manage the "brightness" in a better way later.</p>
+<h3>Textures encoding</h3>
+<p>You might not have noticed it, but the environment map colors are wrong. They appear grayish and toned down. Even if the effect looks pretty good, it's more satisfying to preserve the right colors.</p>
+<p>The problem is that our renderer <code spellcheck="false">outputEncoding</code> is <code spellcheck="false">THREE.sRGBEncoding</code>, yet the environment map texture is by default <code spellcheck="false">THREE.LinearEncoding</code>.</p>
+<p>The rule is straightforward. All textures that we can see directly —like the <code spellcheck="false">map</code> —should have <code spellcheck="false">THREE.sRGBEncoding</code> as encoding, and all other textures — such as <code spellcheck="false">normalMap</code> —should have <code spellcheck="false">THREE.LinearEncoding</code>.</p>
+<p>We can see the <code spellcheck="false">environmentMap</code> texture directly, so we have to change its encoding to <code spellcheck="false">THREE.sRGBEncoding</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-glsl"><code spellcheck="false" class=" language-glsl">environmentMap<span class="token punctuation">.</span>encoding <span class="token operator">=</span> THREE<span class="token punctuation">.</span>sRGBEncoding</code></pre><div class="toolbar"><div class="toolbar-item"><span>GLSL</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-16.png" src="./assets/lessons/25/step-16.png" width="1792" height="1120" alt="./assets/lessons/25/step-16.png" class="is-loaded"></span></p>
+<p>But what about the model textures?</p>
+<p>Fortunately, the <a target="_blank" href="https://threejs.org/docs/#examples/en/loaders/GLTFLoader">GLTFLoader</a> implemented this rule, and all the textures loaded from it will have the right <code spellcheck="false">encoding</code> automatically.</p>
+<h3>Tone mapping</h3>
+<p>The tone mapping intends to convert High Dynamic Range (HDR) values to Low Dynamic Range (LDR) values. HDR is much more than the following interpretation, but you can see that like images where the color values can go beyond <code spellcheck="false">1</code>. It's useful if we want to store light information because light doesn't have intensity limits.</p>
+<p>While our assets are not HDR, the tone mapping effect can have a realistic result as if the camera was poorly adjusted.</p>
+<p>To change the tone mapping, update the <code spellcheck="false">toneMapping</code> property on the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer">WebGLRenderer</a>.</p>
+<p>There are multiple possible values:</p>
+<ul>
+<li><code spellcheck="false">THREE.NoToneMapping</code> (default)</li>
+<li><code spellcheck="false">THREE.LinearToneMapping</code></li>
+<li><code spellcheck="false">THREE.ReinhardToneMapping</code></li>
+<li><code spellcheck="false">THREE.CineonToneMapping</code></li>
+<li><code spellcheck="false">THREE.ACESFilmicToneMapping</code></li>
+</ul>
+<p>Test these tone mapping:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">renderer<span class="token punctuation">.</span>toneMapping <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>ACESFilmicToneMapping</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-17.png" src="./assets/lessons/25/step-17.png" width="1792" height="1120" alt="./assets/lessons/25/step-17.png" class="is-loaded"></span></p>
+<p>To appreciate the difference, let's add the <code spellcheck="false">toneMapping</code> to our Dat.GUI. We can create a dropdown tweak by sending an object with different keys and values as the third parameter of <code spellcheck="false">gui.add(...)</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>renderer<span class="token punctuation">,</span> <span class="token string">'toneMapping'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+No<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>NoToneMapping<span class="token punctuation">,</span>
+Linear<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>LinearToneMapping<span class="token punctuation">,</span>
+Reinhard<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>ReinhardToneMapping<span class="token punctuation">,</span>
+Cineon<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>CineonToneMapping<span class="token punctuation">,</span>
+ACESFilmic<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>ACESFilmicToneMapping
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Unfortunately, changing this tweak will result in a warning in the console, looking like<code spellcheck="false">THREE.WebGLProgram: Unsupported toneMapping: 3</code>. The problem is a bug with Dat.GUI interpreting the values of the object as a String.</p>
+<p>For example, if we use <code spellcheck="false">THREE.ReinhardToneMapping</code>, the value behind this constant is <code spellcheck="false">3</code> as a <code spellcheck="false">Number</code>. But once we change the tweak for tone mapping, Dat.GUI will send <code spellcheck="false">'3'</code> as a <code spellcheck="false">String</code> which will result in the error previously mentioned.</p>
+<p>We can fix that by converting the value to a <code spellcheck="false">Number</code> in the change event callback:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui
+<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>renderer<span class="token punctuation">,</span> <span class="token string">'toneMapping'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+No<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>NoToneMapping<span class="token punctuation">,</span>
+Linear<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>LinearToneMapping<span class="token punctuation">,</span>
+Reinhard<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>ReinhardToneMapping<span class="token punctuation">,</span>
+Cineon<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>CineonToneMapping<span class="token punctuation">,</span>
+ACESFilmic<span class="token operator">:</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>ACESFilmicToneMapping
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">onFinishChange</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+renderer<span class="token punctuation">.</span>toneMapping <span class="token operator">=</span> <span class="token function">Number</span><span class="token punctuation">(</span>renderer<span class="token punctuation">.</span>toneMapping<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/25/step-18.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Changing the tone mapping should work. Nevertheless, if you watch closely, you'll see that the tone mapping changed for the environment map in the background, but not for the model itself.</p>
+<p>We need to find a way to tell the materials that they need to be updated and we already did that in the <code spellcheck="false">updateAllMaterials</code> function. What we can do is call this function right after changing the <code spellcheck="false">toneMapping</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    <span class="token punctuation">.</span><span class="token function">onFinishChange</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+renderer<span class="token punctuation">.</span>toneMapping <span class="token operator">=</span> <span class="token function">Number</span><span class="token punctuation">(</span>renderer<span class="token punctuation">.</span>toneMapping<span class="token punctuation">)</span>
+<span class="token function">updateAllMaterials</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/25/step-19.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The materials should also update when changing the tone mapping.</p>
+<p>We can also change the tone mapping exposure. You can see that like how much light we let in and the algorithm will handle it its way. To change this value, we must update the <code spellcheck="false">toneMappingExposure</code> property directly on the <code spellcheck="false">renderer</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">renderer<span class="token punctuation">.</span>toneMappingExposure <span class="token operator">=</span> <span class="token number">3</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Let's add it to Dat.GUI as well:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gui<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>renderer<span class="token punctuation">,</span> <span class="token string">'toneMappingExposure'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">min</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">step</span><span class="token punctuation">(</span><span class="token number">0.001</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/25/step-20.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Feel free to choose your favorite <code spellcheck="false">toneMapping</code> for the rest of the lesson, but here we will go for <code spellcheck="false">THREE.ReinhardToneMapping</code>.</p>
+<h3>Antialiasing</h3>
+<p>We call aliasing an artifact that might appear in some situations where we can see a stair-like effect, usually on the edge of geometries.</p>
+<p>Our model isn't subject to that problem because there is a lot of details, but if you have a screen with a pixel ratio of <code spellcheck="false">1</code>. Look at the edges —especially the bright ones— rotate the camera slowly, and you might see the problem:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/antialias-1.jpg" src="./assets/lessons/25/antialias-1.jpg" width="659.5" height="1082.5" alt="./assets/lessons/25/antialias-1.jpg" class="is-loaded"></span></p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/antialias-2.jpg" src="./assets/lessons/25/antialias-2.jpg" width="1796" height="516" alt="./assets/lessons/25/antialias-2.jpg" class="is-loaded"></span></p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/antialias-3.jpg" src="./assets/lessons/25/antialias-3.jpg" width="740" height="640" alt="./assets/lessons/25/antialias-3.jpg" class="is-loaded"></span></p>
+<p>It's a well-known problem. When the rendering of a pixel occurs, it tests what geometry is being rendered in that pixel. It calculates the color, and, in the end, that color appears on the screen.</p>
+<p>But geometry edges are usually not perfectly aligned with vertical lines and horizontal lines of pixel of your screen and this is why you get this stair-like artifact named <strong>aliasing</strong>.</p>
+<p>There are many ways of fixing that problem, and developers have been struggling with it for many years.</p>
+<p>One easy solution would be to increase our render's resolution, let's say to the double. When resized to it's normal-sized, each pixel color will automatically be averaged from the 4 pixels rendered.</p>
+<p>This solution is called <strong>super sampling</strong> (SSAA) or <strong>fullscreen sampling</strong> (FSAA), and it's the easiest and more efficient one. Unfortunately, that means 4 times more pixels to render, which can result in performance issues.</p>
+<p>The other solution is called <strong>multi sampling</strong> (MSAA). Again, the idea is to render multiple values per pixel (usually 4) like for the <strong>super sampling</strong> but only on the geometries' edges. The values of the pixel are then averaged to get the final pixel value.</p>
+<p>The most recent GPU can perform this <strong>multi sampling</strong> anti-aliasing, and Three.js handles the setup automatically. We just need to change the <code spellcheck="false">antialias</code> property to <code spellcheck="false">true</code> during the instantiating — and not after:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> renderer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>WebGLRenderer</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+canvas<span class="token operator">:</span> canvas<span class="token punctuation">,</span>
+antialias<span class="token operator">:</span> <span class="token boolean">true</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Those aliasing artifacts should be gone now.</p>
+<p>Using the antialias exhausts some resources. As we said earlier, screens with a pixel ratio above <code spellcheck="false">1</code> don't really need antialias. One right way to do this would be to activate it only for screens with a pixel ratio below <code spellcheck="false">2</code>. We will see how to achieve that in a future lesson, along with other optimizations.</p>
+<h2>Shadows</h2>
+<p>The final touch for a realistic render is to add shadows. First, toggle the shadows on <a target="_blank" href="https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer">WebGLRenderer</a>. Then, change the shadow type to <code spellcheck="false">THREE.PCFSoftShadowMap</code> as we did in the Shadows lesson:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">renderer<span class="token punctuation">.</span>shadowMap<span class="token punctuation">.</span>enabled <span class="token operator">=</span> <span class="token boolean">true</span>
+renderer<span class="token punctuation">.</span>shadowMap<span class="token punctuation">.</span>type <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>PCFSoftShadowMap</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Activate it on the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/lights/DirectionalLight">DirectionalLight</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">directionalLight<span class="token punctuation">.</span>castShadow <span class="token operator">=</span> <span class="token boolean">true</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We also need to set the camera that handles the shadow for this light.</p>
+<p>Add a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/helpers/CameraHelper">CameraHelper</a> to the <code spellcheck="false">directionalLight.shadow.camera</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> directionalLightCameraHelper <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>CameraHelper</span><span class="token punctuation">(</span>directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>directionalLightCameraHelper<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can now see accurately what the shadow camera will render. The box should already fit pretty nicely with the scene. Let's reduce the <code spellcheck="false">far</code> value:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>camera<span class="token punctuation">.</span>far <span class="token operator">=</span> <span class="token number">15</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can remove or comment the <code spellcheck="false">directionalLightCameraHelper</code>.</p>
+<p>As we want realistic and precise shadows and because we have only one light, we can increase the shadow map size to <code spellcheck="false">1024x1024</code> without fearing a frame rate drop.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>mapSize<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">1024</span><span class="token punctuation">,</span> <span class="token number">1024</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Finally, we can activate the shadows on all the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/objects/Mesh">Meshes</a> of our model. As we are already traversing the scene in the <code spellcheck="false">updateAllMaterials</code> function, let's simply activate both <code spellcheck="false">castShadow</code> and <code spellcheck="false">receiveShadow</code> on all the children:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">updateAllMaterials</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+scene<span class="token punctuation">.</span><span class="token function">traverse</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">child</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>child <span class="token keyword">instanceof</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span> <span class="token operator">&amp;&amp;</span> child<span class="token punctuation">.</span>material <span class="token keyword">instanceof</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshStandardMaterial</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+child<span class="token punctuation">.</span>castShadow <span class="token operator">=</span> <span class="token boolean">true</span>
+child<span class="token punctuation">.</span>receiveShadow <span class="token operator">=</span> <span class="token boolean">true</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-21.png" src="./assets/lessons/25/step-21.png" width="1792" height="1120" alt="./assets/lessons/25/step-21.png" class="is-loaded"></span></p>
+<p>You should now observe an accurate shadow, mostly on the wood base and inside the model.</p>
+<h2>Final tweaks</h2>
+<p>Now that we have everything in place, we can tweak the values, make sure the <code spellcheck="false">directionalLight</code> corresponds to the light in the environment map, try other environment maps, test different tone mappings, add animation, etc.</p>
+<p>It's up to you. Take your time, stop looking at your render, and look around because you need real-life markers, make sure your screen colors are good, maybe show your work to your friends to get an external point of view until everything is correctly set.</p>
+<h2>Hamburger</h2>
+<p>Let's try with our hamburger. A version is already located in <code spellcheck="false">/static/models/hamburger.glb</code>.</p>
+<p>This file isn't Draco compressed. If you are using your model, make sure it's not compressed or add the <a target="_blank" href="https://threejs.org/docs/index.html#examples/en/loaders/DRACOLoader">DRACOLoader</a> to the <a target="_blank" href="https://threejs.org/docs/index.html#examples/en/loaders/GLTFLoader">GLTFLoader</a> as we did in the <strong>Imported Model</strong> lesson.</p>
+<p>Replace the path to load the hamburger and change the scale and position:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">gltfLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/models/hamburger.glb'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token parameter">gltf</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>scale<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">0.3</span><span class="token punctuation">,</span> <span class="token number">0.3</span><span class="token punctuation">,</span> <span class="token number">0.3</span><span class="token punctuation">)</span>
+gltf<span class="token punctuation">.</span>scene<span class="token punctuation">.</span>position<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>gltf<span class="token punctuation">.</span>scene<span class="token punctuation">)</span>
+
+<span class="token function">updateAllMaterials</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-22.png" src="./assets/lessons/25/step-22.png" width="1792" height="1120" alt="./assets/lessons/25/step-22.png" class="is-loaded"></span></p>
+<p>Your hamburger appears, but some nasty strips cover its surface.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-23.png" src="./assets/lessons/25/step-23.png" width="1792" height="1120" alt="./assets/lessons/25/step-23.png" class="is-loaded"></span></p>
+<p>No we didn't let the hamburger burn on the grill.</p>
+<p>These artifacts are called shadow acne. Shadow acne can occur on both smooth and flat surfaces for precision reasons when calculating if the surface is in the shadow or not. What's happening here is that the hamburger is casting a shadow on its own surface.</p>
+<p>We have to tweak the light <code spellcheck="false">shadow</code>'s <code spellcheck="false">bias</code> and <code spellcheck="false">normalBias</code> properties to fix this shadow acne. </p>
+<p>The <code spellcheck="false">bias</code> usually helps for flat surfaces. It's not our case here, but if you have the problem on flat surfaces, try to increase the <code spellcheck="false">bias</code> slightly until the acne disappears.</p>
+<p>The <code spellcheck="false">normalBias</code> usually helps for rounded surfaces, which is our case. Let's increase it until the shadow acne is barely visible:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">directionalLight<span class="token punctuation">.</span>shadow<span class="token punctuation">.</span>normalBias <span class="token operator">=</span> <span class="token number">0.05</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/25/step-24.png" src="./assets/lessons/25/step-24.png" width="1792" height="1120" alt="./assets/lessons/25/step-24.png" class="is-loaded"></span></p>
+<p>Now you get a very decent, acne-free hamburger.</p>
+<p>Bon appétit.</p>
+</section>
+</body>
+
+</html>

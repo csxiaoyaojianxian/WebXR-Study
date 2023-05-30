@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<body>
+
+    <section class="text js-text">
+        <h2>Introduction</h2>
+<p>Particles are precisely what you expect from that name. They are very popular and can be used to achieve various effects such as stars, smoke, rain, dust, fire, and many other things.</p>
+<p>The good thing with particles is that you can have hundreds of thousands of them on screen with a reasonable frame rate. The downside is that each particle is composed of a plane (two triangles) always facing the camera.</p>
+<p>Creating particles is as simple as making a <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a>. We need a <a target="_blank" href="https://threejs.org/docs/#api/en/core/BufferGeometry">BufferGeometry</a>, a material that can handle particles (<a target="_blank" href="https://threejs.org/docs/#api/en/materials/PointsMaterial">PointsMaterial</a>), and instead of producing a <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a> we need to create a <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Points">Points</a>.</p>
+<h2>Setup</h2>
+<p>The starter is only composed of a cube in the middle of the scene. That cube ensures that everything is working.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/18/step-01.png" src="./assets/lessons/18/step-01.png" width="1792" height="1120" alt="./assets/lessons/18/step-01.png" class="is-loaded"></span></p>
+<h2>First particles</h2>
+<p>Let's get rid of our cube and create a sphere composed of particles to start.</p>
+<h3>Geometry</h3>
+<p>You can use any of the basic Three.js geometries. For the same reasons as for the Mesh, it's preferable to use <a target="_blank" href="https://threejs.org/docs/#api/en/core/BufferGeometry">BufferGeometries</a>. Each vertex of the geometry will become a particle:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Particles
+*/</span>
+<span class="token comment">// Geometry</span>
+<span class="token keyword">const</span> particlesGeometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>SphereGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">32</span><span class="token punctuation">,</span> <span class="token number">32</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h3>PointsMaterial</h3>
+<p>We need a special type of material called <a target="_blank" href="https://threejs.org/docs/#api/en/materials/PointsMaterial">PointsMaterial</a>. This material can already do a lot, but we will discover how to create our own particles material to go even further in a future lesson.</p>
+<p>The <a target="_blank" href="https://threejs.org/docs/#api/en/materials/PointsMaterial">PointsMaterial</a> has multiple properties specific to particles like the <code spellcheck="false">size</code> to control all particles size and the <code spellcheck="false">sizeAttenuation</code> to specify if distant particles should be smaller than close particles:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Material</span>
+<span class="token keyword">const</span> particlesMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PointsMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+size<span class="token operator">:</span> <span class="token number">0.02</span><span class="token punctuation">,</span>
+sizeAttenuation<span class="token operator">:</span> <span class="token boolean">true</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>As always, we can also change those properties after creating the material:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> particlesMaterial <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>PointsMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+particlesMaterial<span class="token punctuation">.</span>size <span class="token operator">=</span> <span class="token number">0.02</span>
+particlesMaterial<span class="token punctuation">.</span>sizeAttenuation <span class="token operator">=</span> <span class="token boolean">true</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h3>Points</h3>
+<p>Finally, we can create the final particles the same way we create a <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Mesh">Mesh</a>, but this time by using the <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Points">Points</a> class. Don't forget to add it to the scene:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Points</span>
+<span class="token keyword">const</span> particles <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Points</span><span class="token punctuation">(</span>particlesGeometry<span class="token punctuation">,</span> particlesMaterial<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>particles<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/18/step-02.png" src="./assets/lessons/18/step-02.png" width="1792" height="1120" alt="./assets/lessons/18/step-02.png" class="is-loaded"></span></p>
+<p>That was easy. Let's customize those particles.</p>
+<h2>Custom geometry</h2>
+<p>To create a custom geometry, we can start from a <a target="_blank" href="https://threejs.org/docs/#api/en/core/BufferGeometry">BufferGeometry</a>, and add a <code spellcheck="false">position</code> attribute as we did in the <strong>Geometries</strong> lesson. Replace the <a target="_blank" href="https://threejs.org/docs/#api/en/geometries/SphereGeometry">SphereGeometry</a> with custom geometry and add the <code spellcheck="false">'position'</code> attribute as we did before:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// Geometry</span>
+<span class="token keyword">const</span> particlesGeometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferGeometry</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> count <span class="token operator">=</span> <span class="token number">500</span>
+
+<span class="token keyword">const</span> positions <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Float32Array</span><span class="token punctuation">(</span>count <span class="token operator">*</span> <span class="token number">3</span><span class="token punctuation">)</span> <span class="token comment">// Multiply by 3 because each position is composed of 3 values (x, y, z)</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> count <span class="token operator">*</span> <span class="token number">3</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token comment">// Multiply by 3 for same reason</span>
+<span class="token punctuation">{</span>
+positions<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span> <span class="token comment">// Math.random() - 0.5 to have a random value between -0.5 and +0.5</span>
+<span class="token punctuation">}</span>
+
+particlesGeometry<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'position'</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferAttribute</span><span class="token punctuation">(</span>positions<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// Create the Three.js BufferAttribute and specify that each information is composed of 3 values</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/18/step-03.png" src="./assets/lessons/18/step-03.png" width="1792" height="1120" alt="./assets/lessons/18/step-03.png" class="is-loaded"></span></p>
+<p>Don't be frustrated if you can't pull out this code by yourself. It's a little complex, and variables are using strange formats.</p>
+<p>You should get a bunch of particles all around the scene. Now is an excellent time to have fun and test the limits of your computer. Try <code spellcheck="false">5000</code>, <code spellcheck="false">50000</code>, <code spellcheck="false">500000</code> maybe. You can have millions of particles and still have a reasonable frame rate.</p>
+<p>You can imagine that there are limits. On an inferior computer or a smartphone, you won't be able to have a 60fps experience with millions of particles. We are also going to add effects that will drastically reduce the frame rate. But still, that's quite impressive.</p>
+<p>For now, let's keep the count to <code spellcheck="false">5000</code> and change the size to <code spellcheck="false">0.1</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> count <span class="token operator">=</span> <span class="token number">5000</span>
+
+<span class="token comment">// ...</span>
+
+particlesMaterial<span class="token punctuation">.</span>size <span class="token operator">=</span> <span class="token number">0.1</span>
+
+<span class="token comment">// ...</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/18/step-04.png" src="./assets/lessons/18/step-04.png" width="1792" height="1120" alt="./assets/lessons/18/step-04.png" class="is-loaded"></span></p>
+<h2>Color, map and alpha map</h2>
+<p>We can change the color of all particles with the <code spellcheck="false">color</code> property on the <a target="_blank" href="https://threejs.org/docs/#api/en/materials/PointsMaterial">PointsMaterial</a>. Don't forget that you need to use the <a target="_blank" href="https://threejs.org/docs/#api/en/math/Color">Color</a> class if you're changing this property after instancing the material:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">particlesMaterial<span class="token punctuation">.</span>color <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Color</span><span class="token punctuation">(</span><span class="token string">'#ff88cc'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can also use the <code spellcheck="false">map</code> property to put a texture on those particles. Use the <a target="_blank" href="https://threejs.org/docs/#api/en/loaders/TextureLoader">TextureLoader</a> already in the code to load one of the textures located in <code spellcheck="false">/static/textures/particles/</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Textures
+*/</span>
+<span class="token keyword">const</span> textureLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>TextureLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> particleTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/particles/2.png'</span><span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+
+particlesMaterial<span class="token punctuation">.</span>map <span class="token operator">=</span> particleTexture</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/18/step-05.png" src="./assets/lessons/18/step-05.png" width="1792" height="1120" alt="./assets/lessons/18/step-05.png" class="is-loaded"></span></p>
+<p>These textures are resized versions of the pack provided by <a target="_blank" href="https://twitter.com/KenneyNL">Kenney</a> and you can find the full pack here: <a target="_blank" href="https://www.kenney.nl./assets/particle-pack">https://www.kenney.nl./assets/particle-pack</a>. But you can also create your own.</p>
+<p>As you can see, the <code spellcheck="false">color</code> property is changing the map, just like with the other materials.</p>
+<p>If you look closely, you'll see that the front particles are hiding the back particles.</p>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/18/step-06.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>We need to activate transparency with <code spellcheck="false">transparent</code> and use the texture on the <code spellcheck="false">alphaMap</code> property instead of the <code spellcheck="false">map</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// particlesMaterial.map = particleTexture</span>
+particlesMaterial<span class="token punctuation">.</span>transparent <span class="token operator">=</span> <span class="token boolean">true</span>
+particlesMaterial<span class="token punctuation">.</span>alphaMap <span class="token operator">=</span> particleTexture</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/18/step-07.png" src="./assets/lessons/18/step-07.png" width="1792" height="1120" alt="./assets/lessons/18/step-07.png" class="is-loaded"></span></p>
+<p>Now that's better, but we can still randomly see some edges of the particles.</p>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/18/step-08.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>That is because the particles are drawn in the same order as they are created, and WebGL doesn't really know which one is in front of the other.</p>
+<p>There are multiple ways of fixing this.</p>
+<h3>Using alphaTest</h3>
+<p>The <code spellcheck="false">alphaTest</code> is a value between <code spellcheck="false">0</code> and <code spellcheck="false">1</code> that enables the WebGL to know when not to render the pixel according to that pixel's transparency. By default, the value is <code spellcheck="false">0</code> meaning that the pixel will be rendered anyway. If we use a small value such as <code spellcheck="false">0.001</code>, the pixel won't be rendered if the alpha is <code spellcheck="false">0</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">particlesMaterial<span class="token punctuation">.</span>alphaTest <span class="token operator">=</span> <span class="token number">0.001</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/18/step-09.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>This solution isn't perfect and if you watch closely, you can still see glitches, but it's already more satisfying.</p>
+<h3>Using depthTest</h3>
+<p>When drawing, the WebGL tests if what's being drawn is closer than what's already drawn. That is called depth testing and can be deactivated (you can comment the <code spellcheck="false">alphaTest</code>):</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// particlesMaterial.alphaTest = 0.001</span>
+particlesMaterial<span class="token punctuation">.</span>depthTest <span class="token operator">=</span> <span class="token boolean">false</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/18/step-10.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>While this solution seems to completely fix our problem, deactivating the depth testing might create bugs if you have other objects in your scene or particles with different colors. The particles might be drawn as if they were above the rest of the scene.</p>
+<p>Add a cube to the scene to see that:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> cube <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Mesh</span><span class="token punctuation">(</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BoxGeometry</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span>
+scene<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>cube<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/18/step-11.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<h3>Using depthWrite</h3>
+<p>As we said, the WebGL is testing if what's being drawn is closer than what's already drawn. The depth of what's being drawn is stored in what we call a depth buffer. Instead of not testing if the particle is closer than what's in this depth buffer, we can tell the WebGL not to write particles in that depth buffer (you can comment the <code spellcheck="false">depthTest</code>):</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// particlesMaterial.alphaTest = 0.001</span>
+<span class="token comment">// particlesMaterial.depthTest = false</span>
+particlesMaterial<span class="token punctuation">.</span>depthWrite <span class="token operator">=</span> <span class="token boolean">false</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/18/step-12.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>In our case, this solution will fix the problem with almost no drawback. Sometimes, other objects might be drawn behind or in front of the particles depending on many factors like the transparency, in which order you added the objects to your scene, etc.</p>
+<p>We saw multiple techniques, and there is no perfect solution. You'll have to adapt and find the best combination according to the project.</p>
+<h2>Blending</h2>
+<p>Currently, the WebGL draws the pixels one on top of the other.</p>
+<p>By changing the <code spellcheck="false">blending</code> property, we can tell the WebGL not only to draw the pixel, but also to <strong>add</strong> the color of that pixel to the color of the pixel already drawn. That will have a saturation effect that can look amazing.</p>
+<p>To test that, simply change the <code spellcheck="false">blending</code> property to <code spellcheck="false">THREE.AdditiveBlending</code> (keep the <code spellcheck="false">depthWrite</code> property):</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// particlesMaterial.alphaTest = 0.001</span>
+<span class="token comment">// particlesMaterial.depthTest = false</span>
+particlesMaterial<span class="token punctuation">.</span>depthWrite <span class="token operator">=</span> <span class="token boolean">false</span>
+particlesMaterial<span class="token punctuation">.</span>blending <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>AdditiveBlending</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/18/step-13.png" src="./assets/lessons/18/step-13.png" width="1792" height="1120" alt="./assets/lessons/18/step-13.png" class="is-loaded"></span></p>
+<p>Add more particles (let's say <code spellcheck="false">20000</code>) to better enjoy this effect.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/18/step-14.png" src="./assets/lessons/18/step-14.png" width="1792" height="1120" alt="./assets/lessons/18/step-14.png" class="is-loaded"></span></p>
+<p>But be careful, this effect will impact the performances, and you won't be able to have as many particles as before at 60fps.</p>
+<p>Now, we can remove the <code spellcheck="false">cube</code>.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/18/step-15.png" src="./assets/lessons/18/step-15.png" width="1792" height="1120" alt="./assets/lessons/18/step-15.png" class="is-loaded"></span></p>
+<h2>Different colors</h2>
+<p>We can have a different color for each particle. We first need to add a new attribute named <code spellcheck="false">color</code> as we did for the position. A color is composed of red, green, and blue (3 values), so the code will be very similar to the <code spellcheck="false">position</code> attribute. We can actually use the same loop for these two attributes:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> positions <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Float32Array</span><span class="token punctuation">(</span>count <span class="token operator">*</span> <span class="token number">3</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> colors <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Float32Array</span><span class="token punctuation">(</span>count <span class="token operator">*</span> <span class="token number">3</span><span class="token punctuation">)</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> count <span class="token operator">*</span> <span class="token number">3</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+positions<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0.5</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">10</span>
+colors<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+particlesGeometry<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'position'</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferAttribute</span><span class="token punctuation">(</span>positions<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+particlesGeometry<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'color'</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BufferAttribute</span><span class="token punctuation">(</span>colors<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Be careful with singulars and plurals.</p>
+<p>To activate those vertex colors, simply change the <code spellcheck="false">vertexColors</code> property to <code spellcheck="false">true</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">particlesMaterial<span class="token punctuation">.</span>vertexColors <span class="token operator">=</span> <span class="token boolean">true</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/18/step-16.png" src="./assets/lessons/18/step-16.png" width="1792" height="1120" alt="./assets/lessons/18/step-16.png" class="is-loaded"></span></p>
+<p>The main color of the material still affects these vertex colors. Feel free to change that color or even comment it.</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// particlesMaterial.color = new THREE.Color('#ff88cc')</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/18/step-17.png" src="./assets/lessons/18/step-17.png" width="1792" height="1120" alt="./assets/lessons/18/step-17.png" class="is-loaded"></span></p>
+<h2>Animate</h2>
+<p>There are multiple ways of animating particles.</p>
+<h3>By using the points as an object</h3>
+<p>Because the <a target="_blank" href="https://threejs.org/docs/#api/en/objects/Points">Points</a> class inherits from the <a target="_blank" href="https://threejs.org/docs/#api/en/core/Object3D">Object3D</a> class, you can move, rotate and scale the points as you wish.</p>
+<p>Rotate the particles in the <code spellcheck="false">tick</code> function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> elapsedTime <span class="token operator">=</span> clock<span class="token punctuation">.</span><span class="token function">getElapsedTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Update particles</span>
+particles<span class="token punctuation">.</span>rotation<span class="token punctuation">.</span>y <span class="token operator">=</span> elapsedTime <span class="token operator">*</span> <span class="token number">0.2</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/18/step-18.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>While this is already cool, we want more control over each particle.</p>
+<h3>By changing the attributes</h3>
+<p>Another solution would be to update each vertex position separately. This way, vertices can have different trajectories. We are going to animate the particles as if they were floating on waves but first, let's see how we can update the vertices.</p>
+<p>Start by commenting the previous rotation we did on the whole <code spellcheck="false">particles</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// particles.rotation.y = elapsedTime * 0.2</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>To update each vertex, we have to update the right part in the <code spellcheck="false">position</code> attribute because all the vertices are stored in this one dimension array where the first 3 values correspond to the <code spellcheck="false">x</code>, <code spellcheck="false">y</code> and <code spellcheck="false">z</code> coordinates of the first vertex, then the next 3 values correspond to the <code spellcheck="false">x</code>, <code spellcheck="false">y</code> and <code spellcheck="false">z</code> of the second vertex, etc. </p>
+<p>We only want the vertices to move up and down, meaning that we are going to update the <code spellcheck="false">y</code> axis only. Because the <code spellcheck="false">position</code> attribute is a one dimension array, we have to go through it 3 by 3 and only update the second value which is the <code spellcheck="false">y</code> coordinate.</p>
+<p>Let's start by going through each vertices:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> count<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> i3 <span class="token operator">=</span> i <span class="token operator">*</span> <span class="token number">3</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Here, we chose to have a simple <code spellcheck="false">for</code> loop that goes from <code spellcheck="false">0</code> to <code spellcheck="false">count</code> and we created a <code spellcheck="false">i3</code> variable inside that goes 3 by 3 simply by multiplying <code spellcheck="false">i</code> by 3.</p>
+<p>The easiest way to simulate waves movement is to use a simple <strong>sinus</strong>. First, we are going to update all vertices to go up and down on the same frequency.</p>
+<p>The <code spellcheck="false">y</code> coordinate can be access in the array at the index <code spellcheck="false">i3 + 1</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> count<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> i3 <span class="token operator">=</span> i <span class="token operator">*</span> <span class="token number">3</span>
+
+particlesGeometry<span class="token punctuation">.</span>attributes<span class="token punctuation">.</span>position<span class="token punctuation">.</span>array<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">sin</span><span class="token punctuation">(</span>elapsedTime<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Unfortunately, nothing is moving. The problem is that Three.js has to be notified that the geometry changed. To do that, we have to set the <code spellcheck="false">needsUpdate</code> to <code spellcheck="false">true</code> on the <code spellcheck="false">position</code> attribute once we are done updating the vertices:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> count<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> i3 <span class="token operator">=</span> i <span class="token operator">*</span> <span class="token number">3</span>
+
+particlesGeometry<span class="token punctuation">.</span>attributes<span class="token punctuation">.</span>position<span class="token punctuation">.</span>array<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">sin</span><span class="token punctuation">(</span>elapsedTime<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+particlesGeometry<span class="token punctuation">.</span>attributes<span class="token punctuation">.</span>position<span class="token punctuation">.</span>needsUpdate <span class="token operator">=</span> <span class="token boolean">true</span> 
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/18/step-19.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>All the particles should be moving up and down like a plane.</p>
+<p>That's a good start and we are almost there. All we need to do now is apply an offset to the <strong>sinus</strong> between the particles so that we get that wave shape.</p>
+<p>To do that, we can use the <code spellcheck="false">x</code> coordinate. And to get this value we can use the same technique that we used for the <code spellcheck="false">y</code> coordinate but instead of <code spellcheck="false">i3 + 1</code>, it's just <code spellcheck="false">i3</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> count<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">let</span> i3 <span class="token operator">=</span> i <span class="token operator">*</span> <span class="token number">3</span>
+
+<span class="token keyword">const</span> x <span class="token operator">=</span> particlesGeometry<span class="token punctuation">.</span>attributes<span class="token punctuation">.</span>position<span class="token punctuation">.</span>array<span class="token punctuation">[</span>i3<span class="token punctuation">]</span>
+particlesGeometry<span class="token punctuation">.</span>attributes<span class="token punctuation">.</span>position<span class="token punctuation">.</span>array<span class="token punctuation">[</span>i3 <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">sin</span><span class="token punctuation">(</span>elapsedTime <span class="token operator">+</span> x<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+particlesGeometry<span class="token punctuation">.</span>attributes<span class="token punctuation">.</span>position<span class="token punctuation">.</span>needsUpdate <span class="token operator">=</span> <span class="token boolean">true</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/18/step-20.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>You should get beautiful waves of particles. Unfortunately, you should avoid this technique. If we have <code spellcheck="false">20000</code> particles, we are going through each one, calculating a new position, and updating the whole attribute on each frame. That can work with a small number of particles, but we want millions of particles.</p>
+<h3>By using a custom shader</h3>
+<p>To update these millions of particles on each frame with a good framerate, we need to create our own material with our own shaders. But shaders are for a later lesson.</p>
+    </section>
+</body>
+
+</html>

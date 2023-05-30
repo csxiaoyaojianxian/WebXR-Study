@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<section class="text js-text">
+    <h2>Introduction</h2>
+<p>As the name suggests, a Raycaster can cast (or shoot) a ray in a specific direction and test what objects intersect with it.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/20/raycaster.png" src="./assets/lessons/20/raycaster.png" width="1920" height="1080" alt="./assets/lessons/20/raycaster.png" class="is-loaded"></span></p>
+<p>You can use that technique to detect if there is a wall in front of the player, test if the laser gun hit something, test if something is currently under the mouse to simulate mouse events, and many other things. </p>
+<h2>Setup</h2>
+<p>In our starter, we have 3 red spheres, and we are going to shoot a ray through and see if those spheres intersect.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/20/step-01.png" src="./assets/lessons/20/step-01.png" width="1792" height="1120" alt="./assets/lessons/20/step-01.png" class="is-loaded"></span></p>
+<h2>Create the Raycaster</h2>
+<p>Instantiate a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/core/Raycaster">Raycaster</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Raycaster
+*/</span>
+<span class="token keyword">const</span> raycaster <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Raycaster</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>To change the position and direction where ray will be cast, we can use the <code spellcheck="false">set(...)</code> method. The first parameter is the <code spellcheck="false">position</code> and the second parameter is the <code spellcheck="false">direction</code>.</p>
+<p>Both are <a target="_blank" href="https://threejs.org/docs/index.html#api/en/math/Vector3">Vector3</a>, but the <code spellcheck="false">direction</code> has to be normalized. A normalized vector has a length of <code spellcheck="false">1</code>. Don't worry, you don't have to do the mathematics by yourself, and you can call the <code spellcheck="false">normalize()</code> method on the vector:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> rayOrigin <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Vector3</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> rayDirection <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Vector3</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span>
+rayDirection<span class="token punctuation">.</span><span class="token function">normalize</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+raycaster<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>rayOrigin<span class="token punctuation">,</span> rayDirection<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>This example of a normalized vector isn't very relevant because we could have set <code spellcheck="false">1</code> instead of <code spellcheck="false">10</code>, but if we change the values, we will still have the <code spellcheck="false">normalize()</code> method making sure that the vector is <code spellcheck="false">1</code> unit long.</p>
+<p>Here, the ray position supposedly start a little on the left in our scene, and the direction seems to go to the right. Our ray should go through all the spheres.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/20/step-01-a.png" src="./assets/lessons/20/step-01-a.png" width="1792" height="1120" alt="./assets/lessons/20/step-01-a.png" class="is-loaded"></span></p>
+<h2>Cast a ray</h2>
+<p>To cast a ray and get the objects that intersect we can use two methods, <code spellcheck="false">intersectObject(...)</code> (singular) and <code spellcheck="false">intersectObjects(...)</code> (plural).</p>
+<p><code spellcheck="false">intersectObject(...)</code> will test one object and <code spellcheck="false">intersectObjects(...)</code> will test an array of objects:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> intersect <span class="token operator">=</span> raycaster<span class="token punctuation">.</span><span class="token function">intersectObject</span><span class="token punctuation">(</span>object2<span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>intersect<span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> intersects <span class="token operator">=</span> raycaster<span class="token punctuation">.</span><span class="token function">intersectObjects</span><span class="token punctuation">(</span><span class="token punctuation">[</span>object1<span class="token punctuation">,</span> object2<span class="token punctuation">,</span> object3<span class="token punctuation">]</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>intersects<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>If you look at the logs, you'll see that <code spellcheck="false">intersectObject(...)</code> returned an array of one item (probably the second sphere) and <code spellcheck="false">intersectObjects(...)</code>, returned an array of three items (probably the 3 spheres).</p>
+<h2>Result of an intersection</h2>
+<p>The result of an intersection is always an array, even if you are testing only one object. That is because a ray can go through the same object multiple times. Imagine a donut. The ray will go through the first part of the ring, then the middle's hole, then again the second part of the ring.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/20/raycasterDonut.png" src="./assets/lessons/20/raycasterDonut.png" width="1920" height="1080" alt="./assets/lessons/20/raycasterDonut.png" class="is-loaded"></span></p>
+<p>Each item of that returned array contains much useful information:</p>
+<ul>
+<li><code spellcheck="false">distance</code>: the distance between the origin of the ray and the collision point.</li>
+<li><code spellcheck="false">face</code>: what face of the geometry was hit by the ray.</li>
+<li><code spellcheck="false">faceIndex</code>: the index of that face.</li>
+<li><code spellcheck="false">object</code>: what object is concerned by the collision.</li>
+<li><code spellcheck="false">point</code>: a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/math/Vector3">Vector3</a> of the exact position in 3D space of the collision.</li>
+<li><code spellcheck="false">uv</code>: the UV coordinates in that geometry.</li>
+</ul>
+<p>It's up to you to use that data. If you want to test if there is a wall in front of the player, you can test the <code spellcheck="false">distance</code>. If you're going to change the object's color, you can update the <code spellcheck="false">object</code>'s material. If you want to show an explosion on the impact point, you can create this explosion at the <code spellcheck="false">point</code> position.</p>
+<h2>Test on each frame</h2>
+<p>Currently, we only cast one ray at the start. If we want to test things while they are moving, we have to do the test on each frame. Let's animate the spheres and turn them blue when the ray intersects with them.</p>
+<p>Remove the code we did previously and only keep the raycaster instantiation:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> raycaster <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Raycaster</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Animate the spheres by using the elapsed time and classic <code spellcheck="false">Math.sin(...)</code> in the <code spellcheck="false">tick</code> function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> clock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Clock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> elapsedTime <span class="token operator">=</span> clock<span class="token punctuation">.</span><span class="token function">getElapsedTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Animate objects</span>
+object1<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">sin</span><span class="token punctuation">(</span>elapsedTime <span class="token operator">*</span> <span class="token number">0.3</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">1.5</span>
+object2<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">sin</span><span class="token punctuation">(</span>elapsedTime <span class="token operator">*</span> <span class="token number">0.8</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">1.5</span>
+object3<span class="token punctuation">.</span>position<span class="token punctuation">.</span>y <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">sin</span><span class="token punctuation">(</span>elapsedTime <span class="token operator">*</span> <span class="token number">1.4</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">1.5</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/20/step-02.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>You should see the spheres waving up and down at different frequencies.</p>
+<p>Now let's update our raycaster like we did before but in the <code spellcheck="false">tick</code> function:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> clock <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Clock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+<span class="token comment">// Cast a ray</span>
+<span class="token keyword">const</span> rayOrigin <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Vector3</span><span class="token punctuation">(</span><span class="token operator">-</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> rayDirection <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Vector3</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span>
+rayDirection<span class="token punctuation">.</span><span class="token function">normalize</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+raycaster<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>rayOrigin<span class="token punctuation">,</span> rayDirection<span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> objectsToTest <span class="token operator">=</span> <span class="token punctuation">[</span>object1<span class="token punctuation">,</span> object2<span class="token punctuation">,</span> object3<span class="token punctuation">]</span>
+<span class="token keyword">const</span> intersects <span class="token operator">=</span> raycaster<span class="token punctuation">.</span><span class="token function">intersectObjects</span><span class="token punctuation">(</span>objectsToTest<span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>intersects<span class="token punctuation">)</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Yet again, we don't really need to normalize the <code spellcheck="false">rayDirection</code> because its length is already <code spellcheck="false">1</code>. But it's good practice to keep the <code spellcheck="false">normalize()</code> in case we change the direction.</p>
+<p>We also put the array of objects to test in a variable <code spellcheck="false">objectsToTest</code>. That will get handy later.</p>
+<p>If you look at the console, you should get an array with intersections in it, and those intersections keep changing depending on the spheres' positions.</p>
+<p>We can now update the material of the <code spellcheck="false">object</code> property for each item of the <code spellcheck="false">intersects</code> array:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">const</span> intersect <span class="token keyword">of</span> intersects<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+intersect<span class="token punctuation">.</span>object<span class="token punctuation">.</span>material<span class="token punctuation">.</span>color<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'#0000ff'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/20/step-03.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>Unluckily, they all go blue but never go back red. There are many ways to turn the objects that didn't intersect back to red. What we can do is turn all the spheres red and then turn the ones that intersect blue:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">    <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">const</span> object <span class="token keyword">of</span> objectsToTest<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+object<span class="token punctuation">.</span>material<span class="token punctuation">.</span>color<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'#ff0000'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">const</span> intersect <span class="token keyword">of</span> intersects<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+intersect<span class="token punctuation">.</span>object<span class="token punctuation">.</span>material<span class="token punctuation">.</span>color<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'#0000ff'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/20/step-04.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<h2>Use the raycaster with the mouse</h2>
+<p>As we said earlier, we can also use the raycaster to test if an object is behind the mouse. In other words, if you are hovering an object.</p>
+<p>Mathematically speaking, it's a little complex because we need to cast a ray from the camera in the mouse's direction, but, fortunately, Three.js is doing all the heavy lifting.</p>
+<p>For now, let's comment the code related to the raycaster in the <code spellcheck="false">tick</code> function.</p>
+<h3>Hovering</h3>
+<p>First, let's handle hovering.</p>
+<p>To begin with, we need the coordinates of the mouse. We cannot use the basic native JavaScript coordinates, which are in pixels. We need a value that goes from <code spellcheck="false">-1</code> to <code spellcheck="false">+1</code> in both the horizontal and the vertical axis, with the vertical coordinate being positive when moving the mouse upward.</p>
+<p>This is how WebGL works and it's related to things like clip space but we don't need to understand those complex concepts.</p>
+<p>Examples:</p>
+<ul>
+<li>The mouse is on the top left of the page: <code spellcheck="false">-1 / 1</code></li>
+<li>The mouse is on the bottom left of the page: <code spellcheck="false">-1 / - 1</code></li>
+<li>The mouse is on the middle vertically and at right horizontally: <code spellcheck="false">1 / 0</code></li>
+<li>The mouse is in the center of the page: <code spellcheck="false">0 / 0</code></li>
+</ul>
+<p>First, let's create a <code spellcheck="false">mouse</code> variable with a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/math/Vector2">Vector2</a>, and update that variable when the mouse is moving:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">/**
+* Mouse
+*/</span>
+<span class="token keyword">const</span> mouse <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Vector2</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'mousemove'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">event</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+mouse<span class="token punctuation">.</span>x <span class="token operator">=</span> event<span class="token punctuation">.</span>clientX <span class="token operator">/</span> sizes<span class="token punctuation">.</span>width <span class="token operator">*</span> <span class="token number">2</span> <span class="token operator">-</span> <span class="token number">1</span>
+mouse<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token operator">-</span> <span class="token punctuation">(</span>event<span class="token punctuation">.</span>clientY <span class="token operator">/</span> sizes<span class="token punctuation">.</span>height<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">2</span> <span class="token operator">+</span> <span class="token number">1</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>mouse<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Look at the logs and make sure that the values match the previous examples.</p>
+<p>We could cast the ray in the <code spellcheck="false">mousemove</code> event callback, but it's not recommend because the <code spellcheck="false">mousemove</code> event might be triggered more than the frame rate for some browsers. Instead, we will cast the ray in the <code spellcheck="false">tick</code> function as we did before.</p>
+<p>To orient the ray in the right direction, we can use the <code spellcheck="false">setFromCamera()</code> method on the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/core/Raycaster">Raycaster</a>. The rest of the code is the same as before. We just update the objects materials to red or blue if they intersect or not:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+
+raycaster<span class="token punctuation">.</span><span class="token function">setFromCamera</span><span class="token punctuation">(</span>mouse<span class="token punctuation">,</span> camera<span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> objectsToTest <span class="token operator">=</span> <span class="token punctuation">[</span>object1<span class="token punctuation">,</span> object2<span class="token punctuation">,</span> object3<span class="token punctuation">]</span>
+<span class="token keyword">const</span> intersects <span class="token operator">=</span> raycaster<span class="token punctuation">.</span><span class="token function">intersectObjects</span><span class="token punctuation">(</span>objectsToTest<span class="token punctuation">)</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">const</span> intersect <span class="token keyword">of</span> intersects<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+intersect<span class="token punctuation">.</span>object<span class="token punctuation">.</span>material<span class="token punctuation">.</span>color<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'#0000ff'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">const</span> object <span class="token keyword">of</span> objectsToTest<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>intersects<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token parameter">intersect</span> <span class="token operator">=&gt;</span> intersect<span class="token punctuation">.</span>object <span class="token operator">===</span> object<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+object<span class="token punctuation">.</span>material<span class="token punctuation">.</span>color<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'#ff0000'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+        </p><div class="js-video video">
+            <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/20/step-05.mp4"></video>
+            <div class="js-overlay overlay"></div>
+            <div class="logo">
+                <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                    <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                    <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                    <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                    <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                    <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                    <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                </svg>
+            </div>
+        </div>
+    <p></p>
+<p>The spheres should become blue if the cursor is above them.</p>
+<h3>Mouse enter and mouse leave events</h3>
+<p>Mouse events like <code spellcheck="false">'mouseenter'</code>, <code spellcheck="false">'mouseleave'</code>, etc. aren't supported either. If you want to be inform when the mouse "enters" an object or "leaves" that object, you'll have to do it by yourself.</p>
+<p>What we can do to reproduce the <code spellcheck="false">mouseenter</code> and <code spellcheck="false">mouseleave</code> events, is to have a variable containing the currently hovered object.</p>
+<p>If there is one object intersecting, but there wasn't one before, it means a <code spellcheck="false">mouseenter</code> has happened on that object. </p>
+<p>If no object intersects, but there was one before, it means a <code spellcheck="false">mouseleave</code> has happened.</p>
+<p>We just need to save the currently intersecting object:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">let</span> currentIntersect <span class="token operator">=</span> <span class="token keyword">null</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>And then, test and update the <code spellcheck="false">currentIntersect</code> variable:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">tick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token comment">// ...</span>
+raycaster<span class="token punctuation">.</span><span class="token function">setFromCamera</span><span class="token punctuation">(</span>mouse<span class="token punctuation">,</span> camera<span class="token punctuation">)</span>
+<span class="token keyword">const</span> objectsToTest <span class="token operator">=</span> <span class="token punctuation">[</span>object1<span class="token punctuation">,</span> object2<span class="token punctuation">,</span> object3<span class="token punctuation">]</span>
+<span class="token keyword">const</span> intersects <span class="token operator">=</span> raycaster<span class="token punctuation">.</span><span class="token function">intersectObjects</span><span class="token punctuation">(</span>objectsToTest<span class="token punctuation">)</span>
+
+<span class="token keyword">if</span><span class="token punctuation">(</span>intersects<span class="token punctuation">.</span>length<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>currentIntersect<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'mouse enter'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+currentIntersect <span class="token operator">=</span> intersects<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">else</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>currentIntersect<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'mouse leave'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+currentIntersect <span class="token operator">=</span> <span class="token keyword">null</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// ...</span>
+<span class="token punctuation">}</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<h3>Mouse click event</h3>
+<p>Now that we have a variable containing the currently hovered object, we can easily implement a <code spellcheck="false">click</code> event.</p>
+<p>First, we need to listen to the <code spellcheck="false">click</code> event regardless of where it happens:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'click'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Then, we can test if the there is something in the <code spellcheck="false">currentIntersect</code> variable:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'click'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>currentIntersect<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'click'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>We can also test what object was concerned by the click:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'click'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>currentIntersect<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">switch</span><span class="token punctuation">(</span>currentIntersect<span class="token punctuation">.</span>object<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">case</span> object1<span class="token operator">:</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'click on object 1'</span><span class="token punctuation">)</span>
+    <span class="token keyword">break</span>
+
+<span class="token keyword">case</span> object2<span class="token operator">:</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'click on object 2'</span><span class="token punctuation">)</span>
+    <span class="token keyword">break</span>
+
+<span class="token keyword">case</span> object3<span class="token operator">:</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'click on object 3'</span><span class="token punctuation">)</span>
+    <span class="token keyword">break</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Reproducing native events takes time, but once you understand it, it's pretty straightforward.</p>
+</section>
+</body>
+
+</html>

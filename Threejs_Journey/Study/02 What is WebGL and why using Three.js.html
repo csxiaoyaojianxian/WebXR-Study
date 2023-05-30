@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<body>
+    <section class="text js-text">
+        <h2>Introduction</h2>
+<p>If you are here, you probably already know what Three.js is but let's talk about it and see why we need this library.</p>
+<p>Three.js is a 3D JavaScript library that enables developers to create 3D experiences for the web. It works with WebGL, but you can make it work with SVG and CSS as well. Those two are quite limited, and we won't cover them in this course.</p>
+<h2>Showcase</h2>
+<p>Here's a preview of what you can achieve with Three.js:</p>
+<ul>
+<li><a target="_blank" href="https://bruno-simon.com/">https://bruno-simon.com</a></li>
+<li><a target="_blank" href="https://go.pioneer.com/cornrevolution">https://go.pioneer.com/cornrevolution</a></li>
+<li><a target="_blank" href="https://richardmattka.com/">https://richardmattka.com</a></li>
+<li><a target="_blank" href="https://lusion.co/">https://lusion.co</a></li>
+<li><a target="_blank" href="https://www.oculus.com/medal-of-honor/">https://www.oculus.com/medal-of-honor/</a></li>
+<li><a target="_blank" href="http://letsplay.ouigo.com/">http://letsplay.ouigo.com</a></li>
+<li><a target="_blank" href="https://zen.ly/">https://zen.ly</a></li>
+<li><a target="_blank" href="https://prior.co.jp/discover">https://prior.co.jp/discover</a></li>
+<li><a target="_blank" href="https://www.midwam.com">https://www.midwam.com</a></li>
+<li><a target="_blank" href="https://heraclosgame.com">https://heraclosgame.com</a></li>
+<li><a target="_blank" href="https://chartogne-taillet.com">https://chartogne-taillet.com</a></li>
+<li><a target="_blank" href="https://live.vanmoof.com/site">https://live.vanmoof.com/site</a></li>
+</ul>
+<p>Before going further, we need to know what WebGL is exactly.</p>
+<h2>What is WebGL?</h2>
+<p>WebGL is a JavaScript API that renders triangles in a canvas at a remarkable speed. It's compatible with most modern browsers, and it's fast because it uses the Graphic Processing Unit (GPU) of the visitor.</p>
+<p>WebGL can draw more than triangles and can also be used to create 2D experiences, but we will focus on 3D experiences using triangles for the course's sake.</p>
+<p>The GPU can do thousands of parallel calculations. Imagine that you want to render a 3D model and this model is constituted of 1000 triangles—which, come to think about it, is not that many. Each triangle includes 3 points. When we want to render our model, the GPU will have to calculate the position of these 3000 points. Because the GPU can do parallel calculations, it will handle all the triangles points in one raw.</p>
+<p>Once the model's points are well placed, the GPU needs to draw each visible pixel of those triangles. Yet again, the GPU will handle the thousands and thousands of pixels calculations in one go.</p>
+<p>The instructions to place the points and draw the pixels are written in what we call shaders. And let me tell you, shaders are hard to master. We also need to provide data to these shaders. For example: how to place the points according to the model transformations and the camera's properties. These are called matrices. We also need to provide data to help colorize the pixels. If there is a light and the triangle is facing that light, it should be brighter than if the triangle isn't.</p>
+<p>And this is why native WebGL is so hard. Drawing a single triangle on the canvas would take at least 100 lines of code. Good luck if you want to add perspective, lights, models, and animate everything in that case.</p>
+<p>But native WebGL benefits from existing at a low level, very close to the GPU. This enables excellent optimizations and more control.</p>
+<h2>Three.js to the rescue</h2>
+<p>Three.js is a JavaScript library under MIT license that works right above WebGL. The library's goal is to drastically simplify the process of handling all of what we just stated. You'll have an animated 3D scene in just a few code lines, and you won't have to provide shaders and matrices.</p>
+<p>Because Three.js is right above WebGL, we can still interact with it in some ways. At some point, we will get to writing shaders and create matrices.</p>
+<p>Ricardo Cabello, aka Mr.doob (<a target="_blank" href="https://mrdoob.com/">Website</a>, <a target="_blank" href="https://twitter.com/mrdoob">Twitter</a>), is the developer who created Three.js. He is still working on it, but now he's helped by a large community. You can check the list of contributors here: <a target="_blank" href="https://github.com/mrdoob/three.js/graphs/contributors">https://github.com/mrdoob/three.js/graphs/contributors</a></p>
+<p>Currently, the library gets an update every month and you can see what's changed in the releases page here: <a target="_blank" href="https://github.com/mrdoob/three.js/releases">https://github.com/mrdoob/three.js/releases</a></p>
+<p>You can discover many exceptional projects using Three.js on the website's homepage: <a target="_blank" href="https://threejs.org/">https://threejs.org/</a></p>
+<p>There is also some well-maintained documentation that we will use a lot: <a target="_blank" href="https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene">https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene</a></p>
+<p>And you can find hundreds of examples with public code here: <a target="_blank" href="https://threejs.org/examples/#webgl_tonemapping">https://threejs.org/examples/#webgl_tonemapping</a></p>
+<p>If you want to follow updates and discover exceptional projects, I advise you to follow the Mr.doob and Three.js twitter accounts:</p>
+<p><a target="_blank" href="https://twitter.com/mrdoob">https://twitter.com/mrdoob</a></p>
+<p><a target="_blank" href="https://twitter.com/threejs_org">https://twitter.com/threejs_org</a></p>
+<h2>What about other libraries?</h2>
+<p>Three.js is the most popular WebGL library for good reasons that we already covered. It's very stable, it provides many features, the documentation is remarkable, the community is working hard on updates, and it's still close enough to native WebGL.</p>
+<p>That's why it's probably better to learn Three.js.</p>
+<p>But there are many other libraries, and some of them are amazing as well. Be curious, try them out, and experience their strength for yourself. You might even learn things that will be useful for your Three.js projects.</p>
+    </section>
+</body>
+
+</html>

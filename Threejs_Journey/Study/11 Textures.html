@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link type="text/css" rel="stylesheet" href="./public.css" />
+</head>
+
+<body>
+
+    <section class="text js-text">
+        <h2>Introduction</h2>
+<p>Bored with your red cube yet? It's time to add some textures.</p>
+<p>But first, what are textures and what can we really do with them?</p>
+<h2>What are textures?</h2>
+<p>Textures, as you probably know, are images that will cover the surface of your geometries. Many types of textures can have different effects on the appearance of your geometry. It's not just about the color.</p>
+<p>Here are the most common types of textures using a famous <a target="_blank" href="https://3dtextures.me/2019/04/16/door-wood-001/">door texture</a> by João Paulo. Buy him a <a target="_blank" href="https://ko-fi.com/katsukagi">Ko-fi</a> or become a <a target="_blank" href="https://www.patreon.com/gendo">Patreon</a> if you like his work.</p>
+<ul>
+<li>
+<p><strong>Color</strong> (or albedo)
+The albedo texture is the most simple one. It'll only take the pixels of the texture and apply them to the geometry.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/color.jpg" src="./assets/lessons/11/color.jpg" width="512" height="512" alt="./assets/lessons/11/color.jpg" class="is-loaded"></span></p>
+</li>
+<li>
+<p><strong>Alpha</strong>
+The alpha texture is a grayscale image where white will be visible, and black won't.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/alpha.jpg" src="./assets/lessons/11/alpha.jpg" width="512" height="512" alt="./assets/lessons/11/alpha.jpg" class="is-loaded"></span></p>
+</li>
+<li>
+<p><strong>Height</strong>
+The height texture is a grayscale image that will move the vertices to create some relief. You'll need to add subdivision if you want to see it.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/height.png" src="./assets/lessons/11/height.png" width="512" height="512" alt="./assets/lessons/11/height.png" class="is-loaded"></span></p>
+</li>
+<li>
+<p><strong>Normal</strong>
+The normal texture will add small details. It won't move the vertices, but it will lure the light into thinking that the face is oriented differently. Normal textures are very useful to add details with good performance because you don't need to subdivide the geometry.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/normal.jpg" src="./assets/lessons/11/normal.jpg" width="512" height="512" alt="./assets/lessons/11/normal.jpg" class="is-loaded"></span></p>
+</li>
+<li>
+<p><strong>Ambient occlusion</strong>
+The ambient occlusion texture is a grayscale image that will fake shadow in the surface's crevices. While it's not physically accurate, it certainly helps to create contrast.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/ambientOcclusion.jpg" src="./assets/lessons/11/ambientOcclusion.jpg" width="512" height="512" alt="./assets/lessons/11/ambientOcclusion.jpg" class="is-loaded"></span></p>
+</li>
+<li>
+<p><strong>Metalness</strong>
+The metalness texture is a grayscale image that will specify which part is metallic (white) and non-metallic (black). This information will help to create reflection.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/metalness.jpg" src="./assets/lessons/11/metalness.jpg" width="512" height="512" alt="./assets/lessons/11/metalness.jpg" class="is-loaded"></span></p>
+</li>
+<li>
+<p><strong>Roughness</strong>
+The roughness is a grayscale image that comes with metalness, and that will specify which part is rough (white) and which part is smooth (black). This information will help to dissipate the light. A carpet is very rugged, and you won't see the light reflection on it, while the water's surface is very smooth, and you can see the light reflecting on it. Here, the wood is uniform because there is a clear coat on it.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/roughness.jpg" src="./assets/lessons/11/roughness.jpg" width="512" height="512" alt="./assets/lessons/11/roughness.jpg" class="is-loaded"></span></p>
+</li>
+</ul>
+<h4>PBR</h4>
+<p>Those textures (especially the metalness and the roughness) follow what we call PBR principles. PBR stands for Physically Based Rendering. It regroups many techniques that tend to follow real-life directions to get realistic results.</p>
+<p>While there are many other techniques, PBR is becoming the standard for realistic renders, and many software, engines, and libraries are using it.</p>
+<p>For now, we will simply focus on how to load textures, how to use them, what transformations we can apply, and how to optimize them. We will see more about PBR in later lessons, but if you're curious, you can learn more about it here:</p>
+<ul>
+<li><a target="_blank" href="https://marmoset.co/posts/basic-theory-of-physically-based-rendering/">https://marmoset.co/posts/basic-theory-of-physically-based-rendering/</a></li>
+<li><a target="_blank" href="https://marmoset.co/posts/physically-based-rendering-and-you-can-too/">https://marmoset.co/posts/physically-based-rendering-and-you-can-too/</a></li>
+</ul>
+<h2>How to load textures</h2>
+<h3>Getting the URL of the image</h3>
+<p>To load the texture, we need the URL of the image file.</p>
+<p>Because we are using Webpack, there are two ways of getting it.</p>
+<p>You can put the image texture in the <code spellcheck="false">/src/</code> folder and import it like you would import a JavaScript dependency:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">import</span> imageSource <span class="token keyword">from</span> <span class="token string">'./image.png'</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>imageSource<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Or you can put that image in the <code spellcheck="false">/static/</code> folder and access it just by adding the path of the image (without <code spellcheck="false">/static</code>) to the URL:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> imageSource <span class="token operator">=</span> <span class="token string">'/image.png'</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>imageSource<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Be careful, this <code spellcheck="false">/static/</code> folder only works because of the Webpack template's configuration. If you are using other types of bundler, you might need to adapt your project.</p>
+<p>We will use the <code spellcheck="false">/static/</code> folder technique for the rest of the course.</p>
+<h3>Loading the image</h3>
+<p>You can find the door textures we just saw in the <code spellcheck="false">/static/</code> folder, and there are multiple ways of loading them.</p>
+<h4>Using native JavaScript</h4>
+<p>With native JavaScript, first, you must create an <code spellcheck="false">Image</code> instance, listen to the <code spellcheck="false">load</code> event, and then change its <code spellcheck="false">src</code> property to start loading the image:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> image <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Image</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+image<span class="token punctuation">.</span><span class="token function-variable function">onload</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'image loaded'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+image<span class="token punctuation">.</span>src <span class="token operator">=</span> <span class="token string">'/textures/door/color.jpg'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You should see <code spellcheck="false">'image loaded'</code> appears in the console. As you can see, we set the source to <code spellcheck="false">'/textures/door/color.jpg'</code> without the <code spellcheck="false">/static</code> folder in the path.</p>
+<p>We cannot use that image directly. We need to create a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/textures/Texture">Texture</a> from that image first.</p>
+<p>This is because WebGL needs a very specific format that can be access by the GPU and also because some changes will be applied to the textures like the mipmapping but we will see more about that a little later. </p>
+<p>Create the texture with the <a target="_blank" href="https://threejs.org/docs/#api/en/textures/Texture">Texture</a> class:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> image <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Image</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+image<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'load'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+<span class="token keyword">const</span> texture <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Texture</span><span class="token punctuation">(</span>image<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+image<span class="token punctuation">.</span>src <span class="token operator">=</span> <span class="token string">'/textures/door/color.jpg'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>What we need to do now is use that <code spellcheck="false">texture</code> in the <code spellcheck="false">material</code>. Unfortunately, the <code spellcheck="false">texture</code> variable has been declared in a function and we can not access it outside of this function. This is a JavaScript limitation called scope.</p>
+<p>We could create the mesh inside the function, but there is a better solution consisting on creating the texture outside of the function and then updating it once the image is loaded by setting the texture <code spellcheck="false">needsUpdate</code> property to <code spellcheck="false">true</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> image <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Image</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> texture <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>Texture</span><span class="token punctuation">(</span>image<span class="token punctuation">)</span>
+image<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'load'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+texture<span class="token punctuation">.</span>needsUpdate <span class="token operator">=</span> <span class="token boolean">true</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+image<span class="token punctuation">.</span>src <span class="token operator">=</span> <span class="token string">'/textures/door/color.jpg'</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>While doing this, you can immediately use the <code spellcheck="false">texture</code> variable immediately, and the image will be transparent until it is loaded.</p>
+<p>To see the texture on the cube, replace the <code spellcheck="false">color</code> property by <code spellcheck="false">map</code> and use the <code spellcheck="false">texture</code> as value:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> map<span class="token operator">:</span> texture <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/step-01.png" src="./assets/lessons/11/step-01.png" width="1792" height="1120" alt="./assets/lessons/11/step-01.png" class="is-loaded"></span></p>
+<p>You should see the door texture on each side of your cube.</p>
+<h4>Using TextureLoader</h4>
+<p>The native JavaScript technique is not that complicated, but there is an even more straightforward way with <a target="_blank" href="https://threejs.org/docs/index.html#api/en/loaders/TextureLoader">TextureLoader</a>.</p>
+<p>Instantiate a variable using the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/loaders/TextureLoader">TextureLoader</a> class and use its <code spellcheck="false">.load(...)</code> method to create a texture:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> textureLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>TextureLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> texture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/door/color.jpg'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Internally, Three.js will do what it did before to load the image and update the texture once it's ready.</p>
+<p>You can load as many textures as you want with only one <a target="_blank" href="https://threejs.org/docs/index.html#api/en/loaders/TextureLoader">TextureLoader</a> instance.</p>
+<p>You can send 3 functions after the path. They will be called for the following events:</p>
+<ul>
+<li><code spellcheck="false">load</code> when the image loaded successfully</li>
+<li><code spellcheck="false">progress</code> when the loading is progressing</li>
+<li><code spellcheck="false">error</code> if something went wrong</li>
+</ul>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> textureLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>TextureLoader</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> texture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>
+<span class="token string">'/textures/door/color.jpg'</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'loading finished'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'loading progressing'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'loading error'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>If the texture doesn't work, it might be useful to add those callback functions to see what is happening and spot errors.</p>
+<h4>Using the LoadingManager</h4>
+<p>Finally, if you have multiple images to load and want to mutualize the events like being notified when all the images are loaded, you can use a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/loaders/managers/LoadingManager">LoadingManager</a>.</p>
+<p>Create an instance of the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/loaders/managers/LoadingManager">LoadingManager</a> class and pass it to the <a target="_blank" href="https://threejs.org/docs/index.html#api/en/loaders/TextureLoader">TextureLoader</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> loadingManager <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>LoadingManager</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> textureLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>TextureLoader</span><span class="token punctuation">(</span>loadingManager<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You can listen to the various events by replacing the following properties by your own functions <code spellcheck="false">onStart</code>, <code spellcheck="false">onLoad</code>, <code spellcheck="false">onProgress</code>, and <code spellcheck="false">onError</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> loadingManager <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>LoadingManager</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+loadingManager<span class="token punctuation">.</span><span class="token function-variable function">onStart</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'loading started'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+loadingManager<span class="token punctuation">.</span><span class="token function-variable function">onLoad</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'loading finished'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+loadingManager<span class="token punctuation">.</span><span class="token function-variable function">onProgress</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'loading progressing'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+loadingManager<span class="token punctuation">.</span><span class="token function-variable function">onError</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'loading error'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> textureLoader <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>TextureLoader</span><span class="token punctuation">(</span>loadingManager<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>You can now start loading all the images you need:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token comment">// ...</span>
+
+<span class="token keyword">const</span> colorTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/door/color.jpg'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> alphaTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/door/alpha.jpg'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> heightTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/door/height.jpg'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> normalTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/door/normal.jpg'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> ambientOcclusionTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/door/ambientOcclusion.jpg'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> metalnessTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/door/metalness.jpg'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> roughnessTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/door/roughness.jpg'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Has you can see here, we renamed the <code spellcheck="false">texture</code> variable <code spellcheck="false">colorTexture</code> so don't forget to change it in the <code spellcheck="false">material</code> too:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> material <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>MeshBasicMaterial</span><span class="token punctuation">(</span><span class="token punctuation">{</span> map<span class="token operator">:</span> colorTexture <span class="token punctuation">}</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The <a target="_blank" href="https://threejs.org/docs/index.html#api/en/loaders/managers/LoadingManager">LoadingManager</a> is very useful if you want to show a loader and hide it only when all the assets are loaded. As we will see in a future lesson, you can also use it with other types of loaders.</p>
+<h2>UV unwrapping</h2>
+<p>While it is quite logical how to place a texture on a cube, things can be a little trickier for other geometries.</p>
+<p>Try to replace your BoxGeometry with other geometries:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>BoxGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Or</span>
+<span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>SphereGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">32</span><span class="token punctuation">,</span> <span class="token number">32</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Or</span>
+<span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>ConeGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">32</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Or</span>
+<span class="token keyword">const</span> geometry <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">THREE<span class="token punctuation">.</span>TorusGeometry</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0.35</span><span class="token punctuation">,</span> <span class="token number">32</span><span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>As you can see, the texture is being stretched or squeezed in different ways to cover the geometry.</p>
+<p>That is called <strong>UV unwrapping</strong>. You can imagine that like unwrapping an origami or a candy wrap to make it flat. Each vertex will have a 2D coordinate on a flat (usually square) plane.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/uvUnwrapping1.png" src="./assets/lessons/11/uvUnwrapping1.png" width="1920" height="1080" alt="./assets/lessons/11/uvUnwrapping1.png" class="is-loaded"></span></p>
+<p>You can actually see those UV 2D coordinates in the <code spellcheck="false">geometry.attributes.uv</code> property:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>geometry<span class="token punctuation">.</span>attributes<span class="token punctuation">.</span>uv<span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>Those UV coordinates are generated by Three.js when you use the primitives. If you create your own geometry and want to apply a texture to it, you'll have to specify the UV coordinates.</p>
+<p>If you are making the geometry using a 3D software, you'll also have to do the UV unwrapping. </p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/uvUnwrapping2.png" src="./assets/lessons/11/uvUnwrapping2.png" width="1920" height="1080" alt="./assets/lessons/11/uvUnwrapping2.png" class="is-loaded"></span></p>
+<p>Don't worry; most 3D software also has auto unwrapping that should do the trick.</p>
+<h2>Transforming the texture</h2>
+<p>Let's get back to our cube with one texture and see what kind of transformations we can apply to that texture.</p>
+<h4>Repeat</h4>
+<p>You can repeat the texture using the <code spellcheck="false">repeat</code> property, which is a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/math/Vector2">Vector2</a>, meaning that it has <code spellcheck="false">x</code> and <code spellcheck="false">y</code> properties.</p>
+<p>Try to change these properties:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> colorTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/door/color.jpg'</span><span class="token punctuation">)</span>
+colorTexture<span class="token punctuation">.</span>repeat<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">2</span>
+colorTexture<span class="token punctuation">.</span>repeat<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token number">3</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/step-02.png" src="./assets/lessons/11/step-02.png" width="1792" height="1120" alt="./assets/lessons/11/step-02.png" class="is-loaded"></span></p>
+<p>As you can see, the texture is not repeating, but it is smaller, and the last pixel seems stretched.</p>
+<p>That is due to the texture not being set up to repeat itself by default. To change that, you have to update the <code spellcheck="false">wrapS</code> and <code spellcheck="false">wrapT</code> properties using the <code spellcheck="false">THREE.RepeatWrapping</code> constant.</p>
+<ul>
+<li><code spellcheck="false">wrapS</code> is for the <code spellcheck="false">x</code> axis</li>
+<li><code spellcheck="false">wrapT</code> is for the <code spellcheck="false">y</code> axis</li>
+</ul>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">colorTexture<span class="token punctuation">.</span>wrapS <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>RepeatWrapping
+colorTexture<span class="token punctuation">.</span>wrapT <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>RepeatWrapping</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/step-03.png" src="./assets/lessons/11/step-03.png" width="1792" height="1120" alt="./assets/lessons/11/step-03.png" class="is-loaded"></span></p>
+<p>You can also alternate the direction with <code spellcheck="false">THREE.MirroredRepeatWrapping</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">colorTexture<span class="token punctuation">.</span>wrapS <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>MirroredRepeatWrapping
+colorTexture<span class="token punctuation">.</span>wrapT <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>MirroredRepeatWrapping</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/step-04.png" src="./assets/lessons/11/step-04.png" width="1792" height="1120" alt="./assets/lessons/11/step-04.png" class="is-loaded"></span></p>
+<h4>Offset</h4>
+<p>You can offset the texture using the <code spellcheck="false">offset</code> property that is also a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/math/Vector2">Vector2</a> with <code spellcheck="false">x</code> and <code spellcheck="false">y</code> properties. Changing these will simply offset the UV coordinates:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">colorTexture<span class="token punctuation">.</span>offset<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">0.5</span>
+colorTexture<span class="token punctuation">.</span>offset<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token number">0.5</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/step-05.png" src="./assets/lessons/11/step-05.png" width="1792" height="1120" alt="./assets/lessons/11/step-05.png" class="is-loaded"></span></p>
+<h4>Rotation</h4>
+<p>You can rotate the texture using the <code spellcheck="false">rotation</code> property, which is a simple number corresponding to the angle in radians:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">colorTexture<span class="token punctuation">.</span>rotation <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">0.25</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/step-06.png" src="./assets/lessons/11/step-06.png" width="1792" height="1120" alt="./assets/lessons/11/step-06.png" class="is-loaded"></span></p>
+<p>If you remove the <code spellcheck="false">offset</code> and <code spellcheck="false">repeat</code> properties, you'll see that the rotation occurs around the bottom left corner of the cube's faces:</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/step-07.png" src="./assets/lessons/11/step-07.png" width="1792" height="1120" alt="./assets/lessons/11/step-07.png" class="is-loaded"></span></p>
+<p>That is, in fact, the <code spellcheck="false">0, 0</code> UV coordinates. If you want to change the pivot of that rotation, you can do it using the <code spellcheck="false">center</code> property which is also a <a target="_blank" href="https://threejs.org/docs/index.html#api/en/math/Vector2">Vector2</a>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">colorTexture<span class="token punctuation">.</span>rotation <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token constant">PI</span> <span class="token operator">*</span> <span class="token number">0.25</span>
+colorTexture<span class="token punctuation">.</span>center<span class="token punctuation">.</span>x <span class="token operator">=</span> <span class="token number">0.5</span>
+colorTexture<span class="token punctuation">.</span>center<span class="token punctuation">.</span>y <span class="token operator">=</span> <span class="token number">0.5</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>The texture will now rotate on its center.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/step-08.png" src="./assets/lessons/11/step-08.png" width="1792" height="1120" alt="./assets/lessons/11/step-08.png" class="is-loaded"></span></p>
+<h2>Filtering and Mipmapping</h2>
+<p>If you look at the cube's top face while this face is almost hidden, you'll see a very blurry texture.</p>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/step-09.png" src="./assets/lessons/11/step-09.png" width="1792" height="1120" alt="./assets/lessons/11/step-09.png" class="is-loaded"></span></p>
+<p>That is due to the filtering and the mipmapping.</p>
+<p>Mipmapping (or "mip mapping" with a space) is a technique that consists of creating half a smaller version of a texture again and again until you get a 1x1 texture. All those texture variations are sent to the GPU, and the GPU will choose the most appropriate version of the texture.</p>
+<p>Three.js and the GPU already handle all of this, and you can just set what filter algorithm to use. There are two types of filter algorithms: the minification filter and the magnification filter.</p>
+<h4>Minification filter</h4>
+<p>The minification filter happens when the pixels of texture are smaller than the pixels of the render. In other words, the texture is too big for the surface, it covers.</p>
+<p>You can change the minification filter of the texture using the <code spellcheck="false">minFilter</code> property.</p>
+<p>There are 6 possible values:</p>
+<ul>
+<li><code spellcheck="false">THREE.NearestFilter</code></li>
+<li><code spellcheck="false">THREE.LinearFilter</code></li>
+<li><code spellcheck="false">THREE.NearestMipmapNearestFilter</code></li>
+<li><code spellcheck="false">THREE.NearestMipmapLinearFilter</code></li>
+<li><code spellcheck="false">THREE.LinearMipmapNearestFilter</code></li>
+<li><code spellcheck="false">THREE.LinearMipmapLinearFilter</code></li>
+</ul>
+<p>The default is <code spellcheck="false">THREE.LinearMipmapLinearFilter</code>. If you are not satisfied with how your texture looks, you should try the other filters.</p>
+<p>We won't see each one, but we will test the <code spellcheck="false">THREE.NearestFilter</code>, which has a very different result:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">colorTexture<span class="token punctuation">.</span>minFilter <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>NearestFilter</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/11/step-10.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>If you're using a device with a pixel ratio above one, you won't see much of a difference. If not, place the camera where this face is almost hidden, and you should get more details and strange artifacts.</p>
+<p>If you test with the <code spellcheck="false">checkerboard-1024x1024.png</code> texture located in the <code spellcheck="false">/static/textures/</code> folder, you will see those artefacts more clearly:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> colorTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/checkerboard-1024x1024.png'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>
+            </p><div class="js-video video">
+                <video class="js-element element" width="1792" height="1120" controls="" src="./assets/lessons/11/step-11.mp4"></video>
+                <div class="js-overlay overlay"></div>
+                <div class="logo">
+                    <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 58.5 66.6" style="enable-background:new 0 0 58.5 66.6;" xml:space="preserve">
+                        <path class="face-1" d="M23.1,55.7l16.1-9.3c0,0,0,0,0,0c1.1-0.7,1.8-1.9,1.8-3.1l0.1-19.1L23.1,34.4V55.7z"></path>
+                        <path class="face-2" d="M21.3,10L2.9,20.5l18,10.2l18.4-10.5c0,0,0,0-0.1,0l-17.4-10C21.7,10.1,21.5,10.1,21.3,10z"></path>
+                        <path class="face-3" d="M1.8,46.7L18,56.6c0,0,0,0,0,0c0.3,0.2,0.5,0.3,0.8,0.3V34.5L0,23.8v19.7C0,44.9,0.7,46.1,1.8,46.7z"></path>
+                        <path class="triangle-1" d="M56.8,30.4l-11.4-6.6l-0.1,19.2l11.5-6.7c1-0.6,1.7-1.7,1.7-2.9C58.5,32.1,57.9,31,56.8,30.4z"></path>
+                        <path class="triangle-2" d="M0,50.7v12.6c0,1.2,0.6,2.3,1.7,2.9c0.5,0.3,1.1,0.5,1.7,0.5c0.6,0,1.2-0.2,1.7-0.5l10.4-6L0,50.7z"></path>
+                        <path class="triangle-3" d="M16.4,7L5.1,0.5c-1-0.6-2.3-0.6-3.4,0C0.6,1.1,0,2.2,0,3.4v13.2L16.4,7z"></path>
+                    </svg>
+                </div>
+            </div>
+        <p></p>
+<p>The artefacts you see are are called <a target="_blank" href="https://en.wikipedia.org/wiki/Moir%C3%A9_pattern">moiré patterns</a> and you usually want to avoid them.</p>
+<h4>Magnification filter</h4>
+<p>The magnification filter works just like the minification filter, but when the pixels of the texture are bigger than the render's pixels. In other words, the texture too small for the surface it covers.</p>
+<p>You can see the result using the <code spellcheck="false">checkerboard-8x8.png</code> texture also located in the <code spellcheck="false">static/textures/</code> folder:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> colorTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/checkerboard-8x8.png'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/step-12.png" src="./assets/lessons/11/step-12.png" width="1792" height="1120" alt="./assets/lessons/11/step-12.png" class="is-loaded"></span></p>
+<p>The texture gets all blurry because it's a very small texture on a very large surface.</p>
+<p>While you might think this looks awful, it is probably for the best. If the effect isn't too exaggerated, the user will probably not even notice it.</p>
+<p>You can change the magnification filter of the texture using the <code spellcheck="false">magFilter</code> property.</p>
+<p>There are only two possible values:</p>
+<ul>
+<li><code spellcheck="false">THREE.NearestFilter</code></li>
+<li><code spellcheck="false">THREE.LinearFilter</code></li>
+</ul>
+<p>The default is <code spellcheck="false">THREE.LinearFilter</code>.</p>
+<p>If you test the <code spellcheck="false">THREE.NearestFilter</code>, you'll see that the base image is preserved, and you get a pixelated texture:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">colorTexture<span class="token punctuation">.</span>magFilter <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>NearestFilter</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/step-13.png" src="./assets/lessons/11/step-13.png" width="1792" height="1120" alt="./assets/lessons/11/step-13.png" class="is-loaded"></span></p>
+<p>It can be advantageous if you're going for a Minecraft style with pixelated textures.</p>
+<p>You can see the result using the <code spellcheck="false">minecraft.png</code> texture located in the <code spellcheck="false">static/textures/</code> folder:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript"><span class="token keyword">const</span> colorTexture <span class="token operator">=</span> textureLoader<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token string">'/textures/minecraft.png'</span><span class="token punctuation">)</span></code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p class="is-image"><span class="image-inner"><img data-src="./assets/lessons/11/step-14.png" src="./assets/lessons/11/step-14.png" width="1792" height="1120" alt="./assets/lessons/11/step-14.png" class="is-loaded"></span></p>
+<p>One final word about all those filters is that <code spellcheck="false">THREE.NearestFilter</code> is cheaper than the other ones, and you should get better performances when using it.</p>
+<p>Only use the mipmaps for the <code spellcheck="false">minFilter</code> property. If you are using the <code spellcheck="false">THREE.NearestFilter</code>, you don't need the mipmaps, and you can deactivate them with <code spellcheck="false">colorTexture.generateMipmaps = false</code>:</p>
+<div class="code-toolbar"><pre contenteditable="" class=" language-javascript"><code spellcheck="false" class=" language-javascript">colorTexture<span class="token punctuation">.</span>generateMipmaps <span class="token operator">=</span> <span class="token boolean">false</span>
+colorTexture<span class="token punctuation">.</span>minFilter <span class="token operator">=</span> <span class="token constant">THREE</span><span class="token punctuation">.</span>NearestFilter</code></pre><div class="toolbar"><div class="toolbar-item"><span>JavaScript</span></div><div class="toolbar-item"><button>Copy</button></div></div></div>
+<p>That will slightly offload the GPU.</p>
+<h2>Texture format and optimisation</h2>
+<p>When you are preparing your textures, you must keep 3 crucial elements in mind:</p>
+<ul>
+<li>The weight</li>
+<li>The size (or the resolution)</li>
+<li>The data</li>
+</ul>
+<h4>The weight</h4>
+<p>Don't forget that the users going to your website will have to download those textures. You can use most of the types of images we use on the web like <code spellcheck="false">.jpg</code> (lossy compression but usually lighter) or <code spellcheck="false">.png</code> (lossless compression but usually heavier).</p>
+<p>Try to apply the usual methods to get an acceptable image but as light as possible. You can use compression websites like <a target="_blank" href="https://tinypng.com/">TinyPNG</a> (also works with jpg) or any software.</p>
+<h4>The size</h4>
+<p>Each pixel of the textures you are using will have to be stored on the GPU regardless of the image's weight. And like your hard drive, the GPU has storage limitations. It's even worse because the automatically generated mipmapping increases the number of pixels that have to be store.</p>
+<p>Try to reduce the size of your images as much as possible.</p>
+<p>If you remember what we said about the mipmapping, Three.js will produce a half smaller version of the texture repeatedly until it gets a 1x1 texture. Because of that, your texture width and height must be a power of 2. That is mandatory so that Three.js can divide the size of the texture by 2.</p>
+<p>Some examples: <code spellcheck="false">512x512</code>, <code spellcheck="false">1024x1024</code> or <code spellcheck="false">512x2048</code></p>
+<p><code spellcheck="false">512</code>, <code spellcheck="false">1024</code> and <code spellcheck="false">2048</code> can be divided by 2 until it reaches 1. </p>
+<p>If you are using a texture with a width or height different than a power of 2 value, Three.js will try to stretch it to the closest power of 2 number, which can have visually poor results, and you'll also get a warning in the console.</p>
+<h4>The data</h4>
+<p>We haven't tested it yet, because we have other things to see first, but textures support transparency. As you may know, jpg files don't have an alpha channel, so you might prefer using a png.</p>
+<p>Or you can use an alpha map, as we will see in a future lesson.</p>
+<p>If you are using a normal texture (the purple one), you will probably want to have the exact values for each pixel's red, green, and blue channels, or you might end up with visual glitches. For that, you'll need to use a png because its lossless compression will preserve the values.</p>
+<h2>Where to find textures</h2>
+<p>Unfortunately, it's always hard to find the perfect textures. There are many websites, but the textures aren't always right, and you may have to pay.</p>
+<p>It's probably a good idea to start by searching on the web. Here are some websites I frequently end up on.</p>
+<ul>
+<li><a target="_blank" href="http://poliigon.com/">poliigon.com</a></li>
+<li><a target="_blank" href="http://3dtextures.me/">3dtextures.me</a></li>
+<li><a target="_blank" href="http://arroway-textures.ch/">arroway-textures.ch</a></li>
+</ul>
+<p>Always make sure that you have the right to use the texture if it's not for personal usage.</p>
+<p>You can also create your own using photos and 2D software like Photoshop or even procedural textures with software like <a target="_blank" href="https://www.substance3d.com/products/substance-designer/">Substance Designer</a>.</p>
+    </section>
+</body>
+
+</html>
