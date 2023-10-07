@@ -102,6 +102,13 @@ class Game{
     chassisBody.addShape(chassisShape);
     chassisBody.position.set(0, 4, 0);
 
+    setTimeout(() => {
+      chassisBody.applyLocalForce(
+        new CANNON.Vec3(10000, 10000, 0), // 添加的力向量（大小和方向）
+        chassisBody.position // 被施加力的物体局部点
+      );
+    }, 3000);
+
     // ? 添加辅助线
     this.helper.addVisual(chassisBody, 'car');
     

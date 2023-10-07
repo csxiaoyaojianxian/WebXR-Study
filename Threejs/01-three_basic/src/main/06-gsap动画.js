@@ -1,6 +1,7 @@
 /**
  * gsap库设置各种动画效果
  * https://greensock.com/get-started/#easing
+ * https://greensock.com/docs/v3/Eases
  */
 
 import * as THREE from "three";
