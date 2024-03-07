@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<canvas class="webgl"></canvas>
+<script src="//cdn.bootcdn.net/ajax/libs/three.js/0.151.3/three.min.js"></script>
+<script>
+const scene = new THREE.Scene()
+const geometry = new THREE.BoxGeometry(1, 1, 1)
+const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
+const mesh = new THREE.Mesh(geometry, material)
+scene.add(mesh)
+const sizes = {
+  width: 800,
+  height: 600
+}
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height)
+camera.position.z = 3
+scene.add(camera)
+
+// 【1】 添加坐标轴助手
+const axesHelper = new THREE.AxesHelper(2)
+scene.add(axesHelper)
+
+/**
+ * 【2】 Vector3
+ * position / scale
+ * 使用 Vector3(x,y,z)
+ */
+mesh.position.x = 1
+mesh.position.y = 1
+mesh.position.z = 1
+// [length] 向量长度
+console.log(mesh.position.length()) // 1.7320508075688772
+// [distanceTo] 与另一个Vector3的距离
+console.log(mesh.position.distanceTo(camera.position)) // 2.449489742783178
+// [normalize] 归一化（将向量长度减少到1单位但保留其方向）
+console.log(mesh.position.normalize()) // {x: 0.5773502691896258, y: 0.5773502691896258, z: 0.5773502691896258}
+// 改值
+mesh.position.set(0.7, - 0.6, 1)
+
+/**
+ * 【3】 四元数 quaternion / lookAt
+ * rotation
+ * 不推荐使用 Euler(x,y,z)，虽然Euler更容易理解，但旋转顺序会导致问题，因此大多数引擎和 3D 软件使用 quaternion
+ * 可以使用四元数 quaternion 属性，也表示旋转，但以更数学的方式解决了顺序问题
+ * 
+ * 推荐使用 lookAt，Object3D实例最简单的旋转方式，自动将其-z轴旋转到提供的 Vector3 目标，不需要复杂的数学
+ */
+// mesh.rotation.x = Math.PI * 0.25
+// mesh.rotation.y = Math.PI * 0.25
+camera.lookAt(new THREE.Vector3(0, - 1, 0))
+camera.lookAt(mesh.position)
+
+/**
+ * 【4】 Group
+ * new THREE.Group()
+ */
+const group = new THREE.Group()
+group.scale.y = 2
+group.rotation.y = 0.2
+scene.add(group)
+
+group.add(mesh)
+
+
+
+const renderer = new THREE.WebGLRenderer({
+  canvas: document.querySelector('canvas.webgl')
+})
+renderer.setSize(sizes.width, sizes.height)
+renderer.render(scene, camera)
+
+</script>
+</body>
+</html>
