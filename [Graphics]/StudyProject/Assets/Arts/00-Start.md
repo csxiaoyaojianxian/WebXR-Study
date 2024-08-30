@@ -103,33 +103,3 @@ Shader "Unlit/MyShader"
 }
 ```
 
-## 10. 时间time
-
-`_Time.xyzw`
-
-```
-_Time.x (t/20)
-_Time.x (t)
-_Time.x (t*2)
-_Time.x (t*3)
-```
-
-
-
-```
-_MainUVSpeedX("MainUVSpeedX", float) = 0
-_MainUVSpeedY("MainUVSpeedY", float) = 0
-
-float _MainUVSpeedX,_MainUVSpeedY;
-
-
-!!!vert
-
-o.uv = v.uv*_MainTex_ST.xy+_MainTex_ST.zw+float2(_MainUVSpeedX,_MainUVSpeedY) * _Time.y;
-// 等价于
-o.uv = TRANSFORM_TEX(u.uv,_MainTex)+float2(_MainUVSpeedX,_MainUVSpeedY) * _Time.y;
-
-```
-
-
-
