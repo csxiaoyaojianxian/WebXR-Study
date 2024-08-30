@@ -18,13 +18,13 @@ COMMAND LINE ARGUMENTS:
 -name
 AssetImportWorker1
 -projectPath
-/Users/victorsun/workspace/unityTestProject/My project
+/Users/victorsun/workspace/github/WebXR-Study/[Graphics]/StudyProject
 -logFile
 Logs/AssetImportWorker1.log
 -srvPort
-59830
-Successfully changed project path to: /Users/victorsun/workspace/unityTestProject/My project
-/Users/victorsun/workspace/unityTestProject/My project
+56482
+Successfully changed project path to: /Users/victorsun/workspace/github/WebXR-Study/[Graphics]/StudyProject
+/Users/victorsun/workspace/github/WebXR-Study/[Graphics]/StudyProject
 [UnityMemory] Configuration Parameters - Can be set up in boot.config
     "memorysetup-bucket-allocator-granularity=16"
     "memorysetup-bucket-allocator-bucket-count=8"
@@ -58,18 +58,18 @@ Successfully changed project path to: /Users/victorsun/workspace/unityTestProjec
     "memorysetup-temp-allocator-size-gfx=262144"
 Player connection [8569977536]  Target information:
 
-Player connection [8569977536]  * "[IP] 30.19.156.13 [Port] 0 [Flags] 2 [Guid] 3857166535 [EditorId] 3857166535 [Version] 1048832 [Id] OSXEditor(0,VICTORSUN-MB3) [Debug] 1 [PackageName] OSXEditor [ProjectName] Editor" 
+Player connection [8569977536]  * "[IP] 30.19.156.12 [Port] 0 [Flags] 2 [Guid] 4009926585 [EditorId] 4009926585 [Version] 1048832 [Id] OSXEditor(0,VICTORSUN-MB3) [Debug] 1 [PackageName] OSXEditor [ProjectName] Editor" 
 
-Player connection [8569977536]  * "[IP] 192.168.255.10 [Port] 0 [Flags] 2 [Guid] 3857166535 [EditorId] 3857166535 [Version] 1048832 [Id] OSXEditor(0,VICTORSUN-MB3) [Debug] 1 [PackageName] OSXEditor [ProjectName] Editor" 
+Player connection [8569977536]  * "[IP] 192.168.255.10 [Port] 0 [Flags] 2 [Guid] 4009926585 [EditorId] 4009926585 [Version] 1048832 [Id] OSXEditor(0,VICTORSUN-MB3) [Debug] 1 [PackageName] OSXEditor [ProjectName] Editor" 
 
 Player connection [8569977536] Host joined multi-casting on [225.0.0.222:54997]...
 Player connection [8569977536] Host joined alternative multi-casting on [225.0.0.222:34997]...
 [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
-Refreshing native plugins compatible for Editor in 4.31 ms, found 2 plugins.
+Refreshing native plugins compatible for Editor in 5.87 ms, found 2 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 Initialize engine version: 2022.3.42f1 (2dcb6a0abc42)
 [Subsystems] Discovering subsystems at path /Applications/Unity/Hub/Editor/2022.3.42f1/Unity.app/Contents/Resources/UnitySubsystems
-[Subsystems] Discovering subsystems at path /Users/victorsun/workspace/unityTestProject/My project/Assets
+[Subsystems] Discovering subsystems at path /Users/victorsun/workspace/github/WebXR-Study/[Graphics]/StudyProject/Assets
 GfxDevice: creating device client; threaded=0; jobified=0
  preferred device: Apple M1 Pro (high power)
 Metal devices available: 1
@@ -80,46 +80,46 @@ Initialize mono
 Mono path[0] = '/Applications/Unity/Hub/Editor/2022.3.42f1/Unity.app/Contents/Managed'
 Mono path[1] = '/Applications/Unity/Hub/Editor/2022.3.42f1/Unity.app/Contents/MonoBleedingEdge/lib/mono/unityjit-macos'
 Mono config path = '/Applications/Unity/Hub/Editor/2022.3.42f1/Unity.app/Contents/MonoBleedingEdge/etc'
-Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56989
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56853
 Begin MonoManager ReloadAssembly
 Registering precompiled unity dll's ...
 Register platform support module: /Applications/Unity/Hub/Editor/2022.3.42f1/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll
 Register platform support module: /Applications/Unity/Hub/Editor/2022.3.42f1/Unity.app/Contents/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll
-Registered in 0.001487 seconds.
-- Loaded All Assemblies, in  0.221 seconds
+Registered in 0.001126 seconds.
+- Loaded All Assemblies, in  0.214 seconds
 Native extension for OSXStandalone target not found
 Native extension for WebGL target not found
 Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  0.164 seconds
-Domain Reload Profiling: 386ms
-	BeginReloadAssembly (54ms)
+- Finished resetting the current domain, in  0.159 seconds
+Domain Reload Profiling: 374ms
+	BeginReloadAssembly (50ms)
 		ExecutionOrderSort (0ms)
 		DisableScriptedObjects (0ms)
 		BackupInstance (0ms)
 		ReleaseScriptingObjects (0ms)
 		CreateAndSetChildDomain (0ms)
-	RebuildCommonClasses (25ms)
+	RebuildCommonClasses (26ms)
 	RebuildNativeTypeToScriptingClass (8ms)
-	initialDomainReloadingComplete (32ms)
-	LoadAllAssembliesAndSetupDomain (102ms)
-		LoadAssemblies (53ms)
+	initialDomainReloadingComplete (30ms)
+	LoadAllAssembliesAndSetupDomain (101ms)
+		LoadAssemblies (50ms)
 		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (102ms)
-			TypeCache.Refresh (100ms)
-				TypeCache.ScanAssembly (90ms)
+		AnalyzeDomain (99ms)
+			TypeCache.Refresh (98ms)
+				TypeCache.ScanAssembly (89ms)
 			ScanForSourceGeneratedMonoScriptInfo (0ms)
 			ResolveRequiredComponents (0ms)
-	FinalizeReload (164ms)
+	FinalizeReload (159ms)
 		ReleaseScriptCaches (0ms)
 		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (131ms)
+		SetupLoadedEditorAssemblies (127ms)
 			LogAssemblyErrors (0ms)
 			InitializePlatformSupportModulesInManaged (5ms)
 			SetLoadedEditorAssemblies (3ms)
 			RefreshPlugins (0ms)
 			BeforeProcessingInitializeOnLoad (1ms)
-			ProcessInitializeOnLoadAttributes (92ms)
-			ProcessInitializeOnLoadMethodAttributes (29ms)
+			ProcessInitializeOnLoadAttributes (90ms)
+			ProcessInitializeOnLoadMethodAttributes (28ms)
 			AfterProcessingInitializeOnLoad (0ms)
 			EditorAssembliesLoaded (0ms)
 		ExecutionOrderSort2 (0ms)
@@ -128,7 +128,7 @@ Domain Reload Profiling: 386ms
 Worker process is ready to serve import requests
 Caller must complete domain reload
 Begin MonoManager ReloadAssembly
-- Loaded All Assemblies, in  0.386 seconds
+- Loaded All Assemblies, in  0.390 seconds
 Native extension for OSXStandalone target not found
 Native extension for WebGL target not found
 Package Manager log level set to [2]
@@ -136,48 +136,48 @@ Package Manager log level set to [2]
 [Package Manager] UpmClient::Send -- Unable to send message (not connected to UPM process).
 [Package Manager] Cannot connect to Unity Package Manager local server
 Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  0.351 seconds
-Domain Reload Profiling: 739ms
-	BeginReloadAssembly (78ms)
+- Finished resetting the current domain, in  0.333 seconds
+Domain Reload Profiling: 725ms
+	BeginReloadAssembly (82ms)
 		ExecutionOrderSort (0ms)
 		DisableScriptedObjects (3ms)
 		BackupInstance (0ms)
 		ReleaseScriptingObjects (0ms)
-		CreateAndSetChildDomain (17ms)
-	RebuildCommonClasses (24ms)
+		CreateAndSetChildDomain (16ms)
+	RebuildCommonClasses (26ms)
 	RebuildNativeTypeToScriptingClass (8ms)
-	initialDomainReloadingComplete (24ms)
-	LoadAllAssembliesAndSetupDomain (253ms)
-		LoadAssemblies (168ms)
+	initialDomainReloadingComplete (22ms)
+	LoadAllAssembliesAndSetupDomain (254ms)
+		LoadAssemblies (172ms)
 		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (120ms)
-			TypeCache.Refresh (108ms)
-				TypeCache.ScanAssembly (96ms)
+		AnalyzeDomain (122ms)
+			TypeCache.Refresh (111ms)
+				TypeCache.ScanAssembly (98ms)
 			ScanForSourceGeneratedMonoScriptInfo (7ms)
 			ResolveRequiredComponents (3ms)
-	FinalizeReload (351ms)
+	FinalizeReload (334ms)
 		ReleaseScriptCaches (0ms)
 		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (257ms)
+		SetupLoadedEditorAssemblies (241ms)
 			LogAssemblyErrors (0ms)
 			InitializePlatformSupportModulesInManaged (4ms)
 			SetLoadedEditorAssemblies (3ms)
 			RefreshPlugins (0ms)
 			BeforeProcessingInitializeOnLoad (35ms)
-			ProcessInitializeOnLoadAttributes (202ms)
-			ProcessInitializeOnLoadMethodAttributes (13ms)
+			ProcessInitializeOnLoadAttributes (189ms)
+			ProcessInitializeOnLoadMethodAttributes (10ms)
 			AfterProcessingInitializeOnLoad (1ms)
 			EditorAssembliesLoaded (0ms)
 		ExecutionOrderSort2 (0ms)
 		AwakeInstancesAfterBackupRestoration (2ms)
 Launching external process: /Applications/Unity/Hub/Editor/2022.3.42f1/Unity.app/Contents/Tools/UnityShaderCompiler
 Launched and connected shader compiler UnityShaderCompiler after 0.03 seconds
-Refreshing native plugins compatible for Editor in 0.75 ms, found 2 plugins.
+Refreshing native plugins compatible for Editor in 0.84 ms, found 2 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 3090 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 19 unused Assets / (48.5 KB). Loaded Objects now: 3556.
-Memory consumption went from 123.9 MB to 123.9 MB.
-Total: 2.545083 ms (FindLiveObjects: 0.086667 ms CreateObjectMapping: 0.035250 ms MarkObjects: 2.323125 ms  DeleteObjects: 0.099333 ms)
+Unloading 3096 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 19 unused Assets / (48.5 KB). Loaded Objects now: 3562.
+Memory consumption went from 125.6 MB to 125.5 MB.
+Total: 2.241834 ms (FindLiveObjects: 0.117875 ms CreateObjectMapping: 0.035875 ms MarkObjects: 2.005916 ms  DeleteObjects: 0.081584 ms)
 
 AssetImportParameters requested are different than current active one (requested -> active):
   custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
@@ -192,49 +192,3 @@ AssetImportParameters requested are different than current active one (requested
   custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
   custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
   custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
-========================================================================
-Received Import Request.
-  Time since last request: 78066.938237 seconds.
-  path: Assets/Arts/FrameWork.shader
-  artifactKey: Guid(0379255ff351d4bde8f2d39aa58b4aee) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Arts/FrameWork.shader using Guid(0379255ff351d4bde8f2d39aa58b4aee) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
- -> (artifact id: '7bad03bf8fb38e3bc5444b4e6bcc024f') in 0.006013 seconds
-Number of updated asset objects reloaded before import = 1
-Number of asset objects unloaded after import = 0
-========================================================================
-Received Import Request.
-  Time since last request: 17581.253842 seconds.
-  path: Assets/Arts/qb.jpg
-  artifactKey: Guid(65acb0d2f80a24d9a9067237dbbf4aba) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Arts/qb.jpg using Guid(65acb0d2f80a24d9a9067237dbbf4aba) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
-[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
- -> (artifact id: '50f5c638f1d0968dd7c5d4f31521eede') in 0.050386 seconds
-Number of updated asset objects reloaded before import = 1
-Number of asset objects unloaded after import = 2
-========================================================================
-Received Import Request.
-  Time since last request: 46311.616980 seconds.
-  path: Assets/Arts/CharacterUnlit 1.shader
-  artifactKey: Guid(f7f346c9791f247afbe98c344ec46a96) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Arts/CharacterUnlit 1.shader using Guid(f7f346c9791f247afbe98c344ec46a96) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
- -> (artifact id: '37740090bc596506757f9efe7a8f9377') in 0.002491 seconds
-Number of updated asset objects reloaded before import = 0
-Number of asset objects unloaded after import = 1
-========================================================================
-Received Import Request.
-  Time since last request: 10812.068931 seconds.
-  path: Assets/Arts/01-FrameWork.shader
-  artifactKey: Guid(0379255ff351d4bde8f2d39aa58b4aee) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Arts/01-FrameWork.shader using Guid(0379255ff351d4bde8f2d39aa58b4aee) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
- -> (artifact id: 'a62098eceb9b71e6b81c152209bdfab7') in 0.001550 seconds
-Number of updated asset objects reloaded before import = 1
-Number of asset objects unloaded after import = 0
-========================================================================
-Received Import Request.
-  Time since last request: 8.103947 seconds.
-  path: Assets/Arts/02-Properties.shader
-  artifactKey: Guid(5f02c715a507f4cf5b222465156867bb) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Arts/02-Properties.shader using Guid(5f02c715a507f4cf5b222465156867bb) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
- -> (artifact id: '3e1930d262d83eaf30d25a438944e832') in 0.000900 seconds
-Number of updated asset objects reloaded before import = 0
-Number of asset objects unloaded after import = 1
