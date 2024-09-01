@@ -1,4 +1,4 @@
-// [变体的使用]
+// [ multi_compile 变体的使用 ] 参考结合12-shader_feature
 // #pragma multi_compile _ NAME
 Shader "Unlit/variants"
 {
@@ -20,7 +20,7 @@ Shader "Unlit/variants"
             #pragma fragment frag
             // pragma编译指令增加两个变体_和_DISSOLVEENABLED_ON，可通过添加 _ 来定义一个默认空的变体
             // 在unity-inspector的shader面板中能看到compiled code包含两个variants变体
-            // 变体名必须为全大写，此处名为 _DISSOLVEENABLED_ON 是为了和 properties 中的变量自动关联，除了开发用代码打开变体，美术也可以在面板中通过勾选打开变体
+            // 变体名必须为全大写，此处名为 _DISSOLVEENABLED_ON 且带 _ON 结尾，是为了和 properties 中的变量自动关联，除了开发用代码打开变体，美术也可以在面板中通过勾选打开变体
             #pragma multi_compile _ _DISSOLVEENABLED_ON
             #include "UnityCG.cginc"
 

@@ -4,10 +4,10 @@
 Unlit: 不受灯光影响的
 
 ## 2. 数据类型
-`float` 32位精度  
-`half` 16位精度  
-`fixed` -2～2  
-`integer` 整型
+`float` 32位精度，用于世界坐标、UV坐标等  
+`half` 16位精度，用于本地坐标、方向向量等  
+`fixed` 16位精度，-2～2，用于常规的颜色与贴图等  
+`integer` 整型，用于循环与数组的索引
 
 1. PC浮点数都要用float，移动端可选half和fixed提升性能
 2. 类型+数字，如 `float2,float3,float4` 代表多个float来表示2,3,4维变量

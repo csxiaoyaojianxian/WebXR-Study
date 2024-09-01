@@ -10,14 +10,17 @@ Shader "victor/FrameWork"
 			#pragma fragment frag
 			#include "UnityCG.cginc"
 
+			// 获取模型本身数据的结构
 			struct appdata
 			{
+				// POSITION 表示顶点在模型空间中的位置
 				float4 vertex	:POSITION;
 				float4 color    :COLOR;
 			};
 
 			struct v2f
 			{
+				// SV_POSITION 表示顶点在屏幕空间中的位置
 				float4 pos	:SV_POSITION;
 			};
 
