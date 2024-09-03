@@ -2814,3 +2814,346 @@ Start importing Assets/Arts/17.mat using Guid(a7da76460098c4f55a11bf7ff3a12b67) 
  -> (artifact id: 'a11187f62e36fc83bd282ad92cc89ea1') in 0.088040 seconds
 Number of updated asset objects reloaded before import = 1
 Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 107595.815374 seconds.
+  path: Assets/Arts/17.mat
+  artifactKey: Guid(a7da76460098c4f55a11bf7ff3a12b67) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/17.mat using Guid(a7da76460098c4f55a11bf7ff3a12b67) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: 'fbeea96981e1044d0fbb346ae942c0fc') in 0.021865 seconds
+Number of updated asset objects reloaded before import = 1
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 2192.274545 seconds.
+  path: Assets/Arts/18-HeatDistort2.shader
+  artifactKey: Guid(9781769d2a4984a6e869979292c8f25c) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18-HeatDistort2.shader using Guid(9781769d2a4984a6e869979292c8f25c) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: 'dd6f9bebf6f6242b6596af26edb06b42') in 0.001028 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 1
+========================================================================
+Received Import Request.
+  Time since last request: 9.311945 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+Shader error in 'Unlit/HeatDistort2': syntax error: unexpected token 'struct' at Assets/Arts/18-HeatDistort2.shader(28) (on metal)
+
+Compiling Subshader: 0, Pass: <Unnamed Pass 1>, Vertex program with <no keywords>
+Platform defines: SHADER_API_DESKTOP UNITY_ENABLE_DETAIL_NORMALMAP UNITY_ENABLE_REFLECTION_BUFFERS UNITY_FRAMEBUFFER_FETCH_AVAILABLE UNITY_LIGHTMAP_FULL_HDR UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_NEEDS_RENDERPASS_FBFETCH_FALLBACK UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BLENDING UNITY_SPECCUBE_BOX_PROJECTION UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS
+Disabled keywords: SHADER_API_GLES30 UNITY_ASTC_NORMALMAP_ENCODING UNITY_COLORSPACE_GAMMA UNITY_HALF_PRECISION_FRAGMENT_SHADER_REGISTERS UNITY_HARDWARE_TIER1 UNITY_HARDWARE_TIER2 UNITY_HARDWARE_TIER3 UNITY_LIGHTMAP_DLDR_ENCODING UNITY_LIGHTMAP_RGBM_ENCODING UNITY_METAL_SHADOWS_USE_POINT_FILTERING UNITY_NO_DXT5nm UNITY_NO_FULL_STANDARD_SHADER UNITY_NO_SCREENSPACE_SHADOWS UNITY_PBS_USE_BRDF2 UNITY_PBS_USE_BRDF3 UNITY_PRETRANSFORM_TO_DISPLAY_ORIENTATION UNITY_UNIFIED_SHADER_PRECISION_MODEL UNITY_VIRTUAL_TEXTURING
+Shader error in 'Unlit/HeatDistort2': syntax error: unexpected token 'struct' at Assets/Arts/18-HeatDistort2.shader(28) (on metal)
+
+Compiling Subshader: 0, Pass: <Unnamed Pass 1>, Vertex program with <no keywords>
+Platform defines: SHADER_API_DESKTOP UNITY_ENABLE_DETAIL_NORMALMAP UNITY_ENABLE_REFLECTION_BUFFERS UNITY_FRAMEBUFFER_FETCH_AVAILABLE UNITY_LIGHTMAP_FULL_HDR UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_NEEDS_RENDERPASS_FBFETCH_FALLBACK UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BLENDING UNITY_SPECCUBE_BOX_PROJECTION UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS
+Disabled keywords: SHADER_API_GLES30 UNITY_ASTC_NORMALMAP_ENCODING UNITY_COLORSPACE_GAMMA UNITY_HALF_PRECISION_FRAGMENT_SHADER_REGISTERS UNITY_HARDWARE_TIER1 UNITY_HARDWARE_TIER2 UNITY_HARDWARE_TIER3 UNITY_LIGHTMAP_DLDR_ENCODING UNITY_LIGHTMAP_RGBM_ENCODING UNITY_METAL_SHADOWS_USE_POINT_FILTERING UNITY_NO_DXT5nm UNITY_NO_FULL_STANDARD_SHADER UNITY_NO_SCREENSPACE_SHADOWS UNITY_PBS_USE_BRDF2 UNITY_PBS_USE_BRDF3 UNITY_PRETRANSFORM_TO_DISPLAY_ORIENTATION UNITY_UNIFIED_SHADER_PRECISION_MODEL UNITY_VIRTUAL_TEXTURING
+ -> (artifact id: '1ad00189d88abf8dcfd1a8fe46713142') in 0.015259 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 69.138198 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+Shader error in 'Unlit/HeatDistort2': syntax error: unexpected token 'struct' at Assets/Arts/18-HeatDistort2.shader(28) (on metal)
+
+Compiling Subshader: 0, Pass: <Unnamed Pass 1>, Vertex program with <no keywords>
+Platform defines: SHADER_API_DESKTOP UNITY_ENABLE_DETAIL_NORMALMAP UNITY_ENABLE_REFLECTION_BUFFERS UNITY_FRAMEBUFFER_FETCH_AVAILABLE UNITY_LIGHTMAP_FULL_HDR UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_NEEDS_RENDERPASS_FBFETCH_FALLBACK UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BLENDING UNITY_SPECCUBE_BOX_PROJECTION UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS
+Disabled keywords: SHADER_API_GLES30 UNITY_ASTC_NORMALMAP_ENCODING UNITY_COLORSPACE_GAMMA UNITY_HALF_PRECISION_FRAGMENT_SHADER_REGISTERS UNITY_HARDWARE_TIER1 UNITY_HARDWARE_TIER2 UNITY_HARDWARE_TIER3 UNITY_LIGHTMAP_DLDR_ENCODING UNITY_LIGHTMAP_RGBM_ENCODING UNITY_METAL_SHADOWS_USE_POINT_FILTERING UNITY_NO_DXT5nm UNITY_NO_FULL_STANDARD_SHADER UNITY_NO_SCREENSPACE_SHADOWS UNITY_PBS_USE_BRDF2 UNITY_PBS_USE_BRDF3 UNITY_PRETRANSFORM_TO_DISPLAY_ORIENTATION UNITY_UNIFIED_SHADER_PRECISION_MODEL UNITY_VIRTUAL_TEXTURING
+Shader error in 'Unlit/HeatDistort2': syntax error: unexpected token 'struct' at Assets/Arts/18-HeatDistort2.shader(28) (on metal)
+
+Compiling Subshader: 0, Pass: <Unnamed Pass 1>, Vertex program with <no keywords>
+Platform defines: SHADER_API_DESKTOP UNITY_ENABLE_DETAIL_NORMALMAP UNITY_ENABLE_REFLECTION_BUFFERS UNITY_FRAMEBUFFER_FETCH_AVAILABLE UNITY_LIGHTMAP_FULL_HDR UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_NEEDS_RENDERPASS_FBFETCH_FALLBACK UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BLENDING UNITY_SPECCUBE_BOX_PROJECTION UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS
+Disabled keywords: SHADER_API_GLES30 UNITY_ASTC_NORMALMAP_ENCODING UNITY_COLORSPACE_GAMMA UNITY_HALF_PRECISION_FRAGMENT_SHADER_REGISTERS UNITY_HARDWARE_TIER1 UNITY_HARDWARE_TIER2 UNITY_HARDWARE_TIER3 UNITY_LIGHTMAP_DLDR_ENCODING UNITY_LIGHTMAP_RGBM_ENCODING UNITY_METAL_SHADOWS_USE_POINT_FILTERING UNITY_NO_DXT5nm UNITY_NO_FULL_STANDARD_SHADER UNITY_NO_SCREENSPACE_SHADOWS UNITY_PBS_USE_BRDF2 UNITY_PBS_USE_BRDF3 UNITY_PRETRANSFORM_TO_DISPLAY_ORIENTATION UNITY_UNIFIED_SHADER_PRECISION_MODEL UNITY_VIRTUAL_TEXTURING
+ -> (artifact id: '59a3efe1f432b98f32de42b8f56c75c7') in 0.013559 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 71.604517 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+Shader error in 'Unlit/HeatDistort2': invalid subscript 'pos' at Assets/Arts/18-HeatDistort2.shader(45) (on metal)
+
+Compiling Subshader: 0, Pass: <Unnamed Pass 1>, Vertex program with <no keywords>
+Platform defines: SHADER_API_DESKTOP UNITY_ENABLE_DETAIL_NORMALMAP UNITY_ENABLE_REFLECTION_BUFFERS UNITY_FRAMEBUFFER_FETCH_AVAILABLE UNITY_LIGHTMAP_FULL_HDR UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_NEEDS_RENDERPASS_FBFETCH_FALLBACK UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BLENDING UNITY_SPECCUBE_BOX_PROJECTION UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS
+Disabled keywords: SHADER_API_GLES30 UNITY_ASTC_NORMALMAP_ENCODING UNITY_COLORSPACE_GAMMA UNITY_HALF_PRECISION_FRAGMENT_SHADER_REGISTERS UNITY_HARDWARE_TIER1 UNITY_HARDWARE_TIER2 UNITY_HARDWARE_TIER3 UNITY_LIGHTMAP_DLDR_ENCODING UNITY_LIGHTMAP_RGBM_ENCODING UNITY_METAL_SHADOWS_USE_POINT_FILTERING UNITY_NO_DXT5nm UNITY_NO_FULL_STANDARD_SHADER UNITY_NO_SCREENSPACE_SHADOWS UNITY_PBS_USE_BRDF2 UNITY_PBS_USE_BRDF3 UNITY_PRETRANSFORM_TO_DISPLAY_ORIENTATION UNITY_UNIFIED_SHADER_PRECISION_MODEL UNITY_VIRTUAL_TEXTURING
+Shader error in 'Unlit/HeatDistort2': invalid subscript 'pos' at Assets/Arts/18-HeatDistort2.shader(45) (on metal)
+
+Compiling Subshader: 0, Pass: <Unnamed Pass 1>, Vertex program with <no keywords>
+Platform defines: SHADER_API_DESKTOP UNITY_ENABLE_DETAIL_NORMALMAP UNITY_ENABLE_REFLECTION_BUFFERS UNITY_FRAMEBUFFER_FETCH_AVAILABLE UNITY_LIGHTMAP_FULL_HDR UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_NEEDS_RENDERPASS_FBFETCH_FALLBACK UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BLENDING UNITY_SPECCUBE_BOX_PROJECTION UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS
+Disabled keywords: SHADER_API_GLES30 UNITY_ASTC_NORMALMAP_ENCODING UNITY_COLORSPACE_GAMMA UNITY_HALF_PRECISION_FRAGMENT_SHADER_REGISTERS UNITY_HARDWARE_TIER1 UNITY_HARDWARE_TIER2 UNITY_HARDWARE_TIER3 UNITY_LIGHTMAP_DLDR_ENCODING UNITY_LIGHTMAP_RGBM_ENCODING UNITY_METAL_SHADOWS_USE_POINT_FILTERING UNITY_NO_DXT5nm UNITY_NO_FULL_STANDARD_SHADER UNITY_NO_SCREENSPACE_SHADOWS UNITY_PBS_USE_BRDF2 UNITY_PBS_USE_BRDF3 UNITY_PRETRANSFORM_TO_DISPLAY_ORIENTATION UNITY_UNIFIED_SHADER_PRECISION_MODEL UNITY_VIRTUAL_TEXTURING
+ -> (artifact id: 'c88d930335792bc07a162c099a4a59b7') in 0.013095 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 3.526431 seconds.
+  path: Assets/Arts/18-HeatDistort2.shader
+  artifactKey: Guid(9781769d2a4984a6e869979292c8f25c) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18-HeatDistort2.shader using Guid(9781769d2a4984a6e869979292c8f25c) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '3fd1068c5815f86515a7f6d241a9c04a') in 0.000752 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 1
+========================================================================
+Received Import Request.
+  Time since last request: 14.555003 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '6fdfcd3568f2b4ae6ab6ffe4ab52fecb') in 0.108830 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 30.356233 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '83f43d1a13c6b031d481a55382401ace') in 0.046807 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 7.689692 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '49cc486d2457e1378d1f2cbdf223824d') in 0.046479 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 34.252690 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '272e6f67e836bd932e76d01edc2d53e9') in 0.046451 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 75.254150 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: 'f85531d846f28b62be068ce28c9c0213') in 0.046987 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 18.194481 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '0d07757f95f946d1a3489c886af8255b') in 0.047401 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 84.071645 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: 'c4316a325d362aea6b03270e58831e69') in 0.047630 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 10.075315 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: 'cb87c16d30e12ffe41179d1b411ad29c') in 0.046301 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 127.789126 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+Shader error in 'Unlit/HeatDistort2': redefinition of 'grabTex' at Assets/Arts/18-HeatDistort2.shader(55) (on metal)
+
+Compiling Subshader: 0, Pass: <Unnamed Pass 1>, Vertex program with <no keywords>
+Platform defines: SHADER_API_DESKTOP UNITY_ENABLE_DETAIL_NORMALMAP UNITY_ENABLE_REFLECTION_BUFFERS UNITY_FRAMEBUFFER_FETCH_AVAILABLE UNITY_LIGHTMAP_FULL_HDR UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_NEEDS_RENDERPASS_FBFETCH_FALLBACK UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BLENDING UNITY_SPECCUBE_BOX_PROJECTION UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS
+Disabled keywords: SHADER_API_GLES30 UNITY_ASTC_NORMALMAP_ENCODING UNITY_COLORSPACE_GAMMA UNITY_HALF_PRECISION_FRAGMENT_SHADER_REGISTERS UNITY_HARDWARE_TIER1 UNITY_HARDWARE_TIER2 UNITY_HARDWARE_TIER3 UNITY_LIGHTMAP_DLDR_ENCODING UNITY_LIGHTMAP_RGBM_ENCODING UNITY_METAL_SHADOWS_USE_POINT_FILTERING UNITY_NO_DXT5nm UNITY_NO_FULL_STANDARD_SHADER UNITY_NO_SCREENSPACE_SHADOWS UNITY_PBS_USE_BRDF2 UNITY_PBS_USE_BRDF3 UNITY_PRETRANSFORM_TO_DISPLAY_ORIENTATION UNITY_UNIFIED_SHADER_PRECISION_MODEL UNITY_VIRTUAL_TEXTURING
+Shader error in 'Unlit/HeatDistort2': redefinition of 'grabTex' at Assets/Arts/18-HeatDistort2.shader(55) (on metal)
+
+Compiling Subshader: 0, Pass: <Unnamed Pass 1>, Vertex program with <no keywords>
+Platform defines: SHADER_API_DESKTOP UNITY_ENABLE_DETAIL_NORMALMAP UNITY_ENABLE_REFLECTION_BUFFERS UNITY_FRAMEBUFFER_FETCH_AVAILABLE UNITY_LIGHTMAP_FULL_HDR UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_NEEDS_RENDERPASS_FBFETCH_FALLBACK UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BLENDING UNITY_SPECCUBE_BOX_PROJECTION UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS
+Disabled keywords: SHADER_API_GLES30 UNITY_ASTC_NORMALMAP_ENCODING UNITY_COLORSPACE_GAMMA UNITY_HALF_PRECISION_FRAGMENT_SHADER_REGISTERS UNITY_HARDWARE_TIER1 UNITY_HARDWARE_TIER2 UNITY_HARDWARE_TIER3 UNITY_LIGHTMAP_DLDR_ENCODING UNITY_LIGHTMAP_RGBM_ENCODING UNITY_METAL_SHADOWS_USE_POINT_FILTERING UNITY_NO_DXT5nm UNITY_NO_FULL_STANDARD_SHADER UNITY_NO_SCREENSPACE_SHADOWS UNITY_PBS_USE_BRDF2 UNITY_PBS_USE_BRDF3 UNITY_PRETRANSFORM_TO_DISPLAY_ORIENTATION UNITY_UNIFIED_SHADER_PRECISION_MODEL UNITY_VIRTUAL_TEXTURING
+ -> (artifact id: 'f258a226f000e7a1540789c9f90a71c8') in 0.012934 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 5.275580 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '50fa8cccd93909014e8c874a10736505') in 0.037623 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 680.755819 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+Shader error in 'Unlit/HeatDistort2': 'tex2Dproj': no matching 2 parameter intrinsic function; Possible intrinsic functions are: tex2Dproj(sampler2D, float4|half4|min10float4|min16float4) at Assets/Arts/18-HeatDistort2.shader(61) (on metal)
+
+Compiling Subshader: 0, Pass: <Unnamed Pass 1>, Vertex program with <no keywords>
+Platform defines: SHADER_API_DESKTOP UNITY_ENABLE_DETAIL_NORMALMAP UNITY_ENABLE_REFLECTION_BUFFERS UNITY_FRAMEBUFFER_FETCH_AVAILABLE UNITY_LIGHTMAP_FULL_HDR UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_NEEDS_RENDERPASS_FBFETCH_FALLBACK UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BLENDING UNITY_SPECCUBE_BOX_PROJECTION UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS
+Disabled keywords: SHADER_API_GLES30 UNITY_ASTC_NORMALMAP_ENCODING UNITY_COLORSPACE_GAMMA UNITY_HALF_PRECISION_FRAGMENT_SHADER_REGISTERS UNITY_HARDWARE_TIER1 UNITY_HARDWARE_TIER2 UNITY_HARDWARE_TIER3 UNITY_LIGHTMAP_DLDR_ENCODING UNITY_LIGHTMAP_RGBM_ENCODING UNITY_METAL_SHADOWS_USE_POINT_FILTERING UNITY_NO_DXT5nm UNITY_NO_FULL_STANDARD_SHADER UNITY_NO_SCREENSPACE_SHADOWS UNITY_PBS_USE_BRDF2 UNITY_PBS_USE_BRDF3 UNITY_PRETRANSFORM_TO_DISPLAY_ORIENTATION UNITY_UNIFIED_SHADER_PRECISION_MODEL UNITY_VIRTUAL_TEXTURING
+Shader error in 'Unlit/HeatDistort2': 'tex2Dproj': no matching 2 parameter intrinsic function; Possible intrinsic functions are: tex2Dproj(sampler2D, float4|half4|min10float4|min16float4) at Assets/Arts/18-HeatDistort2.shader(61) (on metal)
+
+Compiling Subshader: 0, Pass: <Unnamed Pass 1>, Vertex program with <no keywords>
+Platform defines: SHADER_API_DESKTOP UNITY_ENABLE_DETAIL_NORMALMAP UNITY_ENABLE_REFLECTION_BUFFERS UNITY_FRAMEBUFFER_FETCH_AVAILABLE UNITY_LIGHTMAP_FULL_HDR UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_NEEDS_RENDERPASS_FBFETCH_FALLBACK UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BLENDING UNITY_SPECCUBE_BOX_PROJECTION UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS
+Disabled keywords: SHADER_API_GLES30 UNITY_ASTC_NORMALMAP_ENCODING UNITY_COLORSPACE_GAMMA UNITY_HALF_PRECISION_FRAGMENT_SHADER_REGISTERS UNITY_HARDWARE_TIER1 UNITY_HARDWARE_TIER2 UNITY_HARDWARE_TIER3 UNITY_LIGHTMAP_DLDR_ENCODING UNITY_LIGHTMAP_RGBM_ENCODING UNITY_METAL_SHADOWS_USE_POINT_FILTERING UNITY_NO_DXT5nm UNITY_NO_FULL_STANDARD_SHADER UNITY_NO_SCREENSPACE_SHADOWS UNITY_PBS_USE_BRDF2 UNITY_PBS_USE_BRDF3 UNITY_PRETRANSFORM_TO_DISPLAY_ORIENTATION UNITY_UNIFIED_SHADER_PRECISION_MODEL UNITY_VIRTUAL_TEXTURING
+ -> (artifact id: 'c77f9666c54c00f6e3e40eebf321772a') in 0.017280 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 4.177347 seconds.
+  path: Assets/Arts/18-HeatDistort2.shader
+  artifactKey: Guid(9781769d2a4984a6e869979292c8f25c) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18-HeatDistort2.shader using Guid(9781769d2a4984a6e869979292c8f25c) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '0b07a1344cbf553370f9cd240a493532') in 0.000737 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 1
+========================================================================
+Received Import Request.
+  Time since last request: 29.495626 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '6798b55a50ebe0645f8ecf86a2b5e019') in 0.057248 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 8.169059 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '0fc806095b239d15fb0392931af48087') in 0.051417 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 1873.290189 seconds.
+  path: Assets/Arts/17-HeatDistort.shader
+  artifactKey: Guid(fcedff6201f134220879e21ec7dd481e) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/17-HeatDistort.shader using Guid(fcedff6201f134220879e21ec7dd481e) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '373adf208ea76f83035bc2c7c2dc8c5d') in 0.000535 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 1.897821 seconds.
+  path: Assets/Arts/18-HeatDistort2.shader
+  artifactKey: Guid(9781769d2a4984a6e869979292c8f25c) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18-HeatDistort2.shader using Guid(9781769d2a4984a6e869979292c8f25c) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '3254cbb64e175c1e595e95eeff50a544') in 0.000895 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 1
+========================================================================
+Received Import Request.
+  Time since last request: 11.631790 seconds.
+  path: Assets/Arts/19-HeatDistort3.shader
+  artifactKey: Guid(7dc00333bf2bf4b95a6bfdd3f8238755) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/19-HeatDistort3.shader using Guid(7dc00333bf2bf4b95a6bfdd3f8238755) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '445219394b8bf54aee826e6af1b6761c') in 0.000851 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 1
+========================================================================
+Received Import Request.
+  Time since last request: 91.609521 seconds.
+  path: Assets/Arts/18.mat
+  artifactKey: Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/18.mat using Guid(77d8b77f02ecf433eb08cee8c5cbed3d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: 'fb23a98046b49e980a5de49f5d8f1de2') in 0.006097 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time since last request: 1832.444767 seconds.
+  path: Assets/Arts/19-HeatDistort3.shader
+  artifactKey: Guid(7dc00333bf2bf4b95a6bfdd3f8238755) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/19-HeatDistort3.shader using Guid(7dc00333bf2bf4b95a6bfdd3f8238755) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: 'e1dba9d31fa66321c8e540aa69c2306c') in 0.003647 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 1
+========================================================================
+Received Import Request.
+  Time since last request: 8.065840 seconds.
+  path: Assets/Arts/19.mat
+  artifactKey: Guid(63c2f4969ad774aeb96f9ae7998b72cd) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/19.mat using Guid(63c2f4969ad774aeb96f9ae7998b72cd) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: 'f5ff11723db92cd9534177b7c9d2c7c2') in 0.057180 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 17.005289 seconds.
+  path: Assets/Arts/19.mat
+  artifactKey: Guid(63c2f4969ad774aeb96f9ae7998b72cd) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/19.mat using Guid(63c2f4969ad774aeb96f9ae7998b72cd) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '01e5dad7f0c3d2214af58d7befcb663a') in 0.004884 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 46.786062 seconds.
+  path: Assets/Arts/19.mat
+  artifactKey: Guid(63c2f4969ad774aeb96f9ae7998b72cd) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/19.mat using Guid(63c2f4969ad774aeb96f9ae7998b72cd) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '2433e26319cd0dd9e46544dd56ef0c4a') in 0.006000 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time since last request: 30.566183 seconds.
+  path: Assets/Arts/19.mat
+  artifactKey: Guid(63c2f4969ad774aeb96f9ae7998b72cd) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/19.mat using Guid(63c2f4969ad774aeb96f9ae7998b72cd) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '39cdc40c2378c85e1fd978b5f9fa7561') in 0.004921 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time since last request: 62.429387 seconds.
+  path: Assets/Arts/19.mat
+  artifactKey: Guid(63c2f4969ad774aeb96f9ae7998b72cd) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Arts/19.mat using Guid(63c2f4969ad774aeb96f9ae7998b72cd) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 10 workers.
+ -> (artifact id: '45c5f705b146f2b53214cdc5a50f0382') in 0.025088 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
