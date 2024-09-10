@@ -30,5 +30,5 @@ Material:
     m_Ints: []
     m_Floats: []
     m_Colors:
-    - _Distort: {r: 0.31, g: 0.36, b: 0.06, a: 0}
+    - _Distort: {r: 0.8, g: -0.24, b: -0.03, a: 0}
   m_BuildTextureStacks: []

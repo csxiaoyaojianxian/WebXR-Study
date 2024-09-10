@@ -22,6 +22,8 @@ Shader "victor/FrameWork"
 			{
 				// SV_POSITION 表示顶点在屏幕空间中的位置
 				float4 pos	:SV_POSITION;
+				// 除了 SV_POSITION 还有 TEXCOORD(高精度float) COLOR(低精度fixed) 等
+				// v2f 中的语义并不表示类型，只是表示精度区别
 			};
 
 			/*

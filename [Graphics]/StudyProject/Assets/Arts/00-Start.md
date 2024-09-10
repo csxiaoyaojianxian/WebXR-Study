@@ -102,4 +102,3 @@ Shader "Unlit/MyShader"
     }
 }
 ```
-
