@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+  <canvas id="webgl" width="400" height="400">浏览器不支持HTML5</canvas>
+  <script>
+    // 顶点着色器
+    const vertexSource = `
+      void main() {
+        gl_Position = vec4(0.0, 0.0, 0.0, 1.0); // xyzw
+        gl_PointSize = 10.0; // 点大小
+      }`;
+    // 片段着色器
+    const fragmentSource = `
+      void main() {
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); // rgba
+      }`;
+    // 【1】初始化编译shader
+    const canvas = document.getElementById("webgl");
+    const gl = canvas.getContext("webgl");
+    const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(vertexShader, vertexSource);
+    gl.shaderSource(fragmentShader, fragmentSource);
+    gl.compileShader(vertexShader);
+    gl.compileShader(fragmentShader);
+    const program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    gl.useProgram(program);
+    // 【2】清空画布
+    gl.clearColor(0.5, 0.5, 0.5, 1.0); // rgba
+    gl.clear(gl.COLOR_BUFFER_BIT); // 确认清空
+    // 【3】执行绘制图元
+    /**
+     * @param mode 图元类型，符号常数 GL_POINTS、GL_LINE_STRIP、GL_LLINE_LOOP、GL_LONES、GL_LINE_STRIP_ADJACENCY、GL_LANES_ADJACCENCY、GL_TRIANGLE_STRI、GL_TROANGLE_FAN、GL_TRAANGLES、GL_TTRINGLE_STIP_ADJACENCY、GL_PATCHES
+     * @param first 数组起始索引
+     * @param count 索引数量
+     */
+    gl.drawArrays(gl.POINTS, 0, 1);
+  </script>
+</body>
+</html>

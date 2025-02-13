@@ -1,0 +1,70 @@
+// Effect Syntax Guide: https://github.com/cocos-creator/docs-3d/blob/master/zh/material-system/effect-syntax.md
+
+CCEffect %{
+  techniques:
+  - name: opaque
+    passes:
+    - vert: legacy/main-functions/general-vs:vert # builtin header
+      frag: unlit-fs:frag
+      properties: &props
+        mainTexture:    { value: white }
+        efxTexture:    { value: white }
+        cubeTexture:    { value: white }
+        mainColor:      { value: [1, 1, 1, 1], editor: { type: color } }
+  - name: transparent
+    passes:
+    - vert: legacy/main-functions/general-vs:vert # builtin header
+      frag: unlit-fs:frag
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendSrcAlpha: src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      properties: *props
+}%
+
+CCProgram unlit-fs %{
+  precision highp float;
+  #include <legacy/output>
+  #include <legacy/fog-fs>
+
+  in vec2 v_uv;
+  in vec3 v_position;
+  in vec3 v_normal;
+
+  uniform sampler2D mainTexture;
+  uniform samplerCube cubeTexture;
+  uniform sampler2D efxTexture;
+
+  uniform Constant {
+    vec4 mainColor;
+    //.xy uv流动速度
+    //.z 基础颜色干扰强度
+    //.w 环境反射干扰强度 
+    vec4 parameters;
+  };
+
+  vec4 frag () {
+    vec2 uv = v_uv;
+    uv.y += cc_time.x * 0.8;
+    vec4 efx = texture(efxTexture,uv);
+    vec3 offset = (efx.rgb - 0.5) * 2.0;
+
+    vec4 col = mainColor * texture(mainTexture, v_uv + offset.xy*0.05);
+    col.rgb += efx.rgb;
+
+    //reflect    R = V - 2 * N * dot(N,V)
+
+
+    vec3 V = normalize(v_position - cc_cameraPos.xyz);
+    vec3 N = normalize(v_normal - offset*0.2);
+    vec3 R = V - 2.0 * N * dot(N,V);
+    vec4 cubeColor = texture(cubeTexture,R);
+
+    col.rgb = mix(col.rgb,cubeColor.rgb,0.5);
+    CC_APPLY_FOG(col, v_position);
+    return CCFragOutput(col);
+  }
+}%

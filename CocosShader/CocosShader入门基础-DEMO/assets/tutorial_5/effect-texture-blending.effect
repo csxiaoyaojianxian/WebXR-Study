@@ -1,0 +1,76 @@
+// Effect Syntax Guide: https://github.com/cocos-creator/docs-3d/blob/master/zh/material-system/effect-syntax.md
+
+CCEffect %{
+  techniques:
+  - name: opaque
+    passes:
+    - vert: legacy/main-functions/general-vs:vert # builtin header
+      frag: unlit-fs:frag
+      properties: &props
+        mainTexture:    { value: white }
+        detailTexture:    { value: black }
+        method: { value: 0 }
+        mainColor:      { value: [1, 1, 1, 1], editor: { type: color } }
+  - name: transparent
+    passes:
+    - vert: legacy/main-functions/general-vs:vert # builtin header
+      frag: unlit-fs:frag
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendSrcAlpha: src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      properties: *props
+}%
+
+CCProgram unlit-fs %{
+  precision highp float;
+  #include <legacy/output>
+  #include <legacy/fog-fs>
+
+  in vec2 v_uv;
+  in vec3 v_position;
+
+  uniform sampler2D mainTexture;
+  uniform sampler2D detailTexture;
+
+  uniform Constant {
+    vec4 mainColor;
+    int method; 
+  };
+
+  vec4 frag () {
+    vec4 col = mainColor * texture(mainTexture, v_uv);
+    vec4 detailColor = texture(detailTexture,v_uv);
+
+    if(method == 0){
+      //直接相加
+      col.rgb += detailColor.rgb;
+    }
+    else if(method == 1){
+      //直接相乘
+      col.rgb *= detailColor.rgb;
+    }
+    else if(method == 2){
+      //插值混合
+      col.rgb = mix(col.rgb,detailColor.rgb,0.618);
+    }
+    else if(method == 3){
+      //加权求和
+      col.rgb = col.rgb * 0.2 + detailColor.rgb * 1.2;
+    }
+    else if(method == 4){
+      //灰度混合
+      float gray = detailColor.r * 0.299 + detailColor.g * 0.587 + detailColor.b * 0.114;
+      col.rgb = mix(col.rgb, detailColor.rgb * 1.5, gray);
+    }
+    else if(method == 5){
+      //相减
+      col.rgb = col.rgb - detailColor.rgb;
+    }
+    CC_APPLY_FOG(col, v_position);
+    return CCFragOutput(col);
+  }
+}%
